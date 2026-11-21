@@ -993,3 +993,50 @@ export const publicFaqs = [
     a: "Yes — we help with updates, fixes and improvements after launch so your site keeps growing with your business.",
   },
 ];
+
+
+/* ---------- Website types (homepage layered stack) ---------- */
+export const siteTypes = [
+  {
+    category: "Business Website",
+    title: "Business & Company",
+    sub: "Your brand, services and contact in one place",
+    desc: "A professional home for your business — services, about, gallery, enquiries and location, built to earn trust and bring customers in.",
+    tags: ["Company profile", "Services", "Enquiry forms", "Google Maps"],
+  },
+  {
+    category: "E-Commerce Website",
+    title: "E-Commerce Store",
+    sub: "Sell products online, day and night",
+    desc: "Product catalogues, cart and checkout flows, order management and an admin dashboard to run your store.",
+    tags: ["Product catalogue", "Cart & checkout", "Orders", "Admin dashboard"],
+  },
+  {
+    category: "Booking / Appointment Website",
+    title: "Booking & Events",
+    sub: "Tickets, appointments and reservations",
+    desc: "Let customers discover events, pick slots and book online — like our live TicketX platform.",
+    tags: ["Event listings", "Slot booking", "Reminders", "Like TicketX"],
+  },
+  {
+    category: "Personal Portfolio",
+    title: "Portfolio & Personal Brand",
+    sub: "Show your work, skills and story",
+    desc: "A striking portfolio for creators, professionals and artists — projects, achievements, resume and direct contact.",
+    tags: ["Projects", "Resume", "Testimonials", "Contact links"],
+  },
+  {
+    category: "Restaurant Website",
+    title: "Restaurants & Local Shops",
+    sub: "Menus, offers and orders for local businesses",
+    desc: "Digital menus, offers, galleries, WhatsApp ordering and maps that turn local searches into visits.",
+    tags: ["Digital menu", "WhatsApp orders", "Offers", "Location"],
+  },
+  {
+    category: "Other / Custom Website",
+    title: "Custom Web Apps",
+    sub: "Tools and platforms built around your idea",
+    desc: "Dashboards, utilities and custom platforms — from media tools like AudioX to digital cards like StarX Connect.",
+    tags: ["Dashboards", "Logins", "Databases", "Like AudioX"],
+  },
+];

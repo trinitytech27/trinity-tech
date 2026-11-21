@@ -1,0 +1,993 @@
+/* ==========================================================================
+   TRINITY TECH — SCENES (star text hero, project queue, layer stack,
+   team atom, booking wave, section rail)
+   ========================================================================== */
+
+:root,
+html {
+  --font-head: "Outfit", "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+
+.tt-sr {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* big, tight display headings like the reference */
+.tt-display {
+  font-family: var(--font-head) !important;
+  font-size: clamp(40px, 5.8vw, 88px);
+  line-height: 0.98;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin: 0 0 18px;
+}
+.tt-title,
+.tt-ph-title,
+.tt-fly-title h2 {
+  font-weight: 800 !important;
+  letter-spacing: -0.035em !important;
+}
+
+/* "04 ——— PROGRAMMES" */
+.tt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #b9c1d9;
+  margin-bottom: 18px;
+}
+.tt-tag b {
+  font-family: var(--font-mono) !important;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #67e8f9;
+}
+.tt-tag i {
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, #67e8f9, rgba(103, 232, 249, 0));
+}
+
+.tt-btn.lg {
+  padding: 17px 30px;
+  font-size: 16px;
+}
+
+/* ---------- Hero: stars spell the name above, copy sits below ---------- */
+.tt-hero.tt-hero-stars {
+  min-height: 100vh;
+  align-items: flex-start;
+  padding: 0 0 4vh;
+}
+.tt-hero-stars .tt-hero-inner.solo .tt-hero-copy {
+  padding-top: 50vh;
+}
+.tt-hero-stars .tt-kicker {
+  margin-bottom: 18px;
+}
+.tt-hero-stars .tt-hero-sub {
+  margin-bottom: 26px;
+}
+.tt-hero-stars .tt-hero-actions {
+  margin-bottom: 0;
+}
+.tt-hero-stars .tt-scroll-cue {
+  margin-top: 28px;
+}
+.tt-hero-stars .tt-hero-tagline {
+  font-size: clamp(22px, 2.6vw, 34px);
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .tt-hero-stars .tt-hero-inner.solo .tt-hero-copy {
+    padding-top: 40vh;
+  }
+}
+
+/* ==========================================================================
+   PROJECT QUEUE
+   ========================================================================== */
+.tt-queue {
+  position: relative;
+  padding: 110px 0 60px;
+}
+.tt-queue-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 5;
+}
+.tt-queue-count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #8f98b3;
+  padding-bottom: 20px;
+}
+.tt-queue-count b {
+  font-family: var(--font-head) !important;
+  font-size: 46px;
+  font-weight: 800;
+  color: #fff;
+}
+.tt-queue-count div {
+  display: flex;
+  gap: 6px;
+  margin-left: 12px;
+  align-self: center;
+}
+.tt-queue-count i {
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  transition: width 0.4s var(--ease-out), background 0.4s var(--ease-out);
+}
+.tt-queue-count i.done {
+  background: rgba(103, 232, 249, 0.5);
+}
+.tt-queue-count i.on {
+  width: 44px;
+  background: var(--brand-grad);
+}
+.tt-queue-stage {
+  display: grid;
+  gap: 28px;
+  width: calc(100% - 48px);
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.tt-q-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 0;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(20, 27, 51, 0.92), rgba(9, 13, 26, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(129, 140, 248, 0.08);
+}
+.tt-q-shot {
+  position: relative;
+  display: block;
+  background: #070a14;
+  overflow: hidden;
+}
+.tt-q-bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 14px;
+  background: rgba(7, 10, 20, 0.78);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tt-q-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 1.2s var(--ease-out);
+}
+.tt-q-shot:hover img {
+  transform: scale(1.04);
+}
+.tt-q-info {
+  position: relative;
+  padding: 40px 38px;
+  display: flex;
+  flex-direction: column;
+}
+.tt-q-num {
+  position: absolute;
+  right: 28px;
+  top: 18px;
+  font-family: var(--font-head) !important;
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.16);
+}
+.tt-q-cat {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #67e8f9;
+  margin-bottom: 10px;
+}
+.tt-q-info h3 {
+  font-family: var(--font-head) !important;
+  font-size: clamp(32px, 3.4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+}
+.tt-q-info p {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+.tt-q-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  display: grid;
+  gap: 8px;
+}
+.tt-q-info li {
+  position: relative;
+  padding-left: 22px;
+  color: #c7cde0;
+  font-size: 14.5px;
+}
+.tt-q-info li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--brand-grad);
+}
+.tt-q-actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* desktop: pinned, one project at a time in depth */
+.tt-queue.is-queued {
+  height: 100vh;
+  padding: 96px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tt-queue.is-queued .tt-queue-head {
+  margin-bottom: 0;
+}
+.tt-queue.is-queued .tt-queue-stage {
+  flex: 1;
+  display: block;
+  position: relative;
+  perspective: 1400px;
+  max-width: none;
+  width: 100%;
+}
+.tt-queue.is-queued .tt-q-card {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(1120px, 84vw);
+  margin-left: calc(min(1120px, 84vw) / -2);
+  transform-origin: 50% 50%;
+  translate: 0 -50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.tt-queue.is-queued .tt-q-card.is-active {
+  pointer-events: auto;
+}
+.tt-queue.is-queued .tt-q-shot img {
+  min-height: 0;
+  max-height: min(56vh, 520px);
+  aspect-ratio: 16 / 10;
+}
+.motion-ready .tt-queue.is-queued [data-reveal] {
+  transition: none;
+}
+@media (max-height: 820px) {
+  .tt-queue.is-queued .tt-q-info ul {
+    display: none;
+  }
+  .tt-queue.is-queued .tt-q-info {
+    padding: 30px;
+  }
+}
+
+/* ==========================================================================
+   LAYER STACK (website types)
+   ========================================================================== */
+.tt-layers {
+  position: relative;
+  padding: 110px 0 60px;
+}
+.tt-layers-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.tt-layer-panel {
+  position: relative;
+  padding: 28px 30px;
+  border-radius: 22px;
+  background: linear-gradient(160deg, rgba(20, 27, 51, 0.9), rgba(9, 13, 26, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 2px solid #67e8f9;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+  animation: ttPanelIn 0.6s var(--ease-out) both;
+  max-width: 560px;
+}
+@keyframes ttPanelIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tt-layer-kicker {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #67e8f9;
+  margin-bottom: 10px;
+}
+.tt-layer-panel h3,
+.tt-layer-card h3 {
+  font-family: var(--font-head) !important;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+.tt-layer-panel p,
+.tt-layer-card p {
+  margin: 0 0 16px;
+  color: var(--text-secondary);
+  font-size: 15.5px;
+}
+.tt-layer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.tt-layer-tags em,
+.tt-layer-chips em {
+  font-style: normal;
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.16);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  color: #c7d2fe;
+}
+.tt-layer-dashes {
+  display: none;
+  gap: 8px;
+  margin-top: 22px;
+}
+.tt-layer-dashes i {
+  width: 26px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: width 0.4s var(--ease-out), background 0.4s var(--ease-out);
+}
+.tt-layer-dashes i.on {
+  width: 52px;
+  background: var(--brand-grad);
+}
+.tt-stack {
+  display: none;
+}
+.tt-layers-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 30px;
+}
+.tt-layer-card {
+  display: block;
+  padding: 26px;
+  border-radius: 22px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  color: var(--text);
+}
+.tt-layers-copy .tt-layer-panel {
+  display: none;
+}
+
+/* desktop: pinned, isometric stack */
+.tt-layers.is-stacked {
+  height: 100vh;
+  padding: 0;
+  overflow: hidden;
+}
+.tt-layers.is-stacked .tt-layers-inner {
+  height: 100%;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 40px;
+  padding-top: 60px;
+}
+.tt-layers.is-stacked .tt-layers-copy .tt-layer-panel {
+  display: block;
+}
+.tt-layers.is-stacked .tt-layer-dashes {
+  display: flex;
+}
+.tt-layers.is-stacked .tt-layers-list {
+  display: none;
+}
+.tt-layers.is-stacked .tt-stack {
+  display: block;
+  position: relative;
+  height: 80vh;
+  perspective: 1800px;
+  perspective-origin: 50% 20%;
+}
+.tt-stack-plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(520px, 36vw);
+  height: min(300px, 21vw);
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) rotateX(58deg) rotateZ(-30deg);
+}
+.tt-layer {
+  position: absolute;
+  inset: 0;
+  padding: 26px 30px;
+  border-radius: 22px;
+  background:
+    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(160deg, #141b33, #0a0f1f);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+  will-change: transform, opacity;
+}
+.tt-layer.is-top {
+  border-color: rgba(103, 232, 249, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(103, 232, 249, 0.35),
+    0 0 50px rgba(99, 102, 241, 0.45),
+    0 40px 90px rgba(0, 0, 0, 0.55);
+}
+.tt-layer-n {
+  font-family: var(--font-head) !important;
+  font-size: 15px;
+  font-weight: 800;
+  color: #67e8f9;
+}
+.tt-layer b {
+  font-family: var(--font-head) !important;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 4px 0 4px;
+}
+.tt-layer small {
+  color: #8f98b3;
+  font-size: 14px;
+}
+.tt-layer-chips {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.motion-ready .tt-layers.is-stacked [data-reveal] {
+  transition: none;
+}
+
+/* ==========================================================================
+   TEAM ATOM
+   ========================================================================== */
+.tt-atom {
+  position: relative;
+  padding: 110px 0 60px;
+}
+.tt-atom-head {
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 5;
+}
+.tt-atom-head .tt-lede {
+  max-width: 560px;
+}
+.tt-atom-stage {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  width: calc(100% - 48px);
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.tt-member {
+  position: relative;
+  padding: 30px 28px;
+  border-radius: 26px;
+  background: linear-gradient(165deg, rgba(22, 29, 56, 0.94), rgba(9, 13, 26, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.tt-member::before {
+  content: "";
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35), transparent 65%);
+  pointer-events: none;
+}
+.tt-member.is-founder {
+  border-color: rgba(103, 232, 249, 0.55);
+  box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.2), 0 0 60px rgba(99, 102, 241, 0.35), 0 40px 100px rgba(0, 0, 0, 0.55);
+}
+.tt-member.is-founder::before {
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.4), transparent 65%);
+}
+.tt-member-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.tt-orb {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+}
+.tt-orb b {
+  position: relative;
+  z-index: 1;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-head) !important;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--brand-grad);
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.55);
+}
+.tt-orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(165, 180, 252, 0.45);
+  transform: rotateX(70deg);
+  animation: ttOrbit 6s linear infinite;
+}
+.tt-orb-ring.two {
+  transform: rotateY(70deg);
+  animation-duration: 8s;
+  animation-direction: reverse;
+  border-color: rgba(103, 232, 249, 0.45);
+}
+.tt-orb-ring::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #67e8f9;
+  box-shadow: 0 0 10px #67e8f9;
+}
+@keyframes ttOrbit {
+  to {
+    rotate: 360deg;
+  }
+}
+.tt-member-role {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  color: #67e8f9;
+}
+.tt-member h3 {
+  font-family: var(--font-head) !important;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 10px;
+}
+.tt-member p {
+  margin: 0 0 16px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+.tt-member-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+.tt-member-tags em {
+  font-style: normal;
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #c7cde0;
+}
+.tt-member-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #c7d2fe;
+  word-break: break-all;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+.tt-member-mail:hover {
+  color: #fff;
+}
+
+/* desktop: pinned orbit flight */
+.tt-atom.is-orbiting {
+  height: 100vh;
+  padding: 96px 0 0;
+  overflow: hidden;
+}
+.tt-atom.is-orbiting .tt-atom-head {
+  margin-bottom: 0;
+}
+.tt-atom.is-orbiting .tt-atom-stage {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  max-width: none;
+  perspective: 1500px;
+}
+.tt-atom.is-orbiting .tt-member {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: min(370px, 27vw);
+  translate: -50% -50%;
+  will-change: transform, opacity;
+}
+.motion-ready .tt-atom.is-orbiting [data-reveal] {
+  transition: none;
+}
+@media (max-height: 820px) {
+  .tt-atom.is-orbiting .tt-member p {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   BOOKING WAVE
+   ========================================================================== */
+.tt-wave {
+  position: relative;
+  padding: 34vh 0 40px;
+}
+.tt-wave-head {
+  max-width: 820px;
+  margin-bottom: 44px;
+}
+.tt-wave-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  perspective: 1400px;
+}
+.tt-wave-steps li {
+  position: relative;
+  padding: 30px 26px 28px;
+  border-radius: 24px;
+  background: linear-gradient(170deg, rgba(22, 29, 56, 0.9), rgba(9, 13, 26, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transform-origin: 50% 100%;
+  transition: border-color 0.4s var(--ease-out), translate 0.4s var(--ease-out);
+}
+.tt-wave-steps li:hover {
+  border-color: rgba(103, 232, 249, 0.5);
+  translate: 0 -6px;
+}
+.tt-wave-steps li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--brand-grad);
+  opacity: 0.8;
+}
+.tt-wave-n {
+  position: absolute;
+  right: 20px;
+  top: 14px;
+  font-family: var(--font-head) !important;
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+}
+.tt-wave-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--brand-grad);
+  color: #fff;
+  margin-bottom: 22px;
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.45);
+}
+.tt-wave-steps h3 {
+  font-family: var(--font-head) !important;
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.tt-wave-steps p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14.5px;
+}
+.tt-wave-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+/* steps rise out of the wave, one after another */
+.motion-ready [data-reveal="wave-rise"] {
+  opacity: 1;
+  transform: none;
+}
+.motion-ready [data-reveal="wave-rise"] li {
+  opacity: 0;
+  transform: translate3d(0, 140px, -80px) rotateX(-55deg) scale(0.9);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 1.1s var(--ease-out),
+    border-color 0.4s var(--ease-out),
+    translate 0.4s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 0.14s), calc(var(--i, 0) * 0.14s), 0s, 0s;
+}
+.motion-ready [data-reveal="wave-rise"].is-revealed li {
+  opacity: 1;
+  transform: none;
+}
+
+/* ==========================================================================
+   SECTION RAIL + PILL (replaces the old vertical label)
+   ========================================================================== */
+.tt-sectionlabel {
+  display: none !important;
+}
+.tt-rail {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  transform: translateY(-50%);
+}
+.tt-rail button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  cursor: pointer;
+  color: #fff;
+}
+.tt-rail i {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.28);
+  transition: width 0.4s var(--ease-out), background 0.4s var(--ease-out);
+}
+.tt-rail button:hover i {
+  background: rgba(255, 255, 255, 0.7);
+}
+.tt-rail button.on i {
+  width: 40px;
+  background: var(--brand-grad);
+}
+.tt-rail span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: ttFadeUp 0.5s var(--ease-out) both;
+}
+.tt-pill {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  z-index: 95;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(4, 5, 11, 0.6);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #e8ecf8;
+  pointer-events: none;
+  animation: ttFadeUp 0.5s var(--ease-out) both;
+}
+.tt-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #67e8f9;
+  box-shadow: 0 0 10px #67e8f9;
+}
+html.theme-owner .tt-rail,
+html.theme-owner .tt-pill {
+  display: none;
+}
+@media (max-width: 1280px) {
+  .tt-pill {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .tt-rail {
+    display: none;
+  }
+}
+
+/* ---------- final CTA spacing ---------- */
+.tt-cta-final {
+  margin-top: 90px;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 960px) {
+  .tt-q-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tt-q-shot img {
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+  .tt-q-info {
+    padding: 26px 22px;
+  }
+  .tt-q-num {
+    font-size: 54px;
+  }
+  .tt-atom-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tt-wave-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tt-queue-count {
+    display: none;
+  }
+  .tt-wave {
+    padding-top: 24vh;
+  }
+}
+@media (max-width: 560px) {
+  .tt-wave-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tt-display {
+    font-size: clamp(36px, 10vw, 48px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-orb-ring,
+  .tt-layer-panel {
+    animation: none !important;
+  }
+  .motion-ready [data-reveal="wave-rise"] li {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---------- Spideyy console on the dark theme ---------- */
+.home-ai-scrapbook-card {
+  background: linear-gradient(165deg, rgba(22, 29, 56, 0.97), rgba(9, 13, 26, 0.98)) !important;
+}
+.home-ai-chip {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #c7d2fe !important;
+}
+.home-ai-chip:hover:not(:disabled) {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: #fff !important;
+}
+.home-ai-form {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-radius: 14px !important;
+}
+.home-ai-submit {
+  background: var(--brand-grad) !important;
+  color: #fff !important;
+  border: 0 !important;
+}
+.home-ai-chips-label,
+.home-ai-badge span {
+  color: #8f98b3 !important;
+}
+
+/* ---------- Finale: the stars draw the Trinity mark above the last call ---------- */
+.tt-finale {
+  padding: 60vh 0 20px;
+}
+.tt-finale .tt-cta-final {
+  margin-top: 0;
+}
+
+/* team cards sit a little higher in the pinned scene */
+.tt-atom.is-orbiting .tt-member {
+  top: 56%;
+}
+
+/* phones: founder first */
+.tt-atom:not(.is-orbiting) .tt-member.is-founder {
+  order: -1;
+}

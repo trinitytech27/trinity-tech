@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
+import { gsap, ScrollTrigger, prefersReducedMotion, scrollToElement } from "./scroll";
 
 const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
 const finePointer = () =>
@@ -343,42 +343,70 @@ export function SpinRing({
    -------------------------------------------------------------------------- */
 export function SectionLabel() {
   const loc = useLocation();
-  const [label, setLabel] = useState<{ n: number; text: string } | null>(null);
+  const [sections, setSections] = useState<{ el: HTMLElement; name: string }[]>([]);
+  const [active, setActive] = useState(0);
 
   useEffect(() => {
     let io: IntersectionObserver | null = null;
+    let lastStars = "";
     const id = window.setTimeout(() => {
       const els = Array.from(document.querySelectorAll<HTMLElement>("main [data-section]"));
-      if (!els.length) {
-        setLabel(null);
-        return;
-      }
+      setSections(els.map((el) => ({ el, name: el.dataset.section || "" })));
+      setActive(0);
+      const broadcast = (el: HTMLElement) => {
+        const s = el.dataset.stars;
+        if (s && s !== lastStars) {
+          lastStars = s;
+          window.dispatchEvent(new CustomEvent("tt:stars", { detail: s }));
+        }
+      };
+      if (els[0]) broadcast(els[0]);
       io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
             if (!e.isIntersecting) continue;
-            const i = els.indexOf(e.target as HTMLElement);
-            setLabel({ n: i + 1, text: (e.target as HTMLElement).dataset.section || "" });
+            const el = e.target as HTMLElement;
+            setActive(els.indexOf(el));
+            broadcast(el);
           }
         },
         { rootMargin: "-45% 0px -50% 0px" },
       );
       els.forEach((el) => io?.observe(el));
-      setLabel({ n: 1, text: els[0].dataset.section || "" });
-    }, 300);
+    }, 350);
     return () => {
       window.clearTimeout(id);
       io?.disconnect();
     };
   }, [loc.pathname]);
 
-  if (!label) return null;
+  if (!sections.length) return null;
+  const cur = sections[active];
   return (
-    <div className="tt-sectionlabel" aria-hidden="true" key={label.text}>
-      <span>{String(label.n).padStart(2, "0")}</span>
-      <i />
-      <b>{label.text}</b>
-    </div>
+    <>
+      <div className="tt-pill" key={"p" + cur?.name} aria-hidden="true">
+        <i /> {cur?.name}
+      </div>
+      <nav className="tt-rail" aria-label="Page sections">
+        {sections.map((s, i) => (
+          <button
+            key={s.name + i}
+            type="button"
+            className={i === active ? "on" : ""}
+            aria-label={"Go to " + s.name}
+            aria-current={i === active}
+            onClick={() => scrollToElement(s.el)}
+          >
+            {i === active && (
+              <span>
+                {String(i + 1).padStart(2, "0")} {s.name}
+              </span>
+            )}
+            <i />
+          </button>
+        ))}
+      </nav>
+    </>
   );
 }
 
