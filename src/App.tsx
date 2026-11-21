@@ -35,6 +35,7 @@ import Contact from "./Contact";
 import Assistant from "./Assistant";
 import HomePage from "./Home";
 import { ScrollProgress, useScrollReveal, useScrollState } from "./Motion";
+import { destroySmoothScroll, initSmoothScroll, resetScroll, scrollToElement, ScrollTrigger } from "./scroll";
 import { ChatProvider, useChat, STARTER_QUESTIONS } from "./chat-context";
 import {
   InstagramIcon,
@@ -813,6 +814,12 @@ export default function App() {
   useScrollState();
   useScrollReveal(loc.pathname);
 
+  // StarX-style smooth scrolling (desktop pointers only; touch stays native)
+  useEffect(() => {
+    initSmoothScroll();
+    return () => destroySmoothScroll();
+  }, []);
+
   const finish = () => {
     setIntro(false);
     sessionStorage.setItem("sxd-intro", "1");
@@ -845,10 +852,12 @@ export default function App() {
     setMenu(false);
     if (!loc.hash) {
       // Jump (not smooth-scroll) to the top when changing pages.
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      resetScroll();
+      // new page content: recalculate pinned / scrubbed sections
+      requestAnimationFrame(() => ScrollTrigger.refresh());
     } else {
       const el = document.getElementById(loc.hash.replace("#", ""));
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      if (el) scrollToElement(el);
     }
 
     const p = site.projects.find((p) => loc.pathname === "/work/" + p.slug);

@@ -1,7 +1,7 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  ArrowUpRight,
   Check,
   Code,
   Palette,
@@ -16,6 +16,14 @@ import {
 } from "lucide-react";
 import { projects as seed, brand, pillars, steps, audiences } from "./content";
 import { EnquiryPreview } from "./Contact";
+import {
+  DemoStage,
+  Statement,
+  VelocityMarquee,
+  WorkGallery,
+  useHeroParallax,
+  useProcessScrub,
+} from "./ShowcaseFX";
 
 type SiteLike = { projects: (typeof seed)[number][] };
 
@@ -31,16 +39,6 @@ const STEP_ICONS = [
   <Lightbulb size={20} key="i" />,
   <Rocket size={20} key="t" />,
 ];
-const MARQUEE = [
-  "Build",
-  "Innovate",
-  "Transform",
-  "Websites",
-  "UI/UX Design",
-  "Web Applications",
-  "E-Commerce",
-  "Redesign",
-];
 
 export default function Home({
   site,
@@ -53,6 +51,11 @@ export default function Home({
   affiliation: React.ReactNode;
   contact: React.ReactNode;
 }) {
+  const heroRef = useRef<HTMLElement>(null);
+  const stepsRef = useRef<HTMLElement>(null);
+  useHeroParallax(heroRef);
+  useProcessScrub(stepsRef);
+
   const p = site.projects
     .filter((p) => p.published)
     .sort((a, b) => a.order - b.order);
@@ -66,7 +69,7 @@ export default function Home({
   return (
     <div className="tt-home">
       {/* 1 — HERO */}
-      <section className="tt-hero" aria-label="Trinity Tech">
+      <section ref={heroRef} className="tt-hero" aria-label="Trinity Tech">
         <div className="tt-hero-bg" aria-hidden="true">
           <div className="tt-hero-grid" />
           <div className="tt-hero-glow one" />
@@ -113,22 +116,19 @@ export default function Home({
         </div>
       </section>
 
-      {/* 2 — MOTTO MARQUEE */}
-      <div className="tt-marquee" aria-hidden="true">
-        <div className="tt-marquee-track">
-          {[0, 1].map((k) => (
-            <div className="tt-marquee-group" key={k}>
-              {MARQUEE.map((w) => (
-                <span key={w}>
-                  {w} <i>✦</i>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* 2 — ROLLING MARQUEE (speed follows scroll) */}
+      <VelocityMarquee />
 
-      {/* 3 — SERVICES */}
+      {/* 3 — LIVE DEMOS: pinned stage */}
+      <DemoStage items={featuredCards} />
+
+      {/* 4 — STATEMENT: lines slide apart */}
+      <Statement />
+
+      {/* 5 — ALL WORK: horizontal rolling gallery */}
+      <WorkGallery items={p} />
+
+      {/* 6 — SERVICES */}
       <section id="services" className="tt-section wrap" aria-label="What we do">
         <header className="tt-section-head" data-reveal>
           <span className="tt-eyebrow">What We Do</span>
@@ -158,94 +158,8 @@ export default function Home({
         </div>
       </section>
 
-      {/* 4 — LIVE DEMO PROJECTS */}
-      <section
-        id="featured-projects"
-        className="tt-section tt-projects"
-        aria-label="Live demo projects"
-      >
-        <div className="wrap">
-          <header className="tt-section-head split" data-reveal>
-            <div>
-              <span className="tt-eyebrow">Live Demo Projects</span>
-              <h2 className="tt-title">Real work, live on the web.</h2>
-            </div>
-            <Link to="/work" className="tt-link">
-              Explore all projects <ArrowRight size={16} />
-            </Link>
-          </header>
-
-          {featuredCards.map((card, i) => (
-            <article
-              key={card.slug}
-              className={"tt-showcase" + (i % 2 ? " reverse" : "")}
-              style={{ "--project-color": card.color } as React.CSSProperties}
-            >
-              <a
-                href={card.url}
-                target="_blank"
-                rel="noreferrer"
-                className="tt-showcase-media"
-                data-reveal="wipe"
-                aria-label={"Open the " + card.short + " live demo"}
-              >
-                <div className="tt-browser">
-                  <div className="tt-browser-bar">
-                    <span className="tt-dots">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                    <span className="tt-url">{new URL(card.url).hostname}</span>
-                  </div>
-                  <div className="tt-browser-view">
-                    <img
-                      src={card.image}
-                      alt={card.name + " live website"}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                </div>
-              </a>
-              <div
-                className="tt-showcase-copy"
-                data-reveal={i % 2 ? "from-left" : "from-right"}
-              >
-                <span className="tt-index">{String(i + 1).padStart(2, "0")}</span>
-                <span className="tt-eyebrow">{card.category}</span>
-                <h3>{card.short}</h3>
-                <p>
-                  {card.summary} {card.story}
-                </p>
-                <ul className="tt-feature-list">
-                  {card.features.map((f) => (
-                    <li key={f}>
-                      <Check size={16} /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <div className="tt-showcase-actions">
-                  <a
-                    href={card.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="tt-btn tt-btn-primary"
-                  >
-                    Open Live Demo <ArrowUpRight size={17} />
-                  </a>
-                  <Link to={"/work/" + card.slug} className="tt-btn tt-btn-quiet">
-                    Case study
-                  </Link>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* 5 — PROCESS: BUILD. INNOVATE. TRANSFORM. */}
-      <section className="tt-section wrap" aria-label="How we work">
+      {/* 7 — PROCESS: BUILD. INNOVATE. TRANSFORM. */}
+      <section ref={stepsRef} className="tt-section wrap" aria-label="How we work">
         <header className="tt-section-head center" data-reveal>
           <span className="tt-eyebrow">How We Work</span>
           <h2 className="tt-title">Build. Innovate. Transform.</h2>
@@ -265,7 +179,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* 6 — ABOUT: MISSION / VISION / AUDIENCE */}
+      {/* 8 — ABOUT: MISSION / VISION / AUDIENCE */}
       <section className="tt-section wrap" aria-label="About Trinity Tech">
         <div className="tt-about">
           <div className="tt-about-intro" data-reveal="from-left">
@@ -300,7 +214,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* 7 — PROJECT BOOKING */}
+      {/* 9 — PROJECT BOOKING */}
       <section
         id="choose-website"
         className="tt-section tt-booking"
@@ -333,7 +247,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* 8 — CTA BAND */}
+      {/* 10 — CTA BAND */}
       <section className="wrap tt-cta-wrap" aria-label="Get started">
         <div className="tt-cta" data-reveal="zoom">
           <div>

@@ -4480,14 +4480,13 @@ nav a.active:not(.nav-cta-btn)::after {
   animation: routeEnter 0.45s var(--ease-out) both;
 }
 
+/* opacity only: a transform here would break pinned (position: fixed) sections */
 @keyframes routeEnter {
   from {
     opacity: 0;
-    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 

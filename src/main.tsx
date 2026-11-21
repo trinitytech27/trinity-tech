@@ -6,6 +6,7 @@ import App from "./App";
 import "./style.css";
 import "./editorial.css";
 import "./theme.css";
+import "./showcase.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

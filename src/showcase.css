@@ -1,0 +1,530 @@
+/* ==========================================================================
+   SHOWCASE MOTION (StarX-style): marquee, demo stage, statement, gallery
+   Desktop choreography is enabled by JS classes (.is-staged / .is-rolling);
+   without them every section is a normal, readable block.
+   ========================================================================== */
+.tt-title.light {
+  color: #fff;
+}
+
+/* ---------- Rolling marquee: two crossing bands ---------- */
+.tt-vm {
+  position: relative;
+  padding: 56px 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.tt-vm-band {
+  overflow: hidden;
+  padding: 16px 0;
+}
+.tt-vm-band.is-brand {
+  background: var(--brand-grad);
+  transform: rotate(-2.2deg) scale(1.04);
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 18px 40px rgba(79, 70, 229, 0.25);
+}
+.tt-vm-band.is-ink {
+  background: var(--ink);
+  transform: rotate(1.6deg) scale(1.04);
+  margin-top: -6px;
+}
+.tt-vm-row {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+.tt-vm-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 34px;
+  padding-right: 34px;
+  font-family: var(--font-head) !important;
+  font-size: clamp(26px, 3.6vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.tt-vm-band.is-ink .tt-vm-item {
+  color: transparent;
+  -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.75);
+}
+.tt-vm-item i {
+  font-style: normal;
+  font-size: 0.5em;
+  color: rgba(255, 255, 255, 0.85);
+  -webkit-text-stroke: 0;
+}
+.tt-vm-band.is-ink .tt-vm-item i {
+  color: var(--brand-2);
+}
+
+/* ---------- Live demos stage ---------- */
+.tt-demos {
+  position: relative;
+  background: var(--ink);
+  color: #c7cde0;
+  padding: 96px 0 40px;
+  overflow: hidden;
+}
+.tt-demos::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 80% 10%, rgba(79, 70, 229, 0.35), transparent 40%),
+    radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.18), transparent 40%);
+  pointer-events: none;
+}
+.tt-demos-head {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.tt-demos-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #8b93ab;
+}
+.tt-demos-counter b {
+  font-size: 44px;
+  color: #fff;
+  font-family: var(--font-head) !important;
+}
+.tt-demos-dots {
+  display: flex;
+  gap: 6px;
+  margin-left: 14px;
+  align-self: center;
+}
+.tt-demos-dots i {
+  width: 22px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background 0.4s var(--ease-out), width 0.4s var(--ease-out);
+}
+.tt-demos-dots i.on {
+  width: 40px;
+  background: var(--brand-grad);
+}
+.tt-demos-stage {
+  position: relative;
+}
+.tt-demo {
+  position: relative;
+  padding: 56px 0;
+}
+.tt-demo-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr);
+  gap: 64px;
+  align-items: center;
+  perspective: 1600px;
+}
+.tt-demo-copy h3 {
+  font-size: clamp(34px, 4vw, 56px);
+  color: #fff;
+  margin: 0 0 14px;
+}
+.tt-demo-copy p {
+  color: #a9b3c9;
+  font-size: 17px;
+  margin: 0 0 22px;
+}
+.tt-demo-copy .tt-feature-list li {
+  color: #c7cde0;
+}
+.tt-demo-index {
+  display: block;
+  font-family: var(--font-head) !important;
+  font-size: 88px;
+  line-height: 0.9;
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.28);
+  margin-bottom: 14px;
+}
+.tt-demo-frame {
+  display: block;
+  border-radius: 20px;
+  transform-origin: 50% 70%;
+}
+.tt-demo-frame .tt-browser {
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Pinned (desktop): panels stack in one viewport-tall stage */
+.tt-demos.is-staged {
+  height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tt-demos.is-staged .tt-demos-head {
+  padding-top: 104px;
+}
+.tt-demos.is-staged .tt-demos-stage {
+  flex: 1;
+}
+.tt-demos.is-staged .tt-demo {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  background: var(--ink);
+  will-change: transform;
+}
+.tt-demos.is-staged .tt-demo:first-child {
+  background: transparent;
+}
+.tt-demos.is-staged .tt-demo-inner {
+  width: calc(100% - 112px);
+}
+.tt-demos.is-staged .tt-demo-frame .tt-browser-view {
+  max-height: 60vh;
+}
+/* GSAP owns these elements while staged: drop the CSS reveal states */
+.motion-ready .tt-demos.is-staged [data-reveal] {
+  opacity: 1;
+  transition: none;
+}
+.motion-ready .tt-demos.is-staged .tt-demo-copy[data-reveal] {
+  transform: none;
+}
+.motion-ready .tt-demos.is-staged [data-reveal="wipe"] .tt-browser,
+.motion-ready .tt-demos.is-staged [data-reveal="wipe"] .tt-browser-view {
+  clip-path: none;
+  transform: none;
+  transition: box-shadow 0.4s var(--ease-out);
+}
+.tt-demos.is-staged .tt-browser-view img {
+  animation: none;
+}
+.tt-demos .tt-demo-frame:hover .tt-browser {
+  transform: none;
+}
+
+/* ---------- Statement: lines slide apart ---------- */
+.tt-statement {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  padding: 80px 0;
+}
+.tt-statement-line {
+  font-family: var(--font-head) !important;
+  font-size: clamp(54px, 10vw, 150px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  will-change: transform;
+}
+.tt-statement-line.is-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(15, 23, 42, 0.35);
+}
+.tt-statement-line.is-fill {
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #4f46e5 0%,
+    #3b82f6 25%,
+    #06b6d4 50%,
+    rgba(15, 23, 42, 0.12) 50.1%,
+    rgba(15, 23, 42, 0.12) 100%
+  );
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.tt-statement-note {
+  align-self: center;
+  margin: 34px 24px 0;
+  font-size: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- Work gallery ---------- */
+.tt-work {
+  position: relative;
+  padding: 100px 0 80px;
+  background: linear-gradient(180deg, var(--bg), #eceff8);
+  overflow: hidden;
+}
+.tt-work-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 44px;
+}
+.tt-work-meter {
+  width: 180px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.tt-work-meter span {
+  display: block;
+  height: 100%;
+  background: var(--brand-grad);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.tt-work-viewport {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 10px 0 30px;
+}
+.tt-work-viewport::-webkit-scrollbar {
+  display: none;
+}
+.tt-work-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  width: max-content;
+  padding: 0 max(24px, calc((100vw - 1440px) / 2 + 56px));
+}
+.tt-work-card {
+  flex: 0 0 auto;
+  width: min(78vw, 620px);
+  scroll-snap-align: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transform-origin: 50% 100%;
+}
+.tt-work-shot {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--ink);
+}
+.tt-work-shot > img {
+  width: 112%;
+  height: 100%;
+  margin-left: -6%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.tt-work-phone {
+  position: absolute;
+  right: 6%;
+  bottom: -12%;
+  width: 26%;
+  aspect-ratio: 9 / 19;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 4px solid #0b1020;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 0.6s var(--ease-out);
+}
+.tt-work-card:hover .tt-work-phone {
+  transform: translateY(-8%);
+}
+.tt-work-phone img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+.tt-work-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+}
+.tt-work-num {
+  font-family: var(--font-head) !important;
+  font-size: 34px;
+  font-weight: 700;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(79, 70, 229, 0.55);
+}
+.tt-work-meta > div {
+  flex: 1;
+  min-width: 0;
+}
+.tt-work-cat {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tt-work-meta h3 {
+  margin: 2px 0 0;
+  font-size: 22px;
+  color: var(--ink);
+}
+.tt-work-go {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+.tt-work-go:hover {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  transform: rotate(45deg);
+}
+.tt-work-next {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 44px;
+  width: min(70vw, 440px);
+  background:
+    radial-gradient(circle at 85% 15%, rgba(6, 182, 212, 0.35), transparent 45%),
+    var(--ink);
+  color: #a9b3c9;
+  border-color: var(--ink);
+}
+.tt-work-next h3 {
+  font-size: 38px;
+  color: #fff;
+  margin: 0;
+}
+.tt-work-next p {
+  margin: 0 0 18px;
+}
+.tt-work-track > .tt-work-next {
+  align-self: stretch;
+}
+.tt-work-next .tt-btn {
+  align-self: flex-start;
+}
+
+/* Pinned horizontal roll (desktop) */
+.tt-work.is-rolling {
+  height: 100vh;
+  padding: 110px 0 0;
+  display: flex;
+  flex-direction: column;
+}
+.tt-work.is-rolling .tt-work-viewport {
+  overflow: visible;
+  scroll-snap-type: none;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 0 40px;
+}
+.tt-work.is-rolling .tt-work-track {
+  will-change: transform;
+}
+.tt-work.is-rolling .tt-work-card {
+  /* fit the card (16:10 shot + caption) inside the pinned viewport height */
+  width: min(46vw, 640px, calc((100vh - 380px) * 1.6));
+  min-width: 340px;
+}
+.tt-work.is-rolling .tt-work-head {
+  margin-bottom: 24px;
+}
+.tt-work.is-rolling .tt-work-next {
+  width: min(32vw, 440px);
+  align-self: stretch;
+}
+
+/* Shorter desktop screens: keep the whole project panel inside the stage */
+@media (max-height: 860px) {
+  .tt-demos.is-staged .tt-demos-head {
+    padding-top: 92px;
+  }
+  .tt-demos.is-staged .tt-demo-index {
+    font-size: 56px;
+    margin-bottom: 6px;
+  }
+  .tt-demos.is-staged .tt-feature-list {
+    display: none;
+  }
+  .tt-demos.is-staged .tt-demo-copy p {
+    margin-bottom: 18px;
+  }
+  .tt-demos.is-staged .tt-demo-frame .tt-browser-view {
+    max-height: 52vh;
+  }
+}
+@media (max-height: 680px) {
+  .tt-demos.is-staged .tt-demos-head .tt-title {
+    font-size: 30px;
+  }
+  .tt-demos.is-staged .tt-demo-copy h3 {
+    font-size: 34px;
+  }
+  .tt-demos.is-staged .tt-demo-copy p {
+    font-size: 15px;
+  }
+}
+
+/* Process line scrubbed by scroll on desktop */
+.is-scrubbed .tt-steps-line span {
+  transition: none !important;
+}
+
+@media (max-width: 959px) {
+  .tt-demo-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .tt-demo-frame {
+    order: -1;
+  }
+  .tt-demo-index {
+    font-size: 56px;
+  }
+  .tt-demos-counter {
+    display: none;
+  }
+  .tt-statement {
+    min-height: 0;
+    padding: 90px 0;
+  }
+  .tt-work-head {
+    margin-bottom: 24px;
+  }
+  .tt-work-meter {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-statement-line.is-fill {
+    background-position: 0 0;
+  }
+}
