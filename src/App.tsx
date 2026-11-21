@@ -31,8 +31,9 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { defaults, projects as seed, SANJU_BUSINESS_PHONE, SANJU_WHATSAPP_NUMBER } from "./content";
-import Contact, { EnquiryPreview } from "./Contact";
+import Contact from "./Contact";
 import Assistant from "./Assistant";
+import HomePage from "./Home";
 import { ScrollProgress, useScrollReveal, useScrollState } from "./Motion";
 import { ChatProvider, useChat, STARTER_QUESTIONS } from "./chat-context";
 import {
@@ -71,13 +72,15 @@ function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Trinity Tech home">
       <img
-        src="/assets/official-logo.webp"
-        alt="Trinity Tech official logo"
+        src="/assets/trinity-logo.svg"
+        alt=""
         className="brand-logo-img"
+        width={40}
+        height={40}
       />
       <span className="brand-copy">
         <span className="brand-title">Trinity Tech</span>
-        <span className="brand-sub">Thoughtful Design · Powerful Digital Experiences</span>
+        <span className="brand-sub">Build · Innovate · Transform</span>
       </span>
     </Link>
   );
@@ -216,7 +219,7 @@ function Footer() {
         <div className="compact-footer-brand">
           <Brand />
           <span className="footer-tagline">
-            Thoughtful Design. Powerful Digital Experiences.
+            Your Vision. Our Technology. Infinite Possibilities.
           </span>
         </div>
         <div className="compact-footer-nav">
@@ -467,144 +470,13 @@ function HomepageAiConsole() {
 
 function Home() {
   const s = useSite();
-  const p = s.projects
-    .filter((p) => p.published)
-    .sort((a, b) => a.order - b.order);
-
-  // Live demo projects shown on the homepage: StarX Live and TicketX
-  const featuredCards = [
-    p.find((x) => x.slug === "starx-live") || seed[0],
-    p.find((x) => x.slug === "ticketx") || seed[1],
-  ];
-
   return (
-    <div className="homepage-five-sections">
-      {/* ==============================================================
-          SECTION 1 — LANDING / HERO
-          Only: Trinity Tech + Spideyy AI Console + Start Your Project
-          ============================================================== */}
-      <section className="hero-landing-section wrap" aria-label="Trinity Tech Landing">
-        <div className="hero-landing-container hero-enter">
-          <div className="hero-main-header">
-            <h1 className="hero-studio-name">Trinity Tech</h1>
-          </div>
-
-          {/* Working Spideyy AI Console */}
-          <div className="hero-spideyy-wrap">
-            <HomepageAiConsole />
-          </div>
-
-          {/* Clear Start Your Project Button */}
-          <div className="hero-start-project-wrap">
-            <Link to="/project" className="button hero-start-project-btn">
-              Start Your Project <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ==============================================================
-          SECTION 2 — LIVE DEMO PROJECTS
-          StarX Live, TicketX
-          ============================================================== */}
-      <section id="featured-projects" className="featured-projects-section wrap" aria-label="Featured Projects">
-        <div className="featured-section-header" data-reveal>
-          <div>
-            <span className="eyebrow">Live Demo Projects</span>
-            <h2 className="featured-section-title">Selected Projects</h2>
-          </div>
-          <Link to="/work" className="featured-all-link">
-            Explore All Projects →
-          </Link>
-        </div>
-
-        <div className="featured-projects-grid featured-two" data-reveal-stagger="120">
-          {featuredCards.map((card) => (
-            <article key={card.slug} className="varun-project-card" data-reveal>
-              <div className="project-card-tape" aria-hidden="true" />
-
-              {/* Large, uncropped screenshot preview */}
-              <Link
-                to={"/work/" + card.slug}
-                className="varun-project-preview"
-                style={{ "--project-color": card.color } as React.CSSProperties}
-              >
-                <div className="preview-browser-bar">
-                  <div className="preview-dots">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                  <span className="preview-hostname">{new URL(card.url).hostname}</span>
-                </div>
-                <div className="preview-image-canvas">
-                  <img
-                    src={card.slug === "starx-connect" ? card.mobile : card.image}
-                    alt={card.name + " real website showcase"}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </Link>
-
-              {/* Clean project information */}
-              <div className="varun-project-meta">
-                <span className="varun-project-category">{card.category}</span>
-                <h3 className="varun-project-title">
-                  <Link to={"/work/" + card.slug}>{card.short}</Link>
-                </h3>
-                <p className="varun-project-desc">{card.summary}</p>
-                <div className="varun-project-actions">
-                  <Link to={"/work/" + card.slug} className="button varun-view-btn">
-                    View Project <ArrowRight size={15} />
-                  </Link>
-                  <a
-                    href={card.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="varun-live-link"
-                  >
-                    Live Demo ↗
-                  </a>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* ==============================================================
-          SECTION 3 — CO-FOUNDER AT CODEXA AGENCY
-          Short affiliation panel
-          ============================================================== */}
-      <div className="wrap">
-        <Affiliation />
-      </div>
-
-      {/* ==============================================================
-          SECTION 4 — CHOOSE YOUR WEBSITE / PROJECT ENQUIRY
-          Interactive 3-Step Wizard with CodeXa Structure & Trinity Tech Theme
-          ============================================================== */}
-      <section id="choose-website" className="homepage-enquiry-section wrap" aria-label="Choose Your Website">
-        <div className="homepage-enquiry-header" data-reveal>
-          <span className="eyebrow">Project Enquiry</span>
-          <h2 className="homepage-enquiry-title">Choose Your Website</h2>
-          <p className="homepage-enquiry-sub">
-            Select what you&apos;re planning to create, pick your features, and get an honest proposal with your unique tracking code.
-          </p>
-        </div>
-
-        <div className="homepage-enquiry-card-wrapper" data-reveal>
-          <EnquiryPreview />
-        </div>
-      </section>
-
-      {/* ==============================================================
-          SECTION 5 — CONTACT INFORMATION
-          Let's Connect (Must be last section)
-          ============================================================== */}
-      <ContactSection />
-    </div>
+    <HomePage
+      site={s}
+      console={<HomepageAiConsole />}
+      affiliation={<Affiliation />}
+      contact={<ContactSection />}
+    />
   );
 }
 
@@ -855,7 +727,7 @@ function About() {
       <div className="about-grid" data-reveal>
         <div className="logo-object">
           <img
-            src="/media/official-logo.webp"
+            src="/assets/trinity-logo.svg"
             alt="Trinity Tech official logo"
           />
         </div>
@@ -992,6 +864,8 @@ export default function App() {
                   "/about": "About",
                   "/services": "Services",
                   "/contact": "Start a Project",
+                  "/project": "Start a Project",
+                  "/track": "Track Your Project",
                   "/privacy": "Privacy",
                   "/spideyy": "Spideyy — Private Access",
                   "/admin": "Spideyy — Private Access",
@@ -1015,11 +889,11 @@ export default function App() {
           >
             <div className="intro-mark">
               <img
-                src="/media/official-logo.webp"
+                src="/assets/trinity-logo.svg"
                 alt="Trinity Tech official logo"
               />
               <h2>Trinity Tech</h2>
-              <p>Digital Experiences. Designed to Stand Out.</p>
+              <p>Build. Innovate. Transform.</p>
             </div>
             <button autoFocus onClick={finish}>
               Skip introduction <Arrow />

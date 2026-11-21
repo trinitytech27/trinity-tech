@@ -771,10 +771,10 @@ export function getGeneralWhatsAppUrl(customText?: string): string {
 }
 
 export const defaults = {
-  headline: "Thoughtful Design.\nPowerful Digital Experiences.",
-  intro: "Trinity Tech builds professional digital experiences for individuals, businesses and organizations.",
+  headline: "Your Vision. Our Technology.\nInfinite Possibilities.",
+  intro: "Your Vision. Our Technology. Infinite Possibilities.",
   about:
-    "Trinity Tech is a web development and digital solutions business. We bring design and engineering together to create clear, engaging experiences for businesses and their customers.",
+    "Trinity Tech is a modern web development and digital solutions brand helping businesses, startups, entrepreneurs and individuals build a strong online presence. We transform ideas into professional digital experiences through creative design, modern technologies and reliable web development.",
   email: "sanjuxdev27@gmail.com",
   phone: SANJU_BUSINESS_PHONE,
   whatsapp: `https://wa.me/${SANJU_WHATSAPP_NUMBER}`,
@@ -803,9 +803,9 @@ export const defaults = {
   ],
   knowledge:
     "Trinity Tech provides professional web development and digital solutions. Sanjay is Co-Founder at CodeXa Agency, a separate affiliation, not a sixth project.",
-  seoTitle: "Trinity Tech — Websites with distinction",
+  seoTitle: "Trinity Tech — Build. Innovate. Transform.",
   seoDescription:
-    "Business websites, thoughtful digital experiences and custom applications. Explore five real projects and start a conversation.",
+    "Trinity Tech builds modern websites, UI/UX and custom digital solutions for businesses, startups and personal brands. Your Vision. Our Technology. Infinite Possibilities.",
   assistantWelcome:
     "Hi, I’m spideyy! I can help you understand our services, suggest the right website for your business, explain features, or check your project status.",
   homepageQuestions: [
@@ -842,3 +842,64 @@ export const defaults = {
     "Customer Reviews",
   ],
 };
+
+/* Trinity Tech brand content (homepage) */
+export const brand = {
+  tagline: "Your Vision. Our Technology. Infinite Possibilities.",
+  motto: ["Build", "Innovate", "Transform"],
+  mission:
+    "To empower businesses and individuals with modern digital solutions that help them grow, connect with customers, and succeed online.",
+  vision:
+    "To become a trusted digital technology brand known for creativity, quality, innovation, and impactful web experiences.",
+  core:
+    "Trinity Tech isn't just about building websites. It's about building digital identities, creating meaningful online experiences, and helping businesses move forward in the digital world.",
+};
+
+export const pillars = [
+  {
+    key: "web",
+    title: "Website Development",
+    desc: "Fast, reliable websites built on modern technology — from a single landing page to a full web application.",
+    items: ["Business & company websites", "Portfolios & landing pages", "Startup & agency websites", "E-commerce & custom web apps"],
+  },
+  {
+    key: "uiux",
+    title: "UI/UX Design",
+    desc: "Clean, premium interfaces that feel effortless on every screen size.",
+    items: ["Modern, professional interfaces", "Responsive mobile, tablet & desktop", "User-friendly navigation", "Interactive elements & animation"],
+  },
+  {
+    key: "business",
+    title: "Business Digital Solutions",
+    desc: "Taking traditional businesses online with a digital presence customers trust.",
+    items: ["Taking businesses online", "Digital brand presence", "Online service showcases", "Custom solutions for your needs"],
+  },
+  {
+    key: "redesign",
+    title: "Redesign & Optimization",
+    desc: "Give an outdated website a modern, faster and more usable second life.",
+    items: ["Redesigning outdated websites", "Performance improvements", "Mobile responsiveness", "Better user experience"],
+  },
+  {
+    key: "creative",
+    title: "Creative Digital Experiences",
+    desc: "Distinctive web concepts that make a brand memorable.",
+    items: ["Unique website concepts", "Interactive websites", "Creative project demos", "Innovative digital platforms"],
+  },
+];
+
+export const steps = [
+  { step: "01", title: "Build", desc: "We understand your goals, plan the structure and build a solid, responsive foundation with modern technology." },
+  { step: "02", title: "Innovate", desc: "We craft a premium interface with thoughtful details, smooth interactions and a clear path to action." },
+  { step: "03", title: "Transform", desc: "We launch, refine and help your business move forward with a digital identity that grows with you." },
+];
+
+export const audiences = [
+  "Small & medium businesses",
+  "Startups",
+  "Local businesses",
+  "Entrepreneurs",
+  "Freelancers",
+  "Personal brands",
+  "Growing companies",
+];

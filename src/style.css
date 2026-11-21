@@ -9,7 +9,7 @@ html {
   --text: #252529;
   --muted: #66666a;
   --line: #d5d4d1;
-  --accent: #a51d35;
+  --accent: #4f46e5;
   --soft: #e8dce0;
   --shadow: #21212622;
   color-scheme: light;
@@ -865,7 +865,7 @@ textarea {
     #aaa 40%,
     #fff 48%,
     #333 55%,
-    #8c172b 80%
+    #4f46e5 80%
   );
   background-size: 250%;
   background-clip: text;
@@ -1636,7 +1636,7 @@ dialog {
 }
 .project-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(165, 29, 53, 0.35);
+  border-color: rgba(79, 70, 229, 0.35);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
 }
 .project-meta-top {
@@ -1716,7 +1716,7 @@ dialog {
 }
 .service-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(165, 29, 53, 0.35);
+  border-color: rgba(79, 70, 229, 0.35);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 .service-card-header {
@@ -1787,6 +1787,6 @@ dialog {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(213, 212, 209, 0.85);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(165, 29, 53, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(79, 70, 229, 0.1);
 }
 

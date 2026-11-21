@@ -33,7 +33,7 @@ const origin =
         : "https://sanju-x-dev.vercel.app");
 
 const pages = [
-  ["", "Websites with distinction", seed.seoDescription],
+  ["", "Build. Innovate. Transform.", seed.seoDescription],
   ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, StarX Connect and AudioX."],
   ["about", "About the Business — Trinity Tech", seed.about],
   ["services", "Services — Design & Digital Development", "Web development, UI/UX design, custom web applications, e-commerce storefronts, and interactive digital experiences."],
@@ -59,7 +59,7 @@ for (const [path, title, desc, projectData] of pages) {
   const canonicalUrl = origin + (path ? "/" + path : "/");
   const imageUrl = projectData?.image
     ? (projectData.image.startsWith("http") ? projectData.image : origin + projectData.image)
-    : origin + "/media/official-logo.png";
+    : origin + "/media/trinity-logo.png";
 
   const robotsTag = isPreview
     ? '<meta name="robots" content="noindex,nofollow"/>'
@@ -74,8 +74,8 @@ for (const [path, title, desc, projectData] of pages) {
       "@type": "ProfessionalService",
       "name": "Trinity Tech",
       "url": origin + "/",
-      "logo": origin + "/media/official-logo.png",
-      "image": origin + "/media/official-logo.png",
+      "logo": origin + "/media/trinity-logo.png",
+      "image": origin + "/media/trinity-logo.png",
       "description": seed.seoDescription,
       "email": "sanjuxdev27@gmail.com",
       "sameAs": [
