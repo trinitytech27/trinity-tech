@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { gsap, ScrollTrigger, prefersReducedMotion, scrollToElement } from "./scroll";
 
-const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
+// Same choreography on laptops, tablets and phones (only reduced-motion opts out)
+const DESKTOP = "(prefers-reduced-motion: no-preference)";
 const finePointer = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(pointer: fine)").matches &&

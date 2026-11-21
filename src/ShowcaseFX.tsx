@@ -7,7 +7,8 @@ import type { projects } from "./content";
 type Project = (typeof projects)[number];
 
 /** Desktop-only choreography (pins, horizontal rolls). Phones get simple reveals. */
-const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
+// Same choreography on laptops, tablets and phones (only reduced-motion opts out)
+const DESKTOP = "(prefers-reduced-motion: no-preference)";
 const ANY_MOTION = "(prefers-reduced-motion: no-preference)";
 
 const host = (url: string) => {
@@ -329,7 +330,6 @@ export function Statement({
         .fromTo(b.current, { backgroundPosition: "100% 0" }, { backgroundPosition: "0% 0" }, 0);
     };
     mm.add(DESKTOP, () => build(true));
-    mm.add("(max-width: 959px) and (prefers-reduced-motion: no-preference)", () => build(false));
     return () => mm.revert();
   }, []);
 

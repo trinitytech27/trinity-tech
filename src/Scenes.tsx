@@ -7,7 +7,8 @@ import { BOOKING_STEPS } from "./Home";
 
 type Project = (typeof projects)[number];
 
-const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
+// Same choreography on laptops, tablets and phones (only reduced-motion opts out)
+const DESKTOP = "(prefers-reduced-motion: no-preference)";
 
 /* "04 ——— PROGRAMMES" style section tag */
 export function SectionTag({ n, label }: { n: string; label: string }) {
@@ -44,6 +45,8 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
     mm.add(DESKTOP, () => {
       el.classList.add("is-queued");
       const cards = gsap.utils.toArray<HTMLElement>(".tt-q-card", el);
+      // centre vertically via GSAP (it owns this element's transform)
+      gsap.set(cards, { yPercent: -50 });
       const marks: number[] = [0];
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -64,14 +67,16 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
         },
       });
       // the first project arrives while the section scrolls into place
+      // (animates the card's contents, so it never fights the exit tween on the card)
       gsap.fromTo(
-        cards[0],
-        { z: -900, opacity: 0, rotateX: 14 },
+        cards[0].children,
+        { y: 90, scale: 0.86, opacity: 0 },
         {
-          z: 0,
+          y: 0,
+          scale: 1,
           opacity: 1,
-          rotateX: 0,
           ease: "none",
+          stagger: 0.08,
           scrollTrigger: { trigger: el, start: "top 85%", end: "top top", scrub: 0.8 },
         },
       );
@@ -91,6 +96,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       return () => {
         el.classList.remove("is-queued");
         gsap.set(cards, { clearProps: "all" });
+        gsap.set(cards[0].children, { clearProps: "all" });
       };
     });
     return () => mm.revert();
@@ -296,6 +302,7 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
     mm.add(DESKTOP, () => {
       el.classList.add("is-orbiting");
       const cards = gsap.utils.toArray<HTMLElement>(".tt-member", el);
+      gsap.set(cards, { xPercent: -50, yPercent: -50 });
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
@@ -312,7 +319,8 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
         const slot = Number(card.dataset.slot); // -1, 0, 1
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const RX = vw * 0.32;
+        const narrow = vw < 760;
+        const RX = vw * (narrow ? 0.42 : 0.32);
         const RY = vh * 0.16;
         const tilt = ((i - 1) * Math.PI) / 3;
         const start = i * 2.1;
@@ -326,7 +334,9 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
             y: x * Math.sin(tilt) + y * Math.cos(tilt),
           };
         });
-        const finalX = slot * Math.min(vw * 0.29, 400);
+        // laptops/tablets: a row; phones: a column (founder in the middle)
+        const finalX = narrow ? 0 : slot * Math.min(vw * 0.31, 400);
+        const finalY = narrow ? slot * (card.offsetHeight + 12) : slot === 0 ? -18 : 12;
         tl.fromTo(
           card,
           { x: frames[0].x, y: frames[0].y, scale: 0.35, rotateY: 60, rotateZ: -12, opacity: 0 },
@@ -334,7 +344,7 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
             keyframes: [
               { x: frames[1].x, y: frames[1].y, scale: 0.55, rotateY: 40, rotateZ: -6, opacity: 1, duration: 0.4 },
               { x: frames[2].x, y: frames[2].y, scale: 0.75, rotateY: 20, rotateZ: 4, duration: 0.4 },
-              { x: finalX, y: slot === 0 ? -18 : 12, scale: slot === 0 ? 1.04 : 0.96, rotateY: 0, rotateZ: 0, duration: 0.5 },
+              { x: finalX, y: finalY, scale: narrow ? 1 : slot === 0 ? 1.04 : 0.96, rotateY: 0, rotateZ: 0, duration: 0.5 },
             ],
           },
           i * 0.35,
@@ -376,7 +386,7 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
                 </div>
                 <span className="tt-member-role">{m.role}</span>
               </div>
-              <h3>{m.name}</h3>
+              <h3 data-role={m.role}>{m.name}</h3>
               <p>{m.bio}</p>
               <div className="tt-member-tags">
                 {m.focus.map((f) => (

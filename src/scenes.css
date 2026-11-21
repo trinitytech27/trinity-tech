@@ -280,7 +280,6 @@ html {
   width: min(1120px, 84vw);
   margin-left: calc(min(1120px, 84vw) / -2);
   transform-origin: 50% 50%;
-  translate: 0 -50%;
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -681,7 +680,6 @@ html {
   left: 50%;
   top: 58%;
   width: min(370px, 27vw);
-  translate: -50% -50%;
   will-change: transform, opacity;
 }
 .motion-ready .tt-atom.is-orbiting [data-reveal] {
@@ -990,4 +988,224 @@ html.theme-owner .tt-pill {
 /* phones: founder first */
 .tt-atom:not(.is-orbiting) .tt-member.is-founder {
   order: -1;
+}
+
+/* ==========================================================================
+   SAME SCENES ON TABLETS & PHONES — compact layouts for the pinned modes
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .tt-atom.is-orbiting .tt-member {
+    width: min(330px, 30vw);
+    padding: 22px 20px;
+  }
+  .tt-atom.is-orbiting .tt-member p {
+    display: none;
+  }
+  .tt-atom.is-orbiting .tt-member h3 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 900px) {
+  /* website types: copy on top, stack below */
+  .tt-layers.is-stacked .tt-layers-inner {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 0;
+    padding-top: 84px;
+  }
+  .tt-layers.is-stacked .tt-display {
+    font-size: clamp(32px, 7vw, 52px);
+    margin-bottom: 12px;
+  }
+  .tt-layers.is-stacked .tt-tag {
+    margin-bottom: 10px;
+  }
+  .tt-layers.is-stacked .tt-layer-panel {
+    padding: 16px 18px;
+    max-width: none;
+  }
+  .tt-layers.is-stacked .tt-layer-panel h3 {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .tt-layers.is-stacked .tt-layer-panel p {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .tt-layers.is-stacked .tt-layer-tags {
+    margin-bottom: 10px;
+  }
+  .tt-layers.is-stacked .tt-layer-dashes {
+    margin-top: 12px;
+  }
+  .tt-layers.is-stacked .tt-stack {
+    height: 34vh;
+    min-height: 220px;
+  }
+  .tt-layers.is-stacked .tt-stack-plane {
+    width: min(440px, 68vw);
+    height: min(250px, 38vw);
+  }
+  .tt-layers.is-stacked .tt-layer {
+    padding: 14px 18px;
+    border-radius: 16px;
+  }
+  .tt-layers.is-stacked .tt-layer b {
+    font-size: 20px;
+  }
+  .tt-layers.is-stacked .tt-layer small {
+    font-size: 12px;
+  }
+
+  /* projects: one column card, sized to the screen */
+  .tt-queue.is-queued {
+    padding-top: 84px;
+  }
+  .tt-queue.is-queued .tt-display {
+    font-size: clamp(32px, 7vw, 52px);
+    margin-bottom: 6px;
+  }
+  .tt-queue.is-queued .tt-q-card {
+    width: 92vw;
+    margin-left: -46vw;
+    top: 52%;
+    border-radius: 20px;
+  }
+  .tt-queue.is-queued .tt-q-shot img {
+    max-height: 30vh;
+  }
+  .tt-queue.is-queued .tt-q-info {
+    padding: 18px 18px 20px;
+  }
+  .tt-queue.is-queued .tt-q-info h3 {
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+  .tt-queue.is-queued .tt-q-info p {
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .tt-queue.is-queued .tt-q-info ul {
+    display: none;
+  }
+  .tt-queue.is-queued .tt-q-num {
+    font-size: 44px;
+    top: 12px;
+    right: 16px;
+  }
+  .tt-queue.is-queued .tt-q-actions .tt-btn {
+    padding: 11px 16px;
+    font-size: 14px;
+  }
+  .tt-queue.is-queued .tt-queue-count {
+    display: flex;
+    padding-bottom: 6px;
+  }
+  .tt-queue.is-queued .tt-queue-count b {
+    font-size: 30px;
+  }
+  .tt-queue.is-queued .tt-queue-count div {
+    display: none;
+  }
+}
+
+@media (max-width: 759px) {
+  /* team: compact cards that settle in a column */
+  .tt-atom.is-orbiting {
+    padding-top: 80px;
+  }
+  .tt-atom.is-orbiting .tt-display {
+    font-size: clamp(32px, 9vw, 44px);
+  }
+  .tt-atom.is-orbiting .tt-atom-head .tt-lede {
+    display: none;
+  }
+  .tt-atom.is-orbiting .tt-member {
+    top: 60%;
+    width: 88vw;
+    padding: 14px 16px;
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 14px;
+    align-items: center;
+  }
+  .tt-atom.is-orbiting .tt-member-top {
+    margin: 0;
+    grid-row: span 2;
+  }
+  .tt-atom.is-orbiting .tt-member-role {
+    display: none;
+  }
+  .tt-atom.is-orbiting .tt-orb {
+    width: 52px;
+    height: 52px;
+  }
+  .tt-atom.is-orbiting .tt-orb b {
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
+  .tt-atom.is-orbiting .tt-member h3 {
+    font-size: 21px;
+    margin: 0;
+  }
+  .tt-atom.is-orbiting .tt-member h3::after {
+    content: attr(data-role);
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-body) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #67e8f9;
+  }
+  .tt-atom.is-orbiting .tt-member-tags {
+    display: none;
+  }
+  .tt-atom.is-orbiting .tt-member-mail {
+    border: 0;
+    padding: 2px 0 0;
+    font-size: 12px;
+  }
+
+  /* work page stage on phones */
+  .tt-demos.is-staged .tt-demos-head {
+    padding-top: 80px;
+  }
+  .tt-demos.is-staged .tt-demo-inner {
+    width: calc(100% - 32px);
+    gap: 18px;
+  }
+  .tt-demos.is-staged .tt-demo-frame .tt-browser-view {
+    max-height: 28vh;
+  }
+  .tt-demos.is-staged .tt-demo-copy p {
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .tt-demos.is-staged .tt-feature-list,
+  .tt-demos.is-staged .tt-demo-index {
+    display: none;
+  }
+  .tt-demos.is-staged .tt-demo-copy h3 {
+    font-size: 28px;
+  }
+  .tt-demos.is-staged .tt-title {
+    font-size: 30px;
+  }
+
+  /* rolling gallery on phones */
+  .tt-work.is-rolling {
+    padding-top: 84px;
+  }
+  .tt-work.is-rolling .tt-work-card {
+    width: 82vw;
+    min-width: 0;
+  }
+  .tt-work.is-rolling .tt-work-next {
+    width: 76vw;
+  }
 }
