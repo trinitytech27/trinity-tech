@@ -42,19 +42,19 @@ html {
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #b9c1d9;
+  color: #cbc3b5;
   margin-bottom: 18px;
 }
 .tt-tag b {
   font-family: var(--font-mono) !important;
   font-weight: 500;
   letter-spacing: 0.04em;
-  color: #67e8f9;
+  color: #f6c66b;
 }
 .tt-tag i {
   width: 56px;
   height: 1px;
-  background: linear-gradient(90deg, #67e8f9, rgba(103, 232, 249, 0));
+  background: linear-gradient(90deg, #f6c66b, rgba(246, 198, 107, 0));
 }
 
 .tt-btn.lg {
@@ -113,7 +113,7 @@ html {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  color: #8f98b3;
+  color: #9e968a;
   padding-bottom: 20px;
 }
 .tt-queue-count b {
@@ -136,7 +136,7 @@ html {
   transition: width 0.4s var(--ease-out), background 0.4s var(--ease-out);
 }
 .tt-queue-count i.done {
-  background: rgba(103, 232, 249, 0.5);
+  background: rgba(246, 198, 107, 0.5);
 }
 .tt-queue-count i.on {
   width: 44px;
@@ -155,14 +155,14 @@ html {
   gap: 0;
   border-radius: 26px;
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(20, 27, 51, 0.92), rgba(9, 13, 26, 0.95));
+  background: linear-gradient(160deg, rgba(28, 22, 14, 0.92), rgba(12, 10, 7, 0.95));
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(129, 140, 248, 0.08);
+  box-shadow: 0 50px 120px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(232, 163, 61, 0.08);
 }
 .tt-q-shot {
   position: relative;
   display: block;
-  background: #070a14;
+  background: #080604;
   overflow: hidden;
 }
 .tt-q-bar {
@@ -173,7 +173,7 @@ html {
   align-items: center;
   gap: 14px;
   padding: 11px 14px;
-  background: rgba(7, 10, 20, 0.78);
+  background: rgba(9, 7, 5, 0.78);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .tt-q-shot img {
@@ -209,7 +209,7 @@ html {
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #67e8f9;
+  color: #f6c66b;
   margin-bottom: 10px;
 }
 .tt-q-info h3 {
@@ -234,7 +234,7 @@ html {
 .tt-q-info li {
   position: relative;
   padding-left: 22px;
-  color: #c7cde0;
+  color: #d8d1c4;
   font-size: 14.5px;
 }
 .tt-q-info li::before {
@@ -318,9 +318,9 @@ html {
   position: relative;
   padding: 28px 30px;
   border-radius: 22px;
-  background: linear-gradient(160deg, rgba(20, 27, 51, 0.9), rgba(9, 13, 26, 0.92));
+  background: linear-gradient(160deg, rgba(28, 22, 14, 0.9), rgba(12, 10, 7, 0.92));
   border: 1px solid rgba(255, 255, 255, 0.09);
-  border-left: 2px solid #67e8f9;
+  border-left: 2px solid #f6c66b;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
   animation: ttPanelIn 0.6s var(--ease-out) both;
   max-width: 560px;
@@ -340,7 +340,7 @@ html {
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #67e8f9;
+  color: #f6c66b;
   margin-bottom: 10px;
 }
 .tt-layer-panel h3,
@@ -369,9 +369,9 @@ html {
   font-size: 12.5px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(99, 102, 241, 0.16);
-  border: 1px solid rgba(129, 140, 248, 0.3);
-  color: #c7d2fe;
+  background: rgba(232, 163, 61, 0.16);
+  border: 1px solid rgba(232, 163, 61, 0.3);
+  color: #f3dcb0;
 }
 .tt-layer-dashes {
   display: none;
@@ -453,9 +453,9 @@ html {
   padding: 26px 30px;
   border-radius: 22px;
   background:
-    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
-    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
-    linear-gradient(160deg, #141b33, #0a0f1f);
+    linear-gradient(rgba(200, 190, 170, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(90deg, rgba(200, 190, 170, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(160deg, #1a150e, #0d0a07);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   display: flex;
@@ -464,17 +464,17 @@ html {
   will-change: transform, opacity;
 }
 .tt-layer.is-top {
-  border-color: rgba(103, 232, 249, 0.85);
+  border-color: rgba(246, 198, 107, 0.85);
   box-shadow:
-    0 0 0 1px rgba(103, 232, 249, 0.35),
-    0 0 50px rgba(99, 102, 241, 0.45),
+    0 0 0 1px rgba(246, 198, 107, 0.35),
+    0 0 50px rgba(232, 163, 61, 0.45),
     0 40px 90px rgba(0, 0, 0, 0.55);
 }
 .tt-layer-n {
   font-family: var(--font-head) !important;
   font-size: 15px;
   font-weight: 800;
-  color: #67e8f9;
+  color: #f6c66b;
 }
 .tt-layer b {
   font-family: var(--font-head) !important;
@@ -485,7 +485,7 @@ html {
   margin: 4px 0 4px;
 }
 .tt-layer small {
-  color: #8f98b3;
+  color: #9e968a;
   font-size: 14px;
 }
 .tt-layer-chips {
@@ -525,7 +525,7 @@ html {
   position: relative;
   padding: 30px 28px;
   border-radius: 26px;
-  background: linear-gradient(165deg, rgba(22, 29, 56, 0.94), rgba(9, 13, 26, 0.96));
+  background: linear-gradient(165deg, rgba(30, 24, 15, 0.94), rgba(12, 10, 7, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -537,15 +537,15 @@ html {
   width: 260px;
   height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.35), transparent 65%);
+  background: radial-gradient(circle, rgba(232, 163, 61, 0.35), transparent 65%);
   pointer-events: none;
 }
 .tt-member.is-founder {
-  border-color: rgba(103, 232, 249, 0.55);
-  box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.2), 0 0 60px rgba(99, 102, 241, 0.35), 0 40px 100px rgba(0, 0, 0, 0.55);
+  border-color: rgba(246, 198, 107, 0.55);
+  box-shadow: 0 0 0 1px rgba(246, 198, 107, 0.2), 0 0 60px rgba(232, 163, 61, 0.35), 0 40px 100px rgba(0, 0, 0, 0.55);
 }
 .tt-member.is-founder::before {
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.4), transparent 65%);
+  background: radial-gradient(circle, rgba(246, 198, 107, 0.4), transparent 65%);
 }
 .tt-member-top {
   display: flex;
@@ -573,13 +573,13 @@ html {
   font-weight: 800;
   color: #fff;
   background: var(--brand-grad);
-  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.55);
+  box-shadow: 0 10px 30px rgba(201, 130, 43, 0.55);
 }
 .tt-orb-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px solid rgba(165, 180, 252, 0.45);
+  border: 1px solid rgba(240, 196, 119, 0.45);
   transform: rotateX(70deg);
   animation: ttOrbit 6s linear infinite;
 }
@@ -587,7 +587,7 @@ html {
   transform: rotateY(70deg);
   animation-duration: 8s;
   animation-direction: reverse;
-  border-color: rgba(103, 232, 249, 0.45);
+  border-color: rgba(246, 198, 107, 0.45);
 }
 .tt-orb-ring::after {
   content: "";
@@ -598,8 +598,8 @@ html {
   height: 6px;
   margin-left: -3px;
   border-radius: 50%;
-  background: #67e8f9;
-  box-shadow: 0 0 10px #67e8f9;
+  background: #f6c66b;
+  box-shadow: 0 0 10px #f6c66b;
 }
 @keyframes ttOrbit {
   to {
@@ -613,8 +613,8 @@ html {
   text-transform: uppercase;
   padding: 7px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(103, 232, 249, 0.35);
-  color: #67e8f9;
+  border: 1px solid rgba(246, 198, 107, 0.35);
+  color: #f6c66b;
 }
 .tt-member h3 {
   font-family: var(--font-head) !important;
@@ -641,14 +641,14 @@ html {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #c7cde0;
+  color: #d8d1c4;
 }
 .tt-member-mail {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 13.5px;
-  color: #c7d2fe;
+  color: #f3dcb0;
   word-break: break-all;
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -715,7 +715,7 @@ html {
   position: relative;
   padding: 30px 26px 28px;
   border-radius: 24px;
-  background: linear-gradient(170deg, rgba(22, 29, 56, 0.9), rgba(9, 13, 26, 0.94));
+  background: linear-gradient(170deg, rgba(30, 24, 15, 0.9), rgba(12, 10, 7, 0.94));
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
   overflow: hidden;
@@ -723,7 +723,7 @@ html {
   transition: border-color 0.4s var(--ease-out), translate 0.4s var(--ease-out);
 }
 .tt-wave-steps li:hover {
-  border-color: rgba(103, 232, 249, 0.5);
+  border-color: rgba(246, 198, 107, 0.5);
   translate: 0 -6px;
 }
 .tt-wave-steps li::after {
@@ -756,7 +756,7 @@ html {
   background: var(--brand-grad);
   color: #fff;
   margin-bottom: 22px;
-  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.45);
+  box-shadow: 0 12px 30px rgba(201, 130, 43, 0.45);
 }
 .tt-wave-steps h3 {
   font-family: var(--font-head) !important;
@@ -857,12 +857,12 @@ html {
   padding: 9px 18px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(4, 5, 11, 0.6);
+  background: rgba(5, 4, 3, 0.6);
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #e8ecf8;
+  color: #f1ece3;
   pointer-events: none;
   animation: ttFadeUp 0.5s var(--ease-out) both;
 }
@@ -870,8 +870,8 @@ html {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #67e8f9;
-  box-shadow: 0 0 10px #67e8f9;
+  background: #f6c66b;
+  box-shadow: 0 0 10px #f6c66b;
 }
 html.theme-owner .tt-rail,
 html.theme-owner .tt-pill {
@@ -945,12 +945,12 @@ html.theme-owner .tt-pill {
 
 /* ---------- Spideyy console on the dark theme ---------- */
 .home-ai-scrapbook-card {
-  background: linear-gradient(165deg, rgba(22, 29, 56, 0.97), rgba(9, 13, 26, 0.98)) !important;
+  background: linear-gradient(165deg, rgba(30, 24, 15, 0.97), rgba(12, 10, 7, 0.98)) !important;
 }
 .home-ai-chip {
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #c7d2fe !important;
+  color: #f3dcb0 !important;
 }
 .home-ai-chip:hover:not(:disabled) {
   background: var(--brand) !important;
@@ -969,7 +969,7 @@ html.theme-owner .tt-pill {
 }
 .home-ai-chips-label,
 .home-ai-badge span {
-  color: #8f98b3 !important;
+  color: #9e968a !important;
 }
 
 /* ---------- Finale: the stars draw the Trinity mark above the last call ---------- */
@@ -1156,7 +1156,7 @@ html.theme-owner .tt-pill {
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #67e8f9;
+    color: #f6c66b;
   }
   .tt-atom.is-orbiting .tt-member-tags {
     display: none;

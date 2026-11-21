@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
+import { gsap, ScrollTrigger, prefersReducedMotion, showStars } from "./scroll";
 
 // Same choreography on laptops, tablets and phones (only reduced-motion opts out)
 const DESKTOP = "(prefers-reduced-motion: no-preference)";
@@ -348,14 +348,10 @@ export function SectionLabel() {
 
   useEffect(() => {
     let triggers: ScrollTrigger[] = [];
-    let lastStars = "";
+    // showStars remembers the real current shape (scenes change it too)
     const broadcast = (el: HTMLElement) => {
       setName(el.dataset.section || "");
-      const s = el.dataset.stars;
-      if (s && s !== lastStars) {
-        lastStars = s;
-        window.dispatchEvent(new CustomEvent("tt:stars", { detail: s }));
-      }
+      if (el.dataset.stars) showStars(el.dataset.stars);
     };
     // Scenes can also ask for a star symbol directly (e.g. per project / domain)
     const id = window.setTimeout(() => {
@@ -369,8 +365,9 @@ export function SectionLabel() {
       triggers = els.map((el) =>
         ScrollTrigger.create({
           trigger: el,
-          start: "top 55%",
-          end: "bottom 55%",
+          // switch early, so the stars are already re-forming as the section arrives
+          start: "top 85%",
+          end: "bottom 40%",
           onToggle: (self) => self.isActive && broadcast(el),
         }),
       );

@@ -73,14 +73,16 @@ function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Trinity Tech home">
       <img
-        src="/assets/trinity-logo.svg"
+        src="/brand/mark.webp"
         alt=""
         className="brand-logo-img"
-        width={40}
+        width={53}
         height={40}
       />
       <span className="brand-copy">
-        <span className="brand-title">Trinity Tech</span>
+        <span className="brand-title">
+          <span className="bt-a">Trinity</span> <span className="bt-b">Tech</span>
+        </span>
         <span className="brand-sub">Build · Innovate · Transform</span>
       </span>
     </Link>
@@ -498,6 +500,11 @@ export default function App() {
     document.documentElement.classList.toggle("theme-owner", isOwner);
   }, [isOwner]);
 
+  // lets pages tune the star background (e.g. calmer behind the booking form)
+  useEffect(() => {
+    document.documentElement.dataset.route = loc.pathname;
+  }, [loc.pathname]);
+
   const finish = () => {
     setIntro(false);
     sessionStorage.setItem("sxd-intro", "1");
@@ -584,7 +591,7 @@ export default function App() {
           >
             <div className="intro-mark">
               <img
-                src="/assets/trinity-logo.svg"
+                src="/brand/mark.webp"
                 alt="Trinity Tech official logo"
               />
               <h2>Trinity Tech</h2>

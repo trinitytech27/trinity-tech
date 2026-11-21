@@ -141,21 +141,21 @@ function sampleCanvas(key: string, draw: (ctx: CanvasRenderingContext2D, W: numb
   return out;
 }
 
-const HEAD_FONT = '"Outfit", "Space Grotesk", "Inter", system-ui, sans-serif';
+const HEAD_FONT = '"Cinzel", "Playfair Display", Georgia, serif';
 
 const drawers: Partial<Record<Shape, (ctx: CanvasRenderingContext2D, W: number, H: number) => void>> = {
   text: (ctx, W, H) => {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `800 ${H * 0.4}px ${HEAD_FONT}`;
+    ctx.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
     ctx.fillText("TRINITY", W / 2, H * 0.3);
-    ctx.font = `800 ${H * 0.4}px ${HEAD_FONT}`;
+    ctx.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
     ctx.fillText("TECH", W / 2, H * 0.74);
   },
   code: (ctx, W, H) => {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `700 ${H * 0.78}px ${HEAD_FONT}`;
+    ctx.font = `700 ${H * 0.78}px "Outfit", "Inter", sans-serif`;
     ctx.fillText("</>", W / 2, H * 0.54);
   },
   logo: (ctx, W, H) => {
@@ -382,10 +382,10 @@ const fragment = /* glsl */ `
 
 const PALETTE = [
   new THREE.Color("#ffffff"),
-  new THREE.Color("#c7d2fe"),
-  new THREE.Color("#818cf8"),
-  new THREE.Color("#67e8f9"),
-  new THREE.Color("#a5b4fc"),
+  new THREE.Color("#f3dcb0"),
+  new THREE.Color("#e8a33d"),
+  new THREE.Color("#f6c66b"),
+  new THREE.Color("#f0c477"),
 ];
 
 export default function Starfield({ route }: { route: string }) {
@@ -520,7 +520,7 @@ export default function Starfield({ route }: { route: string }) {
       aTo.needsUpdate = true;
       morphTween?.kill();
       uniforms.uMorph.value = 0;
-      const dur = reduced ? 0 : quick ? 0.8 : 2.2;
+      const dur = reduced ? 0 : quick ? 0.6 : 1.15; // quick, so stars keep up with scrolling
       morphTween = gsap.to(uniforms.uMorph, { value: 1, duration: dur, ease: "power2.inOut" });
       gsap.to(style, { spin: styleOf(next).spin, tilt: styleOf(next).tilt, duration: dur || 0.01, ease: "power2.inOut" });
       gsap.to(uniforms.uWave, { value: next === "wave" ? 1 : 0, duration: dur || 0.01 });
@@ -532,7 +532,7 @@ export default function Starfield({ route }: { route: string }) {
 
     if (!fontReady) {
       const ready = Promise.race([
-        document.fonts?.load(`800 200px Outfit`).catch(() => null),
+        document.fonts?.load(`700 200px Cinzel`).catch(() => null),
         new Promise((r) => setTimeout(r, 1800)),
       ]);
       ready.then(() => {
@@ -550,15 +550,33 @@ export default function Starfield({ route }: { route: string }) {
         .to(uniforms.uWarp, { value: 1, duration: 0.55, ease: "power3.in" })
         .to(uniforms.uWarp, { value: 0, duration: 1.1, ease: "power3.out" });
     };
+    // "shape@side": the formation moves beside the content (left / right / top)
+    const offset = { x: 0, y: 0 };
+    const offsetTarget = { side: "center" };
+    const placeSide = (side: string) => {
+      offsetTarget.side = side;
+      const narrow = view.narrow;
+      offset.x = 0;
+      offset.y = 0;
+      // phones: move up out of the way instead of sideways
+      if (side === "left" || side === "right") {
+        if (narrow) offset.y = view.h * 0.2;
+        else offset.x = (side === "left" ? -1 : 1) * view.w * 0.23;
+      } else if (side === "top") offset.y = view.h * 0.22;
+      else if (side === "bottom") offset.y = -view.h * 0.2;
+    };
     const onScene = (e: Event) => {
-      const s = (e as CustomEvent<string>).detail as Shape;
-      if (s && isShape(s)) morphTo(s);
+      const raw = String((e as CustomEvent<string>).detail || "");
+      const [s, side = "center"] = raw.split("@");
+      placeSide(side);
+      if (s && isShape(s)) morphTo(s as Shape);
     };
     window.addEventListener("tt:warp", onWarp);
     window.addEventListener("tt:stars", onScene);
 
     const target = { rx: 0, ry: 0, scroll: 0 };
-    const cur = { rx: 0, ry: 0, scroll: 0 };
+    const cur = { rx: 0, ry: 0, scroll: 0, x: 0, y: 0, vel: 0 };
+    let lastY = window.scrollY;
     const onPointer = (e: PointerEvent) => {
       target.ry = (e.clientX / window.innerWidth - 0.5) * 0.3;
       target.rx = (e.clientY / window.innerHeight - 0.5) * 0.18;
@@ -577,7 +595,10 @@ export default function Starfield({ route }: { route: string }) {
       renderOnce();
       window.clearTimeout(resizeT);
       // re-fit text/symbol shapes to the new screen
-      resizeT = window.setTimeout(() => morphTo(shape, true), 250);
+      resizeT = window.setTimeout(() => {
+        placeSide(offsetTarget.side);
+        morphTo(shape, true);
+      }, 250);
     };
     window.addEventListener("resize", onResize);
 
@@ -592,10 +613,19 @@ export default function Starfield({ route }: { route: string }) {
       cur.rx += (target.rx - cur.rx) * 0.05;
       cur.ry += (target.ry - cur.ry) * 0.05;
       cur.scroll += (target.scroll - cur.scroll) * 0.06;
+      // scroll speed makes the stars lean and drift with you
+      const y = window.scrollY;
+      cur.vel += (Math.max(-60, Math.min(60, y - lastY)) - cur.vel) * 0.08;
+      lastY = y;
+      cur.x += (offset.x - cur.x) * 0.05;
+      cur.y += (offset.y - cur.y) * 0.05;
+      const t = uniforms.uTime.value;
       // readable shapes face the visitor; 3D shapes turn
-      group.rotation.y = spin + cur.ry * (0.6 + style.spin);
+      group.rotation.y = spin + cur.ry * (0.6 + style.spin) + cur.vel * 0.004;
       group.rotation.x = style.tilt + cur.rx * 0.8;
-      group.position.y = cur.scroll * 6 * style.spin;
+      group.rotation.z = -cur.vel * 0.0025;
+      group.position.x = cur.x + Math.sin(t * 0.22) * view.w * 0.015;
+      group.position.y = cur.y + cur.vel * 0.06 + Math.cos(t * 0.18) * view.h * 0.012 + cur.scroll * 4 * style.spin;
       renderer.render(scene, camera);
     };
 

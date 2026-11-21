@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { PageHero } from "./FX3D";
-import { scrollToPageTop } from "./scroll";
+import { scrollToElement, scrollToPageTop, showStars } from "./scroll";
 import {
   Copy,
   Check,
@@ -86,7 +86,9 @@ export interface FormState {
   whatsappPhone: string;
   sameAsPhone: boolean;
   city: string;
+  country: string;
   isBusiness: boolean;
+  bizChosen: boolean;
   businessName: string;
   preferredContact: string;
   additionalMessage: string;
@@ -143,19 +145,21 @@ export default function ProjectPage() {
     designMind: "",
     referenceUrl: "",
     hasDomain: "",
-    timeline: "Flexible",
-    budget: "Not Sure Yet",
+    timeline: "",
+    budget: "",
 
     name: "",
     email: "",
     countryCode: "+91",
     phone: "",
     whatsappPhone: "",
-    sameAsPhone: true,
+    sameAsPhone: false,
     city: "",
+    country: "",
     isBusiness: false,
+    bizChosen: false,
     businessName: "",
-    preferredContact: "WhatsApp",
+    preferredContact: "",
     additionalMessage: "",
     consent: false,
     website: "",
@@ -165,7 +169,7 @@ export default function ProjectPage() {
   // Restore saved draft from sessionStorage on mount
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("sxd_enquiry_draft_v5");
+      const saved = sessionStorage.getItem("tt_enquiry_draft_v6");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === "object") {
@@ -183,12 +187,32 @@ export default function ProjectPage() {
     }
   }, [initialCategory]);
 
+  // the star background draws the type of website the client picked
+  useEffect(() => {
+    const ICONS: Record<string, string> = {
+      portfolio: "user",
+      blog: "book-open",
+      business: "briefcase",
+      agency: "layers",
+      ecommerce: "shopping-cart",
+      restaurant: "utensils",
+      shop: "store",
+      booking: "calendar-check",
+      educational: "graduation-cap",
+      custom: "code-xml",
+      not_sure: "circle-help",
+    };
+    const cat = DEFAULT_WEBSITE_CATEGORIES.find((c) => c.label === form.selectedCategory);
+    const icon = cat ? ICONS[cat.id] : "";
+    showStars(icon ? "icon:" + icon + "@top" : "wave");
+  }, [form.selectedCategory]);
+
   // Persist draft
   useEffect(() => {
     try {
       const safeState: Record<string, unknown> = { ...form };
       delete safeState.website;
-      sessionStorage.setItem("sxd_enquiry_draft_v5", JSON.stringify(safeState));
+      sessionStorage.setItem("tt_enquiry_draft_v6", JSON.stringify(safeState));
     } catch {
       /* ignore storage errors */
     }
@@ -232,8 +256,13 @@ export default function ProjectPage() {
     });
   };
 
-  // every Continue / Back returns to the top of the page
-  const scrollToTop = () => scrollToPageTop();
+  // every Continue / Back brings the stepper + new step header into view
+  const scrollToTop = () =>
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(".builder-progress-stepper");
+      if (el) scrollToElement(el);
+      else scrollToPageTop();
+    });
 
   // Step 1 Validation
   function handleGoToStep2(e?: React.FormEvent) {
@@ -314,7 +343,9 @@ export default function ProjectPage() {
     if (!form.phone.trim()) return "Please enter your mobile phone number.";
     const wa = form.sameAsPhone ? form.phone.trim() : form.whatsappPhone.trim();
     if (!wa) return "Please enter your WhatsApp number (or check 'Same as Mobile Number').";
-    if (!form.city.trim()) return "Please enter your city or location.";
+    if (!form.city.trim()) return "Please enter your city.";
+    if (!form.country.trim()) return "Please enter your country.";
+    if (!form.bizChosen) return "Please tell us if this is for yourself or a business.";
     if (form.isBusiness && !form.businessName.trim()) return "Please enter your business or brand name.";
     return "";
   }
@@ -335,6 +366,10 @@ export default function ProjectPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (!form.preferredContact) {
+      setStatus("Please choose how we should contact you.");
+      return;
+    }
     if (form.preferredContact === "Other" && !contactOther.trim()) {
       setStatus("Please tell us how you would like us to contact you.");
       return;
@@ -357,8 +392,8 @@ export default function ProjectPage() {
       setStatus("Please enter your WhatsApp number (or check 'Same as Mobile Number').");
       return;
     }
-    if (!form.city.trim()) {
-      setStatus("Please enter your city or location.");
+    if (!form.city.trim() || !form.country.trim()) {
+      setStatus("Please enter your city and country.");
       return;
     }
     if (form.isBusiness && !form.businessName.trim()) {
@@ -421,10 +456,10 @@ export default function ProjectPage() {
         reference_url: form.referenceUrl.trim(),
         design_preference: form.designStyle,
         has_domain: form.hasDomain,
-        timeline: form.timeline,
-        budget: form.budget,
+        timeline: form.timeline || "Flexible",
+        budget: form.budget || "Not Sure Yet",
         description: `Project enquiry for ${categoryDescription}. Objectives: ${form.selectedPurposes.join(", ") || "General"}. Pages: ${form.pageCount}. Style: ${form.designStyle}.`,
-        city: form.city.trim(),
+        city: (form.city.trim() + ", " + form.country.trim()).slice(0, 100),
         additional_message: [
           form.preferredContact === "Other" ? "Preferred contact: " + contactOther.trim() : "",
           form.additionalMessage.trim(),
@@ -456,7 +491,7 @@ export default function ProjectPage() {
         email: form.email.trim(),
         phone: fullMobile,
         whatsapp: fullWhatsApp,
-        city: form.city.trim(),
+        city: form.city.trim() + ", " + form.country.trim(),
         websiteType: categoryDescription,
         primaryPurpose: form.selectedPurposes,
         features: compiledFeatures,
@@ -485,8 +520,8 @@ export default function ProjectPage() {
         referenceUrl: form.referenceUrl.trim() || undefined,
         hasDomain:
           DOMAIN_OPTIONS.find((dm) => dm.id === form.hasDomain)?.label || form.hasDomain || undefined,
-        timeline: form.timeline,
-        budget: form.budget,
+        timeline: form.timeline || "Flexible",
+        budget: form.budget || "Not Sure Yet",
         additionalMessage: form.additionalMessage.trim() || undefined,
       };
 
@@ -495,7 +530,7 @@ export default function ProjectPage() {
       setSent(true);
 
       // Clear draft storage
-      sessionStorage.removeItem("sxd_enquiry_draft_v5");
+      sessionStorage.removeItem("tt_enquiry_draft_v6");
       scrollToTop();
 
       // Continue on WhatsApp only when that is the chosen contact method
@@ -1416,21 +1451,24 @@ export default function ProjectPage() {
                       <label htmlFor="client-whatsapp" style={{ margin: 0 }}>
                         WhatsApp Number <span className="req">*</span>
                       </label>
-                      <label className="builder-checkbox-inline" style={{ margin: 0, fontSize: 12.5, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        <input
-                          type="checkbox"
-                          checked={form.sameAsPhone}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setForm((f) => ({
-                              ...f,
-                              sameAsPhone: checked,
-                              whatsappPhone: checked ? f.phone : f.whatsappPhone,
-                            }));
-                          }}
-                        />
-                        Same as Mobile
-                      </label>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={form.sameAsPhone}
+                        className={"tt-switch" + (form.sameAsPhone ? " on" : "")}
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            sameAsPhone: !f.sameAsPhone,
+                            whatsappPhone: !f.sameAsPhone ? f.phone : f.whatsappPhone,
+                          }))
+                        }
+                      >
+                        <span className="tt-switch-track">
+                          <span className="tt-switch-thumb" />
+                        </span>
+                        Same as mobile
+                      </button>
                     </div>
                     <input
                       id="client-whatsapp"
@@ -1445,21 +1483,44 @@ export default function ProjectPage() {
                     />
                   </div>
 
-                  {/* City / Location */}
+                  {/* City */}
                   <div className="builder-form-group">
                     <label htmlFor="client-city">
-                      City / Location <span className="req">*</span>
+                      City <span className="req">*</span>
                     </label>
                     <input
                       id="client-city"
                       type="text"
                       className="builder-input"
                       required
-                      maxLength={60}
-                      placeholder="e.g. Hyderabad, Bengaluru, Mumbai"
+                      maxLength={50}
+                      placeholder="e.g. Hyderabad"
                       value={form.city}
                       onChange={(e) => update("city", e.target.value)}
                     />
+                  </div>
+
+                  {/* Country */}
+                  <div className="builder-form-group">
+                    <label htmlFor="client-country">
+                      Country <span className="req">*</span>
+                    </label>
+                    <input
+                      id="client-country"
+                      type="text"
+                      className="builder-input"
+                      required
+                      maxLength={45}
+                      list="tt-countries"
+                      placeholder="e.g. India"
+                      value={form.country}
+                      onChange={(e) => update("country", e.target.value)}
+                    />
+                    <datalist id="tt-countries">
+                      {["India", "United States", "United Kingdom", "United Arab Emirates", "Canada", "Australia", "Singapore", "Germany", "Saudi Arabia", "Qatar"].map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
 
                   {/* Individual vs Business */}
@@ -1470,15 +1531,15 @@ export default function ProjectPage() {
                     <div className="builder-pills-row" role="radiogroup">
                       <button
                         type="button"
-                        className={`builder-pill ${!form.isBusiness ? "active" : ""}`}
-                        onClick={() => update("isBusiness", false)}
+                        className={`builder-pill ${form.bizChosen && !form.isBusiness ? "active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, isBusiness: false, bizChosen: true }))}
                       >
                         Personal / Individual Project
                       </button>
                       <button
                         type="button"
-                        className={`builder-pill ${form.isBusiness ? "active" : ""}`}
-                        onClick={() => update("isBusiness", true)}
+                        className={`builder-pill ${form.bizChosen && form.isBusiness ? "active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, isBusiness: true, bizChosen: true }))}
                       >
                         Business / Organization
                       </button>
@@ -1663,7 +1724,7 @@ export default function ProjectPage() {
                     <div className="review-row">
                       <span className="review-lbl">Timeline & Budget:</span>
                       <span className="review-val">
-                        {form.timeline} · {form.budget}
+                        {form.timeline || "Flexible"} · {form.budget || "Not sure yet"}
                       </span>
                       <button type="button" className="review-edit-btn" onClick={() => setStep(2)}>
                         Edit

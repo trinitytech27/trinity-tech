@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { localAnswer } from "./spideyyLocal";
 
 export type AiStatus = "Available" | "Connecting" | "Limited Assistance" | "Unavailable";
 
@@ -25,7 +26,8 @@ export interface ChatMessage {
 
 export const STARTER_QUESTIONS = [
   "What website is right for me?",
-  "Can you build an online store?",
+  "How much does a website cost?",
+  "Show me your live projects",
   "How do I start a project?",
 ];
 
@@ -41,7 +43,7 @@ interface ChatContextType {
 
 const initialMessage: ChatMessage = {
   role: "assistant",
-  text: "Hi, I'm Spideyy! I can help you understand our services, recommend the right website type, explain features, or plan your project.",
+  text: "Hi, I'm Spideyy — Trinity Tech's guide. Ask me about websites, pricing, timelines or our live projects, or tap a question below.",
   links: [],
   mode: "Spideyy",
 };
@@ -131,15 +133,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       messagesRef.current = finalMessages;
       setMessages(finalMessages);
     } catch {
+      // live AI unreachable: answer instantly from Trinity Tech's own content
       setStatus("Limited Assistance");
+      const local = localAnswer(trimmed);
       const fallbackMessage: ChatMessage = {
         role: "assistant",
-        text: "I couldn't reach the live AI assistant right now. You can explore our verified projects in Our Work or share your project requirements directly through our Project page.",
-        links: [
-          { label: "Start Your Project", url: "/project" },
-          { label: "View Projects", url: "/work" },
-        ],
-        mode: "Limited Assistance",
+        text: local.text,
+        links: local.links,
+        mode: "Quick answers",
         timestamp: new Date().toISOString(),
       };
       const finalMessages = [...messagesRef.current, fallbackMessage];

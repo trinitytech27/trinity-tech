@@ -10,6 +10,7 @@ import "./showcase.css";
 import "./space.css";
 import "./scenes.css";
 import "./upgrades.css";
+import "./brand.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

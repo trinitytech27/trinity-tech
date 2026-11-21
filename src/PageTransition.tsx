@@ -122,7 +122,7 @@ export default function PageTransition() {
   return (
     <div ref={overlay} className="tt-pt" aria-hidden="true">
       <div className="tt-pt-inner">
-        <img className="tt-pt-mark" src="/assets/trinity-logo.svg" alt="" width={56} height={56} />
+        <img className="tt-pt-mark" src="/brand/mark.webp" alt="" width={96} height={72} />
         <span className="tt-pt-kicker">{label.kicker}</span>
         <h2 className="tt-pt-title">
           {label.title.split("").map((ch, i) => (

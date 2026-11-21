@@ -100,7 +100,8 @@
       ],
       "note": "Public pages inspected. Booking fulfilment was not tested. The live crew page identifies Sanjay as Digital Media & Creative Director, managing the website and digital presence.",
       "published": true,
-      "order": 1
+      "order": 1,
+      "quote": "Lost in the noise. Found in the sound."
     },
     {
       "slug": "ticketx",
@@ -122,7 +123,8 @@
       ],
       "note": "Public interfaces inspected. Payment, seat fulfilment and authenticated booking records were not tested.",
       "published": true,
-      "order": 2
+      "order": 2,
+      "quote": "Every great show begins with the right seat."
     },
     {
       "slug": "abps-books",
@@ -144,7 +146,8 @@
       ],
       "note": "Demo catalogue inspected. Titles, prices and availability on the live demo are illustrative; purchases were not tested.",
       "published": true,
-      "order": 3
+      "order": 3,
+      "quote": "A new chapter in learning."
     },
     {
       "slug": "starx-connect",
@@ -166,7 +169,8 @@
       ],
       "note": "Visible controls inspected. External messages were not sent.",
       "published": true,
-      "order": 4
+      "order": 4,
+      "quote": "One tap. Every connection that matters."
     },
     {
       "slug": "audiox",
@@ -188,7 +192,8 @@
       ],
       "note": "Interface inspected. Conversion and completed downloads were not tested.",
       "published": true,
-      "order": 5
+      "order": 5,
+      "quote": "Your media. Your terms. Anywhere."
     }
   ],
   "faqs": [

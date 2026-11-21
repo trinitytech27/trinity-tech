@@ -22,11 +22,15 @@ export function SectionTag({ n, label }: { n: string; label: string }) {
 }
 
 /* ==========================================================================
-   PROJECTS — "fly through" one at a time: each project arrives out of deep
-   space into the main frame, then drifts back to the left as the next one
-   comes in. The caption panel shows the current project with
-   "Visit Live Site" and "View Full Details".
+   PROJECTS — fly-through, alternating sides. Each project comes out of deep
+   space onto its own side (right, then left, then right…), the caption sits
+   on the other side, and the stars draw the project's symbol opposite the
+   image. When the next one arrives, the current screen rushes past the
+   visitor and blurs away.
    ========================================================================== */
+const sideOf = (i: number) => (i % 2 === 0 ? "right" : "left");
+const opposite = (s: string) => (s === "right" ? "left" : "right");
+
 export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
@@ -34,8 +38,10 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
   const activeRef = useRef(0);
   activeRef.current = active;
 
+  const starsFor = (i: number) => `${PROJECT_ICONS[items[i]?.slug] || "galaxy"}@${opposite(sideOf(i))}`;
+
   useEffect(() => {
-    if (inView.current) showStars(PROJECT_ICONS[items[active]?.slug]);
+    if (inView.current) showStars(starsFor(active));
   }, [active, items]);
 
   useLayoutEffect(() => {
@@ -46,20 +52,20 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       el.classList.add("is-flying");
       const cards = gsap.utils.toArray<HTMLElement>(".tt-pf-card", el);
       const narrow = window.innerWidth < 760;
-      // main frame, the "just passed" spot on the left, and far away
-      const MAIN = narrow ? { x: 0, y: -7, z: 0, scale: 1 } : { x: 9, y: -4, z: 0, scale: 1 };
-      const LEFT = narrow ? { x: -62, y: -12, z: -500, scale: 0.6 } : { x: -21, y: -5, z: -520, scale: 0.56 };
-      const FAR = narrow ? { x: 40, y: -20, z: -1600, scale: 0.5 } : { x: 32, y: -16, z: -1800, scale: 0.55 };
-      const at = (p: { x: number; y: number; z: number; scale: number }, opacity: number) => ({
+      const sx = (i: number) => (narrow ? 0 : sideOf(i) === "right" ? 20 : -20); // vw
+      const pose = (x: number, y: number, z: number, scale: number, opacity: number, blur = 0) => ({
         xPercent: -50,
         yPercent: -50,
-        x: p.x + "vw",
-        y: p.y + "vh",
-        z: p.z,
-        scale: p.scale,
+        x: x + "vw",
+        y: y + "vh",
+        z,
+        scale,
         opacity,
+        filter: `blur(${blur}px)`,
       });
-      gsap.set(cards, at(FAR, 0));
+      const MAIN_Y = narrow ? -9 : -3;
+      // waiting far away, small, on the project's own side
+      cards.forEach((c, i) => gsap.set(c, pose(sx(i) * 0.55, MAIN_Y - 6, -1800, 0.5, 0)));
 
       const marks: number[] = [];
       const tl = gsap.timeline({
@@ -75,7 +81,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
           snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
           onToggle: (self) => {
             inView.current = self.isActive;
-            if (self.isActive) showStars(PROJECT_ICONS[items[activeRef.current]?.slug]);
+            if (self.isActive) showStars(starsFor(activeRef.current));
           },
           onUpdate: (self) => {
             const t = self.progress * (self.animation ? self.animation.duration() : 0);
@@ -87,13 +93,13 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       });
       cards.forEach((card, i) => {
         if (i > 0) {
-          // previous project drifts back to the left…
-          tl.to(cards[i - 1], { ...at(LEFT, 0.5), duration: 1 }, ">");
-          // …the one before it leaves completely
-          if (i > 1) tl.to(cards[i - 2], { ...at({ ...LEFT, x: LEFT.x - 30, z: -900 }, 0), duration: 1 }, "<");
+          // the current screen rushes toward the visitor and blurs away
+          tl.to(cards[i - 1], { ...pose(sx(i - 1) * 1.5, MAIN_Y + 4, 900, 1.6, 0, 14), duration: 1, ease: "power2.in" }, ">");
         }
-        // this project flies in to the main frame
-        tl.to(card, { ...at(MAIN, 1), duration: 1.1, ease: "power3.out" }, i === 0 ? 0 : "<0.1");
+        // the next screen glides in from deep space to its side
+        tl.to(card, { ...pose(sx(i), MAIN_Y, 0, 1, 1, 0), duration: 1.1, ease: "power3.out" }, i === 0 ? 0 : "<0.15");
+        // and the one after it appears far behind, waiting
+        if (cards[i + 1]) tl.to(cards[i + 1], { ...pose(sx(i + 1) * 0.6, MAIN_Y - 5, -1300, 0.55, 0.35, 2), duration: 0.8 }, "<0.3");
         marks.push(tl.duration());
         tl.addLabel("p" + i);
         tl.to({}, { duration: 0.5 });
@@ -107,13 +113,9 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
   }, [items.length]);
 
   const cur = items[active];
+  const side = sideOf(active);
   return (
-    <section
-      ref={root}
-      className="tt-pfly"
-      data-section="Our Work"
-      aria-label="Our live projects"
-    >
+    <section ref={root} className="tt-pfly" data-section="Our Work" aria-label="Our live projects">
       <header className="tt-pfly-head wrap">
         <SectionTag n={n} label="Live Projects" />
       </header>
@@ -125,20 +127,21 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
             target="_blank"
             rel="noreferrer"
             className={"tt-pf-card" + (i === active ? " is-active" : "")}
-            style={{ zIndex: i + 1 } as React.CSSProperties}
+            style={{ zIndex: items.length - Math.abs(i - active) } as React.CSSProperties}
             aria-label={"Visit the " + p.short + " live site"}
           >
             <span className="tt-pf-chip">
               <b>{String(i + 1).padStart(2, "0")}</b> {p.category.split("/")[0].trim()}
             </span>
-            <img src={p.image} alt={p.name + " live website"} loading="lazy" decoding="async" />
+            <img src={p.image} alt={p.name + " live website"} loading="eager" decoding="async" />
           </a>
         ))}
       </div>
       {cur && (
-        <div className="tt-pf-caption" key={cur.slug}>
+        <div className={"tt-pf-caption on-" + opposite(side)} key={cur.slug}>
           <span className="tt-pf-kicker">{cur.category}</span>
           <h3>{cur.short}</h3>
+          <p className="tt-pf-quote">“{(cur as Project & { quote?: string }).quote || cur.headline}”</p>
           <p>{cur.summary}</p>
           <div className="tt-pf-actions">
             <a href={cur.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary">
@@ -150,13 +153,12 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
           </div>
         </div>
       )}
-      <div className="tt-pf-progress" aria-hidden="true">
+      <div className={"tt-pf-progress on-" + side} aria-hidden="true">
         <b>{String(active + 1).padStart(2, "0")}</b>
         <i>
           <span style={{ transform: `scaleX(${(active + 1) / items.length})` }} />
         </i>
       </div>
-      {/* list for reduced motion / no-JS */}
       <ul className="tt-pf-list">
         {items.map((p) => (
           <li key={p.slug}>
@@ -170,6 +172,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
     </section>
   );
 }
+
 
 /* ==========================================================================
    DOMAINS — starts as a compressed stack; on arrival it opens up and each
@@ -185,7 +188,7 @@ export function LayerStack({ n = "03" }: { n?: string }) {
   activeRef.current = active;
 
   useEffect(() => {
-    if (inView.current) showStars(siteTypes[active]?.icon);
+    if (inView.current) showStars(siteTypes[active]?.icon + "@center");
   }, [active]);
 
   useLayoutEffect(() => {
@@ -225,7 +228,7 @@ export function LayerStack({ n = "03" }: { n?: string }) {
         snap: { snapTo: snaps, duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
         onToggle: (self) => {
           inView.current = self.isActive;
-          if (self.isActive) showStars(siteTypes[activeRef.current]?.icon);
+          if (self.isActive) showStars(siteTypes[activeRef.current]?.icon + "@center");
         },
         onUpdate: (self) => {
           const v = self.progress;
@@ -306,88 +309,70 @@ export function LayerStack({ n = "03" }: { n?: string }) {
 }
 
 /* ==========================================================================
-   TEAM — no flying in. A glowing Trinity hub appears, connection lines draw
-   out to each person, and each card rises into place where it belongs.
+   TEAM — the stars form an atom; the three cards rise out of its centre and
+   fan out (left · founder in front · right), like a hand of cards.
    ========================================================================== */
-const ORDER = [1, 0, 2]; // Madhan (left) · Balajose (centre) · Sanjay (right)
+const ORDER = [1, 0, 2]; // Madhan (left) · Balajose (centre, in front) · Sanjay (right)
 
 export function TeamAtom({ n = "04" }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
-  const [paths, setPaths] = useState<string[]>([]);
-  const [hub, setHub] = useState({ x: 0, y: 0 });
-
-  // connection lines from the hub to the top of each card
-  useLayoutEffect(() => {
-    const st = stage.current;
-    if (!st) return;
-    const measure = () => {
-      const box = st.getBoundingClientRect();
-      const hubEl = st.querySelector<HTMLElement>(".tt-hub");
-      const cards = Array.from(st.querySelectorAll<HTMLElement>(".tt-member"));
-      if (!hubEl || !cards.length) return;
-      const h = hubEl.getBoundingClientRect();
-      const hx = h.left + h.width / 2 - box.left;
-      const hy = h.top + h.height / 2 - box.top;
-      setHub({ x: hx, y: hy });
-      setPaths(
-        cards.map((c) => {
-          const r = c.getBoundingClientRect();
-          const cx = r.left + r.width / 2 - box.left;
-          const cy = r.top - box.top;
-          const my = (hy + cy) / 2;
-          return `M ${hx} ${hy} C ${hx} ${my}, ${cx} ${my}, ${cx} ${cy}`;
-        }),
-      );
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(st);
-    return () => ro.disconnect();
-  }, []);
 
   useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;
     const mm = gsap.matchMedia();
     mm.add(DESKTOP, () => {
-      el.classList.add("is-linking");
-      const q = gsap.utils.selector(el);
-      const cards = q(".tt-member");
-      const order = [1, 0, 2]; // founder first, then the developers
+      el.classList.add("is-fanning");
+      const cards = gsap.utils.toArray<HTMLElement>(".tt-member", el);
+      const narrow = window.innerWidth < 760;
+      // fan positions: [x (vw), y (vh), rotation, scale]
+      const fan = narrow
+        ? [
+            [-20, 6, -9, 0.9],
+            [0, 0, 0, 1],
+            [20, 6, 9, 0.9],
+          ]
+        : [
+            [-24, 5, -8, 0.94],
+            [0, 0, 0, 1.04],
+            [24, 5, 8, 0.94],
+          ];
+      gsap.set(cards, { xPercent: -50, yPercent: -50, x: 0, y: "12vh", scale: 0.2, rotate: 0, opacity: 0, rotateX: 50 });
       const tl = gsap.timeline({
-        defaults: { ease: "power2.out" },
+        defaults: { ease: "power3.out" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * 1.4,
+          end: () => "+=" + window.innerHeight * 1.5,
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
-      tl.fromTo(q(".tt-hub"), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)" })
-        .fromTo(q(".tt-link-path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, stagger: 0.12 }, "<0.2");
-      order.forEach((ci, k) => {
-        tl.fromTo(
-          cards[ci],
-          { opacity: 0, y: 60, rotateX: 28, scale: 0.94 },
-          { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.8 },
-          k === 0 ? "<0.35" : "<0.3",
-        );
-      });
-      tl.to({}, { duration: 0.6 });
+      // out of the atom's centre, rising up together…
+      tl.to(cards, { y: "2vh", scale: 0.55, opacity: 1, rotateX: 20, duration: 0.6, stagger: 0.08 })
+        // …then each card fans out to its place
+        .to(cards, {
+          x: (i) => fan[i][0] + "vw",
+          y: (i) => fan[i][1] + "vh",
+          rotate: (i) => fan[i][2],
+          scale: (i) => fan[i][3],
+          rotateX: 0,
+          duration: 1,
+          stagger: 0.12,
+        })
+        .to({}, { duration: 0.5 });
       return () => {
-        el.classList.remove("is-linking");
-        gsap.set([...cards, ...q(".tt-hub"), ...q(".tt-link-path")], { clearProps: "all" });
+        el.classList.remove("is-fanning");
+        gsap.set(cards, { clearProps: "all" });
       };
     });
     return () => mm.revert();
   }, []);
 
   return (
-    <section ref={root} className="tt-atom" data-section="Team" data-stars="atom" aria-label="Our team">
+    <section ref={root} className="tt-atom" data-section="Team" data-stars="atom@top" aria-label="Our team">
       <header className="tt-atom-head wrap">
         <SectionTag n={n} label="The Team" />
         <h2 className="tt-display">
@@ -395,57 +380,37 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
         </h2>
         <p className="tt-lede">One founder, two developers — and one shared obsession with building things that work beautifully.</p>
       </header>
-      <div ref={stage} className="tt-team-stage wrap">
-        <svg className="tt-links" aria-hidden="true">
-          <defs>
-            <linearGradient id="tt-link-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#67e8f9" />
-              <stop offset="1" stopColor="#6366f1" />
-            </linearGradient>
-          </defs>
-          {paths.map((d, i) => (
-            <g key={i}>
-              <path className="tt-link-path" d={d} pathLength={1} />
-              <circle className="tt-link-dot" r="3.5">
-                <animateMotion dur={3 + i * 0.6 + "s"} repeatCount="indefinite" path={d} />
-              </circle>
-            </g>
-          ))}
-        </svg>
-        <div className="tt-hub" style={{ "--hx": hub.x + "px" } as React.CSSProperties}>
-          <img src="/assets/trinity-logo.svg" alt="" width={40} height={40} />
-        </div>
-        <div className="tt-team-grid">
-          {ORDER.map((idx) => {
-            const m = team[idx];
-            return (
-              <article className={"tt-member" + (idx === 0 ? " is-founder" : "")} key={m.name}>
-                <div className="tt-member-top">
-                  <div className="tt-orb">
-                    <span className="tt-orb-ring" />
-                    <span className="tt-orb-ring two" />
-                    <b>{m.initials}</b>
-                  </div>
-                  <span className="tt-member-role">{m.role}</span>
+      <div className="tt-fan-stage">
+        {ORDER.map((idx) => {
+          const m = team[idx];
+          return (
+            <article className={"tt-member" + (idx === 0 ? " is-founder" : "")} key={m.name}>
+              <div className="tt-member-top">
+                <div className="tt-orb">
+                  <span className="tt-orb-ring" />
+                  <span className="tt-orb-ring two" />
+                  <b>{m.initials}</b>
                 </div>
-                <h3 data-role={m.role}>{m.name}</h3>
-                <p>{m.bio}</p>
-                <div className="tt-member-tags">
-                  {m.focus.map((f) => (
-                    <em key={f}>{f}</em>
-                  ))}
-                </div>
-                <a href={"mailto:" + m.email} className="tt-member-mail">
-                  <Mail size={15} /> {m.email}
-                </a>
-              </article>
-            );
-          })}
-        </div>
+                <span className="tt-member-role">{m.role}</span>
+              </div>
+              <h3 data-role={m.role}>{m.name}</h3>
+              <p>{m.bio}</p>
+              <div className="tt-member-tags">
+                {m.focus.map((f) => (
+                  <em key={f}>{f}</em>
+                ))}
+              </div>
+              <a href={"mailto:" + m.email} className="tt-member-mail">
+                <Mail size={15} /> {m.email}
+              </a>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
 }
+
 
 /* ==========================================================================
    BOOKING — a rolling wave of stars overhead; the four steps rise out of it

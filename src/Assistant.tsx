@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { X, ArrowUp, RotateCcw, ArrowRight, ExternalLink } from "lucide-react";
+import { X, ArrowUp, RotateCcw, ArrowRight, ExternalLink, Rocket, MessageCircle, Radar } from "lucide-react";
+import { mainContact } from "./content";
 import { useChat, STARTER_QUESTIONS } from "./chat-context";
 
 export default function Assistant() {
@@ -52,9 +53,9 @@ export default function Assistant() {
       case "Connecting":
         return { label: "Connecting", className: "status-connecting" };
       case "Limited Assistance":
-        return { label: "Limited Assistance", className: "status-limited" };
+        return { label: "Quick answers", className: "status-limited" };
       default:
-        return { label: "Limited Assistance", className: "status-limited" };
+        return { label: "Quick answers", className: "status-limited" };
     }
   };
 
@@ -122,6 +123,19 @@ export default function Assistant() {
             </div>
           </div>
 
+          {/* quick actions, always one tap away */}
+          <div className="chat-quick">
+            <Link to="/project" className="chat-quick-btn primary" onClick={() => setFloatingOpen(false)}>
+              <Rocket size={14} /> Start a Project
+            </Link>
+            <a href={mainContact.whatsappHref} target="_blank" rel="noreferrer" className="chat-quick-btn">
+              <MessageCircle size={14} /> WhatsApp
+            </a>
+            <Link to="/track" className="chat-quick-btn" onClick={() => setFloatingOpen(false)}>
+              <Radar size={14} /> Track
+            </Link>
+          </div>
+
           {/* 2. CONVERSATION AREA */}
           <div className="chat-body" aria-live="polite">
             <div className="chat-messages-scroll">
@@ -146,6 +160,7 @@ export default function Assistant() {
                     {m.links && m.links.length > 0 && (
                       <div className="chat-contextual-actions">
                         {m.links.slice(0, 2).map((lnk, linkIdx) => {
+                          // internal links close the chat so the page is visible
                           const isPrimary = lnk.label.includes("Start");
                           const isExternal = lnk.url.startsWith("http");
 
@@ -168,6 +183,7 @@ export default function Assistant() {
                               key={linkIdx}
                               to={lnk.url}
                               className={`chat-action-pill ${isPrimary ? "primary" : "secondary"}`}
+                              onClick={() => setFloatingOpen(false)}
                             >
                               {lnk.label} <ArrowRight size={14} />
                             </Link>
@@ -199,7 +215,7 @@ export default function Assistant() {
             {/* 3. STARTER QUESTIONS (MAXIMUM THREE, COLLAPSED ONCE CONVERSATION BEGINS) */}
             {isFreshConversation && (
               <div className="chat-starter-section">
-                <span className="chat-starter-heading">Suggested questions:</span>
+                <span className="chat-starter-heading">Popular questions</span>
                 <div className="chat-starter-grid">
                   {STARTER_QUESTIONS.map((sq, sqIdx) => (
                     <button

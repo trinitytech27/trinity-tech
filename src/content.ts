@@ -1,6 +1,7 @@
 export const projects = [
   {
     slug: "starx-live",
+    quote: "Lost in the noise. Found in the sound.",
     name: "StarX Live — Official Website",
     short: "StarX Live",
     category: "Interactive Website / Entertainment",
@@ -25,6 +26,7 @@ export const projects = [
   },
   {
     slug: "ticketx",
+    quote: "Every great show begins with the right seat.",
     name: "TicketX",
     short: "TicketX",
     category: "Booking Platform / Web Application",
@@ -49,6 +51,7 @@ export const projects = [
   },
   {
     slug: "abps-books",
+    quote: "A new chapter in learning.",
     name: "ABPS Books — Learning Bookstore",
     short: "ABPS Books",
     category: "E-Commerce / Online Bookstore",
@@ -71,6 +74,7 @@ export const projects = [
   },
   {
     slug: "starx-connect",
+    quote: "One tap. Every connection that matters.",
     name: "StarX Connect — Digital Card",
     short: "StarX Connect",
     category: "Digital Business Card / Smart Links",
@@ -95,6 +99,7 @@ export const projects = [
   },
   {
     slug: "audiox",
+    quote: "Your media. Your terms. Anywhere.",
     name: "AudioX",
     short: "AudioX",
     category: "Web Application / Media Utility",
