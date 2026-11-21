@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Mail, Radar } from "lucide-react";
-import { gsap, ScrollTrigger } from "./scroll";
-import { team, siteTypes, type projects } from "./content";
+import { gsap, ScrollTrigger, showStars } from "./scroll";
+import { team, siteTypes, PROJECT_ICONS, type projects } from "./content";
 import { BOOKING_STEPS } from "./Home";
 
 type Project = (typeof projects)[number];
@@ -21,160 +21,172 @@ export function SectionTag({ n, label }: { n: string; label: string }) {
   );
 }
 
-const host = (url: string) => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-};
-
 /* ==========================================================================
-   PROJECTS — one at a time. Each project comes forward out of deep space,
-   holds in the centre with "View Live Website" / "View Details", then flies
-   past as the next one arrives.
+   PROJECTS — "fly through" one at a time: each project arrives out of deep
+   space into the main frame, then drifts back to the left as the next one
+   comes in. The caption panel shows the current project with
+   "Visit Live Site" and "View Full Details".
    ========================================================================== */
 export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const inView = useRef(false);
+  const activeRef = useRef(0);
+  activeRef.current = active;
+
+  useEffect(() => {
+    if (inView.current) showStars(PROJECT_ICONS[items[active]?.slug]);
+  }, [active, items]);
 
   useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;
     const mm = gsap.matchMedia();
     mm.add(DESKTOP, () => {
-      el.classList.add("is-queued");
-      const cards = gsap.utils.toArray<HTMLElement>(".tt-q-card", el);
-      // centre vertically via GSAP (it owns this element's transform)
-      gsap.set(cards, { yPercent: -50 });
-      const marks: number[] = [0];
+      el.classList.add("is-flying");
+      const cards = gsap.utils.toArray<HTMLElement>(".tt-pf-card", el);
+      const narrow = window.innerWidth < 760;
+      // main frame, the "just passed" spot on the left, and far away
+      const MAIN = narrow ? { x: 0, y: -7, z: 0, scale: 1 } : { x: 9, y: -4, z: 0, scale: 1 };
+      const LEFT = narrow ? { x: -62, y: -12, z: -500, scale: 0.6 } : { x: -21, y: -5, z: -520, scale: 0.56 };
+      const FAR = narrow ? { x: 40, y: -20, z: -1600, scale: 0.5 } : { x: 32, y: -16, z: -1800, scale: 0.55 };
+      const at = (p: { x: number; y: number; z: number; scale: number }, opacity: number) => ({
+        xPercent: -50,
+        yPercent: -50,
+        x: p.x + "vw",
+        y: p.y + "vh",
+        z: p.z,
+        scale: p.scale,
+        opacity,
+      });
+      gsap.set(cards, at(FAR, 0));
+
+      const marks: number[] = [];
       const tl = gsap.timeline({
-        defaults: { ease: "none" },
+        defaults: { ease: "power2.inOut" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * (cards.length * 1.05),
+          end: () => "+=" + window.innerHeight * (cards.length * 0.95),
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
+          onToggle: (self) => {
+            inView.current = self.isActive;
+            if (self.isActive) showStars(PROJECT_ICONS[items[activeRef.current]?.slug]);
+          },
           onUpdate: (self) => {
-            const t = self.animation ? self.animation.time() : 0;
+            const t = self.progress * (self.animation ? self.animation.duration() : 0);
             let idx = 0;
-            marks.forEach((m, i) => t >= m && (idx = i));
+            marks.forEach((m, i) => t >= m - 0.05 && (idx = i));
             setActive(idx);
           },
         },
       });
-      // the first project arrives while the section scrolls into place
-      // (animates the card's contents, so it never fights the exit tween on the card)
-      gsap.fromTo(
-        cards[0].children,
-        { y: 90, scale: 0.86, opacity: 0 },
-        {
-          y: 0,
-          scale: 1,
-          opacity: 1,
-          ease: "none",
-          stagger: 0.08,
-          scrollTrigger: { trigger: el, start: "top 85%", end: "top top", scrub: 0.8 },
-        },
-      );
-      gsap.set(cards.slice(1), { z: -1600, opacity: 0, rotateX: 18 });
-      tl.to({}, { duration: 0.5 });
       cards.forEach((card, i) => {
-        if (i === 0) return;
-        const prev = cards[i - 1];
-        // outgoing project flies past the visitor and clears quickly…
-        tl.to(prev, { z: 560, y: "-8vh", rotateX: -12, duration: 0.7, ease: "power1.in" })
-          .to(prev, { opacity: 0, duration: 0.32, ease: "power1.in" }, "<")
-          // …then the next one comes forward out of deep space
-          .to(card, { z: 0, opacity: 1, rotateX: 0, duration: 0.9, ease: "power2.out" }, "<0.3");
-        marks.push(tl.duration() - 0.5);
-        tl.to({}, { duration: 0.55 });
+        if (i > 0) {
+          // previous project drifts back to the left…
+          tl.to(cards[i - 1], { ...at(LEFT, 0.5), duration: 1 }, ">");
+          // …the one before it leaves completely
+          if (i > 1) tl.to(cards[i - 2], { ...at({ ...LEFT, x: LEFT.x - 30, z: -900 }, 0), duration: 1 }, "<");
+        }
+        // this project flies in to the main frame
+        tl.to(card, { ...at(MAIN, 1), duration: 1.1, ease: "power3.out" }, i === 0 ? 0 : "<0.1");
+        marks.push(tl.duration());
+        tl.addLabel("p" + i);
+        tl.to({}, { duration: 0.5 });
       });
       return () => {
-        el.classList.remove("is-queued");
+        el.classList.remove("is-flying");
         gsap.set(cards, { clearProps: "all" });
-        gsap.set(cards[0].children, { clearProps: "all" });
       };
     });
     return () => mm.revert();
   }, [items.length]);
 
+  const cur = items[active];
   return (
-    <section ref={root} className="tt-queue" data-section="Our Work" data-stars="code" aria-label="Our work">
-      <header className="tt-queue-head wrap">
-        <div>
-          <SectionTag n={n} label="Our Work" />
-          <h2 className="tt-display">
-            Live projects, <span className="tt-gradient-text">one by one.</span>
-          </h2>
-        </div>
-        <div className="tt-queue-count" aria-hidden="true">
-          <b>{String(active + 1).padStart(2, "0")}</b>
-          <span>/ {String(items.length).padStart(2, "0")}</span>
-          <div>
-            {items.map((p, i) => (
-              <i key={p.slug} className={i === active ? "on" : i < active ? "done" : ""} />
-            ))}
-          </div>
-        </div>
+    <section
+      ref={root}
+      className="tt-pfly"
+      data-section="Our Work"
+      aria-label="Our live projects"
+    >
+      <header className="tt-pfly-head wrap">
+        <SectionTag n={n} label="Live Projects" />
       </header>
-      <div className="tt-queue-stage">
+      <div className="tt-pfly-stage">
         {items.map((p, i) => (
-          <article
+          <a
             key={p.slug}
-            className={"tt-q-card" + (i === active ? " is-active" : "")}
-            style={{ "--project-color": p.color, zIndex: items.length - i } as React.CSSProperties}
-            data-reveal="rise"
+            href={p.url}
+            target="_blank"
+            rel="noreferrer"
+            className={"tt-pf-card" + (i === active ? " is-active" : "")}
+            style={{ zIndex: i + 1 } as React.CSSProperties}
+            aria-label={"Visit the " + p.short + " live site"}
           >
-            <a href={p.url} target="_blank" rel="noreferrer" className="tt-q-shot" aria-label={"Open " + p.short + " live website"}>
-              <span className="tt-q-bar">
-                <span className="tt-dots">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="tt-url">{host(p.url)}</span>
-              </span>
-              <img src={p.image} alt={p.name + " live website"} loading="lazy" decoding="async" />
-            </a>
-            <div className="tt-q-info">
-              <span className="tt-q-num">{String(i + 1).padStart(2, "0")}</span>
-              <span className="tt-q-cat">{p.category}</span>
-              <h3>{p.short}</h3>
-              <p>{p.summary}</p>
-              <ul>
-                {p.features.slice(0, 3).map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-              <div className="tt-q-actions">
-                <a href={p.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary">
-                  View Live Website <ArrowUpRight size={17} />
-                </a>
-                <Link to={"/work/" + p.slug} className="tt-btn tt-btn-ghost">
-                  View Details <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-          </article>
+            <span className="tt-pf-chip">
+              <b>{String(i + 1).padStart(2, "0")}</b> {p.category.split("/")[0].trim()}
+            </span>
+            <img src={p.image} alt={p.name + " live website"} loading="lazy" decoding="async" />
+          </a>
         ))}
       </div>
+      {cur && (
+        <div className="tt-pf-caption" key={cur.slug}>
+          <span className="tt-pf-kicker">{cur.category}</span>
+          <h3>{cur.short}</h3>
+          <p>{cur.summary}</p>
+          <div className="tt-pf-actions">
+            <a href={cur.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary">
+              Visit Live Site <ArrowUpRight size={17} />
+            </a>
+            <Link to={"/work/" + cur.slug} className="tt-btn tt-btn-ghost">
+              View Full Details <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      )}
+      <div className="tt-pf-progress" aria-hidden="true">
+        <b>{String(active + 1).padStart(2, "0")}</b>
+        <i>
+          <span style={{ transform: `scaleX(${(active + 1) / items.length})` }} />
+        </i>
+      </div>
+      {/* list for reduced motion / no-JS */}
+      <ul className="tt-pf-list">
+        {items.map((p) => (
+          <li key={p.slug}>
+            <a href={p.url} target="_blank" rel="noreferrer">
+              {p.short}
+            </a>{" "}
+            · <Link to={"/work/" + p.slug}>Details</Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
 /* ==========================================================================
-   WEBSITE TYPES — a tilted stack of glowing layers next to a star helix.
-   Scrolling lifts each layer off the stack to reveal the next; the panel on
-   the left follows the active layer.
+   DOMAINS — starts as a compressed stack; on arrival it opens up and each
+   scroll brings the next domain to the top. The stars draw that domain's
+   symbol (briefcase, cart, calendar…).
    ========================================================================== */
 export function LayerStack({ n = "03" }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const N = siteTypes.length;
+  const inView = useRef(false);
+  const activeRef = useRef(0);
+  activeRef.current = active;
+
+  useEffect(() => {
+    if (inView.current) showStars(siteTypes[active]?.icon);
+  }, [active]);
 
   useLayoutEffect(() => {
     const el = root.current;
@@ -183,30 +195,43 @@ export function LayerStack({ n = "03" }: { n?: string }) {
     mm.add(DESKTOP, () => {
       el.classList.add("is-stacked");
       const layers = gsap.utils.toArray<HTMLElement>(".tt-layer", el);
-      const place = (p: number) => {
+      const OPEN = 0.14; // first part of the scroll: the compressed stack opens
+      const place = (open: number, p: number) => {
+        const gap = 12 + 74 * open;
         layers.forEach((layer, k) => {
           const d = k - p;
           if (d < 0) {
-            // lifted off and fading away
             gsap.set(layer, { z: 70 + -d * 360, y: d * 40, opacity: Math.max(0, 1 + d * 1.6) });
           } else {
-            gsap.set(layer, { z: 70 - d * 86, y: 0, opacity: Math.max(0.22, 1 - d * 0.2) });
+            gsap.set(layer, {
+              z: 70 - d * gap,
+              y: 0,
+              opacity: Math.max(0.22, 1 - d * (0.05 + 0.15 * open)),
+            });
           }
           layer.classList.toggle("is-top", Math.abs(d) < 0.5);
         });
       };
-      place(0);
+      place(0, 0);
+      const snaps = [0, ...siteTypes.slice(1).map((_, k) => OPEN + ((1 - OPEN) * (k + 1)) / (N - 1))];
       ScrollTrigger.create({
         trigger: el,
         start: "top top",
-        end: () => "+=" + window.innerHeight * N * 0.55,
+        end: () => "+=" + window.innerHeight * N * 0.6,
         scrub: 0.6,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        snap: { snapTo: snaps, duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
+        onToggle: (self) => {
+          inView.current = self.isActive;
+          if (self.isActive) showStars(siteTypes[activeRef.current]?.icon);
+        },
         onUpdate: (self) => {
-          const p = self.progress * (N - 1);
-          place(p);
+          const v = self.progress;
+          const open = Math.min(1, v / OPEN);
+          const p = v <= OPEN ? 0 : ((v - OPEN) / (1 - OPEN)) * (N - 1);
+          place(open, p);
           setActive(Math.round(p));
         },
       });
@@ -220,10 +245,10 @@ export function LayerStack({ n = "03" }: { n?: string }) {
 
   const cur = siteTypes[active];
   return (
-    <section ref={root} className="tt-layers" data-section="Website Types" data-stars="helixV" aria-label="Websites we build">
+    <section ref={root} className="tt-layers" data-section="Domains" aria-label="Websites we build">
       <div className="tt-layers-inner wrap">
         <div className="tt-layers-copy">
-          <SectionTag n={n} label="Website Types" />
+          <SectionTag n={n} label="Domains We Build" />
           <h2 className="tt-display">
             Websites for <span className="tt-gradient-text">every ambition.</span>
           </h2>
@@ -264,7 +289,6 @@ export function LayerStack({ n = "03" }: { n?: string }) {
             ))}
           </div>
         </div>
-        {/* phones: every type as a readable card */}
         <div className="tt-layers-list" data-reveal-stagger="80">
           {siteTypes.map((t, k) => (
             <Link key={t.title} to={"/project?category=" + encodeURIComponent(t.category)} className="tt-layer-card" data-reveal="rise">
@@ -273,11 +297,6 @@ export function LayerStack({ n = "03" }: { n?: string }) {
               </span>
               <h3>{t.title}</h3>
               <p>{t.desc}</p>
-              <div className="tt-layer-tags">
-                {t.tags.map((x) => (
-                  <em key={x}>{x}</em>
-                ))}
-              </div>
             </Link>
           ))}
         </div>
@@ -287,73 +306,81 @@ export function LayerStack({ n = "03" }: { n?: string }) {
 }
 
 /* ==========================================================================
-   TEAM — the stars form an atom; each member's card travels along an orbit
-   and settles into place (founder in the centre).
+   TEAM — no flying in. A glowing Trinity hub appears, connection lines draw
+   out to each person, and each card rises into place where it belongs.
    ========================================================================== */
 const ORDER = [1, 0, 2]; // Madhan (left) · Balajose (centre) · Sanjay (right)
 
 export function TeamAtom({ n = "04" }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const [paths, setPaths] = useState<string[]>([]);
+  const [hub, setHub] = useState({ x: 0, y: 0 });
+
+  // connection lines from the hub to the top of each card
+  useLayoutEffect(() => {
+    const st = stage.current;
+    if (!st) return;
+    const measure = () => {
+      const box = st.getBoundingClientRect();
+      const hubEl = st.querySelector<HTMLElement>(".tt-hub");
+      const cards = Array.from(st.querySelectorAll<HTMLElement>(".tt-member"));
+      if (!hubEl || !cards.length) return;
+      const h = hubEl.getBoundingClientRect();
+      const hx = h.left + h.width / 2 - box.left;
+      const hy = h.top + h.height / 2 - box.top;
+      setHub({ x: hx, y: hy });
+      setPaths(
+        cards.map((c) => {
+          const r = c.getBoundingClientRect();
+          const cx = r.left + r.width / 2 - box.left;
+          const cy = r.top - box.top;
+          const my = (hy + cy) / 2;
+          return `M ${hx} ${hy} C ${hx} ${my}, ${cx} ${my}, ${cx} ${cy}`;
+        }),
+      );
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(st);
+    return () => ro.disconnect();
+  }, []);
 
   useLayoutEffect(() => {
     const el = root.current;
     if (!el) return;
     const mm = gsap.matchMedia();
     mm.add(DESKTOP, () => {
-      el.classList.add("is-orbiting");
-      const cards = gsap.utils.toArray<HTMLElement>(".tt-member", el);
-      gsap.set(cards, { xPercent: -50, yPercent: -50 });
+      el.classList.add("is-linking");
+      const q = gsap.utils.selector(el);
+      const cards = q(".tt-member");
+      const order = [1, 0, 2]; // founder first, then the developers
       const tl = gsap.timeline({
-        defaults: { ease: "none" },
+        defaults: { ease: "power2.out" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * 1.8,
+          end: () => "+=" + window.innerHeight * 1.4,
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
-      cards.forEach((card, i) => {
-        const slot = Number(card.dataset.slot); // -1, 0, 1
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const narrow = vw < 760;
-        const RX = vw * (narrow ? 0.42 : 0.32);
-        const RY = vh * 0.16;
-        const tilt = ((i - 1) * Math.PI) / 3;
-        const start = i * 2.1;
-        // points along this member's orbit, then the final slot
-        const frames = [0, 0.33, 0.66].map((f) => {
-          const a = start + f * Math.PI * 1.4;
-          const x = Math.cos(a) * RX;
-          const y = Math.sin(a) * RY;
-          return {
-            x: x * Math.cos(tilt) - y * Math.sin(tilt),
-            y: x * Math.sin(tilt) + y * Math.cos(tilt),
-          };
-        });
-        // laptops/tablets: a row; phones: a column (founder in the middle)
-        const finalX = narrow ? 0 : slot * Math.min(vw * 0.31, 400);
-        const finalY = narrow ? slot * (card.offsetHeight + 12) : slot === 0 ? -18 : 12;
+      tl.fromTo(q(".tt-hub"), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)" })
+        .fromTo(q(".tt-link-path"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, stagger: 0.12 }, "<0.2");
+      order.forEach((ci, k) => {
         tl.fromTo(
-          card,
-          { x: frames[0].x, y: frames[0].y, scale: 0.35, rotateY: 60, rotateZ: -12, opacity: 0 },
-          {
-            keyframes: [
-              { x: frames[1].x, y: frames[1].y, scale: 0.55, rotateY: 40, rotateZ: -6, opacity: 1, duration: 0.4 },
-              { x: frames[2].x, y: frames[2].y, scale: 0.75, rotateY: 20, rotateZ: 4, duration: 0.4 },
-              { x: finalX, y: finalY, scale: narrow ? 1 : slot === 0 ? 1.04 : 0.96, rotateY: 0, rotateZ: 0, duration: 0.5 },
-            ],
-          },
-          i * 0.35,
+          cards[ci],
+          { opacity: 0, y: 60, rotateX: 28, scale: 0.94 },
+          { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.8 },
+          k === 0 ? "<0.35" : "<0.3",
         );
       });
       tl.to({}, { duration: 0.6 });
       return () => {
-        el.classList.remove("is-orbiting");
-        gsap.set(cards, { clearProps: "all" });
+        el.classList.remove("is-linking");
+        gsap.set([...cards, ...q(".tt-hub"), ...q(".tt-link-path")], { clearProps: "all" });
       };
     });
     return () => mm.revert();
@@ -368,37 +395,53 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
         </h2>
         <p className="tt-lede">One founder, two developers — and one shared obsession with building things that work beautifully.</p>
       </header>
-      <div className="tt-atom-stage">
-        {ORDER.map((idx, i) => {
-          const m = team[idx];
-          return (
-            <article
-              className={"tt-member" + (idx === 0 ? " is-founder" : "")}
-              key={m.name}
-              data-slot={i - 1}
-              data-reveal="rise"
-            >
-              <div className="tt-member-top">
-                <div className="tt-orb">
-                  <span className="tt-orb-ring" />
-                  <span className="tt-orb-ring two" />
-                  <b>{m.initials}</b>
+      <div ref={stage} className="tt-team-stage wrap">
+        <svg className="tt-links" aria-hidden="true">
+          <defs>
+            <linearGradient id="tt-link-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#67e8f9" />
+              <stop offset="1" stopColor="#6366f1" />
+            </linearGradient>
+          </defs>
+          {paths.map((d, i) => (
+            <g key={i}>
+              <path className="tt-link-path" d={d} pathLength={1} />
+              <circle className="tt-link-dot" r="3.5">
+                <animateMotion dur={3 + i * 0.6 + "s"} repeatCount="indefinite" path={d} />
+              </circle>
+            </g>
+          ))}
+        </svg>
+        <div className="tt-hub" style={{ "--hx": hub.x + "px" } as React.CSSProperties}>
+          <img src="/assets/trinity-logo.svg" alt="" width={40} height={40} />
+        </div>
+        <div className="tt-team-grid">
+          {ORDER.map((idx) => {
+            const m = team[idx];
+            return (
+              <article className={"tt-member" + (idx === 0 ? " is-founder" : "")} key={m.name}>
+                <div className="tt-member-top">
+                  <div className="tt-orb">
+                    <span className="tt-orb-ring" />
+                    <span className="tt-orb-ring two" />
+                    <b>{m.initials}</b>
+                  </div>
+                  <span className="tt-member-role">{m.role}</span>
                 </div>
-                <span className="tt-member-role">{m.role}</span>
-              </div>
-              <h3 data-role={m.role}>{m.name}</h3>
-              <p>{m.bio}</p>
-              <div className="tt-member-tags">
-                {m.focus.map((f) => (
-                  <em key={f}>{f}</em>
-                ))}
-              </div>
-              <a href={"mailto:" + m.email} className="tt-member-mail">
-                <Mail size={15} /> {m.email}
-              </a>
-            </article>
-          );
-        })}
+                <h3 data-role={m.role}>{m.name}</h3>
+                <p>{m.bio}</p>
+                <div className="tt-member-tags">
+                  {m.focus.map((f) => (
+                    <em key={f}>{f}</em>
+                  ))}
+                </div>
+                <a href={"mailto:" + m.email} className="tt-member-mail">
+                  <Mail size={15} /> {m.email}
+                </a>
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -415,7 +458,7 @@ export function BookingWave({ n = "05", email }: { n?: string; email: string }) 
         <header className="tt-wave-head" data-reveal>
           <SectionTag n={n} label="Start a Project" />
           <h2 className="tt-display">
-            Your project in <span className="tt-gradient-text">four easy steps.</span>
+            Your project in <span className="tt-gradient-text">five easy steps.</span>
           </h2>
           <p className="tt-lede">
             No long forms, no confusion. Choose what you need, get an honest proposal and

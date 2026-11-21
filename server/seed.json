@@ -2,7 +2,7 @@
   "headline": "Your Vision. Our Technology.\nInfinite Possibilities.",
   "intro": "Trinity Tech builds professional digital experiences for individuals, businesses and organizations.",
   "about": "Trinity Tech is a modern web development and digital solutions brand helping businesses, startups, entrepreneurs and individuals build a strong online presence. We transform ideas into professional digital experiences through creative design, modern technologies and reliable web development.",
-  "email": "balajoseboddukuri@gmail.com",
+  "email": "trinitytech27@gmail.com",
   "instagram": "https://www.instagram.com/sanju_x_dev/",
   "defaultTheme": "silver",
   "introEnabled": true,
@@ -125,6 +125,28 @@
       "order": 2
     },
     {
+      "slug": "abps-books",
+      "name": "ABPS Books — Learning Bookstore",
+      "short": "ABPS Books",
+      "category": "E-Commerce / Online Bookstore",
+      "kind": "Websites",
+      "url": "https://abps-books.vercel.app/",
+      "image": "/media/abps.webp",
+      "mobile": "/media/abps-mobile.webp",
+      "color": "#1e3a5f",
+      "headline": "A new chapter in learning.",
+      "summary": "An online bookstore for textbooks, reference books and learning resources for every class.",
+      "story": "Students and parents can search by title, ISBN, subject or class, browse categories, add books to a cart with bulk discounts, and follow their orders and branch details — all in a calm, readable storefront.",
+      "features": [
+        "Search by title, ISBN, subject or class",
+        "Class-wise catalogue and categories",
+        "Cart, bulk discounts and order tracking"
+      ],
+      "note": "Demo catalogue inspected. Titles, prices and availability on the live demo are illustrative; purchases were not tested.",
+      "published": true,
+      "order": 3
+    },
+    {
       "slug": "starx-connect",
       "name": "StarX Connect — Digital Card",
       "short": "StarX Connect",
@@ -144,7 +166,7 @@
       ],
       "note": "Visible controls inspected. External messages were not sent.",
       "published": true,
-      "order": 3
+      "order": 4
     },
     {
       "slug": "audiox",
@@ -166,7 +188,7 @@
       ],
       "note": "Interface inspected. Conversion and completed downloads were not tested.",
       "published": true,
-      "order": 4
+      "order": 5
     }
   ],
   "faqs": [

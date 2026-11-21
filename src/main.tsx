@@ -9,6 +9,7 @@ import "./theme.css";
 import "./showcase.css";
 import "./space.css";
 import "./scenes.css";
+import "./upgrades.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

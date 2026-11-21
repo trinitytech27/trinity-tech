@@ -48,6 +48,28 @@ export const projects = [
     order: 2,
   },
   {
+    slug: "abps-books",
+    name: "ABPS Books — Learning Bookstore",
+    short: "ABPS Books",
+    category: "E-Commerce / Online Bookstore",
+    kind: "Websites",
+    url: "https://abps-books.vercel.app/",
+    image: "/media/abps.webp",
+    mobile: "/media/abps-mobile.webp",
+    color: "#1e3a5f",
+    headline: "A new chapter in learning.",
+    summary: "An online bookstore for textbooks, reference books and learning resources for every class.",
+    story: "Students and parents can search by title, ISBN, subject or class, browse categories, add books to a cart with bulk discounts, and follow their orders and branch details — all in a calm, readable storefront.",
+    features: [
+      "Search by title, ISBN, subject or class",
+      "Class-wise catalogue and categories",
+      "Cart, bulk discounts and order tracking",
+    ],
+    note: "Demo catalogue inspected. Titles, prices and availability on the live demo are illustrative; purchases were not tested.",
+    published: true,
+    order: 3,
+  },
+  {
     slug: "starx-connect",
     name: "StarX Connect — Digital Card",
     short: "StarX Connect",
@@ -69,7 +91,7 @@ export const projects = [
     ],
     note: "Visible controls inspected. External messages were not sent.",
     published: true,
-    order: 3,
+    order: 4,
   },
   {
     slug: "audiox",
@@ -93,7 +115,7 @@ export const projects = [
     ],
     note: "Interface inspected. Conversion and completed downloads were not tested.",
     published: true,
-    order: 4,
+    order: 5,
   },
 ];
 
@@ -775,7 +797,7 @@ export const defaults = {
   intro: "Your Vision. Our Technology. Infinite Possibilities.",
   about:
     "Trinity Tech is a modern web development and digital solutions brand helping businesses, startups, entrepreneurs and individuals build a strong online presence. We transform ideas into professional digital experiences through creative design, modern technologies and reliable web development.",
-  email: "balajoseboddukuri@gmail.com",
+  email: "trinitytech27@gmail.com",
   phone: SANJU_BUSINESS_PHONE,
   whatsapp: `https://wa.me/${SANJU_WHATSAPP_NUMBER}`,
   instagram: "https://www.instagram.com/sanju_x_dev/",
@@ -794,7 +816,7 @@ export const defaults = {
     },
     {
       q: "Can I see your work?",
-      a: "Explore StarX Live, TicketX, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
+      a: "Explore StarX Live, TicketX, ABPS Books, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
     },
     {
       q: "How much does a website cost?",
@@ -935,6 +957,24 @@ export const team = [
 
 export const contactEmails = team.map((m) => ({ name: m.name, role: m.role, email: m.email }));
 
+/** Main Trinity Tech contact (used site-wide; personal emails stay on team cards). */
+export const mainContact = {
+  email: "trinitytech27@gmail.com",
+  phone: "+91 70754 52718",
+  phoneHref: "tel:+917075452718",
+  whatsapp: "+91 70754 52718",
+  whatsappHref: "https://wa.me/917075452718?text=" + encodeURIComponent("Hello Trinity Tech, I would like to discuss a website."),
+};
+
+/** Star symbol shown in the background for each project. */
+export const PROJECT_ICONS: Record<string, string> = {
+  "starx-live": "icon:music",
+  ticketx: "icon:ticket",
+  "abps-books": "icon:book-open",
+  "starx-connect": "icon:contact",
+  audiox: "icon:headphones",
+};
+
 /* ---------- Trust-building content ---------- */
 export const deliverables = [
   { title: "Responsive on every screen", desc: "Designed and tested for phones, tablets and desktops." },
@@ -998,6 +1038,7 @@ export const publicFaqs = [
 /* ---------- Website types (homepage layered stack) ---------- */
 export const siteTypes = [
   {
+    icon: "icon:briefcase",
     category: "Business Website",
     title: "Business & Company",
     sub: "Your brand, services and contact in one place",
@@ -1005,6 +1046,7 @@ export const siteTypes = [
     tags: ["Company profile", "Services", "Enquiry forms", "Google Maps"],
   },
   {
+    icon: "icon:shopping-cart",
     category: "E-Commerce Website",
     title: "E-Commerce Store",
     sub: "Sell products online, day and night",
@@ -1012,6 +1054,7 @@ export const siteTypes = [
     tags: ["Product catalogue", "Cart & checkout", "Orders", "Admin dashboard"],
   },
   {
+    icon: "icon:calendar-check",
     category: "Booking / Appointment Website",
     title: "Booking & Events",
     sub: "Tickets, appointments and reservations",
@@ -1019,6 +1062,7 @@ export const siteTypes = [
     tags: ["Event listings", "Slot booking", "Reminders", "Like TicketX"],
   },
   {
+    icon: "icon:user",
     category: "Personal Portfolio",
     title: "Portfolio & Personal Brand",
     sub: "Show your work, skills and story",
@@ -1026,6 +1070,7 @@ export const siteTypes = [
     tags: ["Projects", "Resume", "Testimonials", "Contact links"],
   },
   {
+    icon: "icon:utensils",
     category: "Restaurant Website",
     title: "Restaurants & Local Shops",
     sub: "Menus, offers and orders for local businesses",
@@ -1033,6 +1078,7 @@ export const siteTypes = [
     tags: ["Digital menu", "WhatsApp orders", "Offers", "Location"],
   },
   {
+    icon: "icon:code-xml",
     category: "Other / Custom Website",
     title: "Custom Web Apps",
     sub: "Tools and platforms built around your idea",

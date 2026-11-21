@@ -28,10 +28,11 @@ export const PILLAR_ICONS: Record<string, React.ReactNode> = {
 };
 
 export const BOOKING_STEPS = [
-  { icon: <MousePointerClick size={22} />, title: "Choose a website type", desc: "Portfolio, business, e-commerce, booking, custom app and more." },
-  { icon: <ListChecks size={22} />, title: "Select your features", desc: "Pick the pages and features you need — nothing you don't." },
-  { icon: <Send size={22} />, title: "Share your details", desc: "Tell us about your goals and receive an honest proposal." },
-  { icon: <Radar size={22} />, title: "Track your project", desc: "Your tracking ID shows progress at every stage." },
+  { icon: <MousePointerClick size={22} />, title: "Website type", desc: "Portfolio, business, e-commerce, booking, custom app and more." },
+  { icon: <ListChecks size={22} />, title: "Features", desc: "Pick the pages and features you need — nothing you don't." },
+  { icon: <Palette size={22} />, title: "Design", desc: "Choose a style, page count and the feel you want." },
+  { icon: <Send size={22} />, title: "Your details", desc: "Just the basics so we know who we're building for." },
+  { icon: <Radar size={22} />, title: "Contact & track", desc: "Email, Google Meet, WhatsApp or call — then track with your ID." },
 ];
 
 export default function Home({
@@ -66,7 +67,7 @@ export default function Home({
               <span className="tt-kicker-dot" /> Web Development &amp; Digital Solutions
             </span>
             <p className="tt-hero-tagline">
-              Your Vision. Our Technology. <span className="tt-gradient-text">Infinite Possibilities.</span>
+              Your Vision. Our Code. <span className="tt-gradient-text">Infinite Possibilities.</span>
             </p>
             <p className="tt-hero-sub">
               We turn ideas into fast, beautiful websites and digital products that help
@@ -79,10 +80,6 @@ export default function Home({
               <Link to="/work" className="tt-btn tt-btn-ghost">
                 Explore Our Work
               </Link>
-            </div>
-            <div className="tt-scroll-cue" aria-hidden="true">
-              <span />
-              Scroll to explore
             </div>
           </div>
         </div>
@@ -128,20 +125,9 @@ export default function Home({
 
       {/* 07 — FINALE: the stars form the Trinity mark, then one last call */}
       <section className="wrap tt-finale" data-section="Get Started" data-stars="logo" aria-label="Get started">
-        <div className="tt-cta tt-cta-final" data-reveal="zoom">
-          <div>
-            <h2>Ready to build your digital identity?</h2>
-            <p>Tell us about your idea — we&apos;ll help shape it into a professional online experience.</p>
-          </div>
-          <div className="tt-cta-actions">
-            <Link to="/project" className="tt-btn tt-btn-light">
-              Start Your Project <ArrowRight size={18} />
-            </Link>
-            <Link to="/contact" className="tt-btn tt-btn-outline-light">
-              Contact us
-            </Link>
-          </div>
-        </div>
+        <h2 className="tt-display tt-finale-title" data-reveal>
+          Let&apos;s build something <span className="tt-gradient-text">remarkable.</span>
+        </h2>
       </section>
     </div>
   );

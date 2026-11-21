@@ -46,7 +46,7 @@ function emailShell(title, preheader, content) {
     ${content}
     <div class="footer">
       Trinity Tech — Design with distinction & powerful digital experiences.<br>
-      Direct enquiries: <a href="mailto:balajoseboddukuri@gmail.com" style="color: #4f46e5;">balajoseboddukuri@gmail.com</a>
+      Direct enquiries: <a href="mailto:trinitytech27@gmail.com" style="color: #4f46e5;">trinitytech27@gmail.com</a>
     </div>
   </div>
 </body>

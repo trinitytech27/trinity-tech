@@ -707,8 +707,8 @@ html {
   padding: 0;
   margin: 0 0 40px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
   perspective: 1400px;
 }
 .tt-wave-steps li {
@@ -985,10 +985,6 @@ html.theme-owner .tt-pill {
   top: 56%;
 }
 
-/* phones: founder first */
-.tt-atom:not(.is-orbiting) .tt-member.is-founder {
-  order: -1;
-}
 
 /* ==========================================================================
    SAME SCENES ON TABLETS & PHONES — compact layouts for the pinned modes

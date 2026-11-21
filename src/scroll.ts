@@ -64,3 +64,22 @@ export function scrollToElement(el: HTMLElement) {
 }
 
 export { gsap, ScrollTrigger };
+
+/** Smoothly return to the very top of the page (wizard steps, Home link). */
+export function scrollToPageTop() {
+  if (lenis) lenis.scrollTo(0, { duration: 1 });
+  else window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}
+
+/** Ask the star background for a symbol (sent only when it changes). */
+let lastStars = "";
+export function showStars(shape?: string) {
+  if (!shape || shape === lastStars) return;
+  lastStars = shape;
+  window.dispatchEvent(new CustomEvent("tt:stars", { detail: shape }));
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("tt:stars", (e) => {
+    lastStars = String((e as CustomEvent).detail || "");
+  });
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
+import { STAR_ICONS } from "./starIcons";
 
 /**
  * Living star background (single WebGL canvas behind every page).
@@ -30,7 +31,10 @@ export type Shape =
   | "trinity"
   | "wave"
   | "torus"
-  | "atom";
+  | "atom"
+  | `icon:${string}`;
+
+type BaseShape = Exclude<Shape, `icon:${string}`>;
 
 export const ROUTE_SHAPES: Record<string, Shape> = {
   "/": "text",
@@ -38,7 +42,7 @@ export const ROUTE_SHAPES: Record<string, Shape> = {
   "/services": "orbit",
   "/about": "trinity",
   "/project": "wave",
-  "/contact": "torus",
+  "/contact": "icon:handshake",
 };
 
 export const shapeFor = (path: string): Shape => {
@@ -47,7 +51,7 @@ export const shapeFor = (path: string): Shape => {
 };
 
 /** How the formation is presented: spin (0 = faces visitor) and base tilt. */
-const STYLE: Record<Shape, { spin: number; tilt: number }> = {
+const BASE_STYLE: Record<BaseShape, { spin: number; tilt: number }> = {
   text: { spin: 0, tilt: 0 },
   code: { spin: 0, tilt: 0 },
   infinity: { spin: 0, tilt: 0 },
@@ -61,6 +65,43 @@ const STYLE: Record<Shape, { spin: number; tilt: number }> = {
   torus: { spin: 1, tilt: 0.45 },
   atom: { spin: 0.55, tilt: 0.2 },
 };
+const ICON_STYLE = { spin: 0, tilt: 0 };
+const styleOf = (s: Shape) => (s.startsWith("icon:") ? ICON_STYLE : BASE_STYLE[s as BaseShape]);
+const isShape = (s: string): s is Shape =>
+  (s.startsWith("icon:") && s.slice(5) in STAR_ICONS) || s in BASE_STYLE;
+
+/** Draw a 24×24 outline icon (lucide format) centred on the canvas. */
+function drawIcon(name: string, ctx: CanvasRenderingContext2D, W: number, H: number) {
+  const nodes = STAR_ICONS[name];
+  if (!nodes) return;
+  const k = (H * 0.9) / 24;
+  ctx.setTransform(k, 0, 0, k, W / 2 - 12 * k, H / 2 - 12 * k);
+  ctx.lineWidth = 1.9;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const n = (v?: string) => Number(v || 0);
+  for (const [tag, a] of nodes) {
+    ctx.beginPath();
+    if (tag === "path") {
+      ctx.stroke(new Path2D(a.d));
+      continue;
+    }
+    if (tag === "circle") ctx.arc(n(a.cx), n(a.cy), n(a.r), 0, Math.PI * 2);
+    else if (tag === "ellipse") ctx.ellipse(n(a.cx), n(a.cy), n(a.rx), n(a.ry), 0, 0, Math.PI * 2);
+    else if (tag === "rect") ctx.roundRect(n(a.x), n(a.y), n(a.width), n(a.height), n(a.rx));
+    else if (tag === "line") {
+      ctx.moveTo(n(a.x1), n(a.y1));
+      ctx.lineTo(n(a.x2), n(a.y2));
+    } else if (tag === "polyline" || tag === "polygon") {
+      const p = String(a.points || "").trim().split(/[s,]+/).map(Number);
+      for (let i = 0; i < p.length; i += 2) (i ? ctx.lineTo : ctx.moveTo).call(ctx, p[i], p[i + 1]);
+      if (tag === "polygon") ctx.closePath();
+    }
+    ctx.stroke();
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const gauss = () => {
@@ -144,16 +185,25 @@ function buildShape(shape: Shape, out: Float32Array, from: number, count: number
     out[i * 3 + 2] = z;
   };
 
-  const draw = drawers[shape];
+  const isIcon = shape.startsWith("icon:");
+  const draw = isIcon
+    ? (ctx: CanvasRenderingContext2D, W: number, H: number) => drawIcon(shape.slice(5), ctx, W, H)
+    : drawers[shape as BaseShape];
   if (draw) {
     const pts = sampleCanvas(shape, draw);
     if (pts.length) {
       // fit to the visible area
       const fitW = shape === "text" ? (view.narrow ? 0.9 : 0.66) : shape === "code" ? 0.4 : 0.42;
       const width = Math.min(view.w * fitW, shape === "text" ? 86 : 64);
+      // icons: square box, sized to the shorter screen side
+      const iconSize = Math.min(view.w * (view.narrow ? 0.8 : 0.42), view.h * 0.62, 46);
       const aspect = 520 / 1200;
-      const scaleX = shape === "logo" ? width * (1200 / 520) * 0.55 : width;
-      const scaleY = shape === "logo" ? scaleX * aspect : width * aspect;
+      const scaleX = isIcon
+        ? iconSize / ((520 * 0.9) / 1200)
+        : shape === "logo"
+        ? width * (1200 / 520) * 0.55
+        : width;
+      const scaleY = isIcon || shape === "logo" ? scaleX * aspect : width * aspect;
       const lift = shape === "text" ? view.h * (view.narrow ? 0.17 : 0.12) : shape === "logo" ? view.h * 0.2 : 0;
       const n = pts.length / 2;
       for (let k = 0; k < count; k++) {
@@ -447,7 +497,7 @@ export default function Starfield({ route }: { route: string }) {
 
     const renderOnce = () => renderer.render(scene, camera);
     let morphTween: gsap.core.Tween | null = null;
-    const style = { spin: STYLE[shape].spin, tilt: STYLE[shape].tilt };
+    const style = { spin: styleOf(shape).spin, tilt: styleOf(shape).tilt };
 
     const morphTo = (next: Shape, quick = false) => {
       if (next === shape && uniforms.uMorph.value >= 1 && !quick) return;
@@ -472,7 +522,7 @@ export default function Starfield({ route }: { route: string }) {
       uniforms.uMorph.value = 0;
       const dur = reduced ? 0 : quick ? 0.8 : 2.2;
       morphTween = gsap.to(uniforms.uMorph, { value: 1, duration: dur, ease: "power2.inOut" });
-      gsap.to(style, { spin: STYLE[next].spin, tilt: STYLE[next].tilt, duration: dur || 0.01, ease: "power2.inOut" });
+      gsap.to(style, { spin: styleOf(next).spin, tilt: styleOf(next).tilt, duration: dur || 0.01, ease: "power2.inOut" });
       gsap.to(uniforms.uWave, { value: next === "wave" ? 1 : 0, duration: dur || 0.01 });
       if (reduced) renderOnce();
     };
@@ -502,7 +552,7 @@ export default function Starfield({ route }: { route: string }) {
     };
     const onScene = (e: Event) => {
       const s = (e as CustomEvent<string>).detail as Shape;
-      if (s && s in STYLE) morphTo(s);
+      if (s && isShape(s)) morphTo(s);
     };
     window.addEventListener("tt:warp", onWarp);
     window.addEventListener("tt:stars", onScene);

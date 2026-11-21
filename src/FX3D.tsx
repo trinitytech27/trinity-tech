@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion, scrollToElement } from "./scroll";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
 
 // Same choreography on laptops, tablets and phones (only reduced-motion opts out)
 const DESKTOP = "(prefers-reduced-motion: no-preference)";
@@ -162,7 +162,7 @@ export function FlyThrough({
           invalidateOnRefresh: true,
           // the caption follows the screen that is currently closest
           onUpdate: (self) => {
-            const t = self.animation ? self.animation.time() : 0;
+            const t = self.progress * (self.animation ? self.animation.duration() : 0);
             setActive(Math.max(0, Math.min(cards.length - 1, Math.round((t - 0.8) / gap))));
           },
         },
@@ -344,70 +344,48 @@ export function SpinRing({
    -------------------------------------------------------------------------- */
 export function SectionLabel() {
   const loc = useLocation();
-  const [sections, setSections] = useState<{ el: HTMLElement; name: string }[]>([]);
-  const [active, setActive] = useState(0);
+  const [name, setName] = useState("");
 
   useEffect(() => {
-    let io: IntersectionObserver | null = null;
+    let triggers: ScrollTrigger[] = [];
     let lastStars = "";
+    const broadcast = (el: HTMLElement) => {
+      setName(el.dataset.section || "");
+      const s = el.dataset.stars;
+      if (s && s !== lastStars) {
+        lastStars = s;
+        window.dispatchEvent(new CustomEvent("tt:stars", { detail: s }));
+      }
+    };
+    // Scenes can also ask for a star symbol directly (e.g. per project / domain)
     const id = window.setTimeout(() => {
       const els = Array.from(document.querySelectorAll<HTMLElement>("main [data-section]"));
-      setSections(els.map((el) => ({ el, name: el.dataset.section || "" })));
-      setActive(0);
-      const broadcast = (el: HTMLElement) => {
-        const s = el.dataset.stars;
-        if (s && s !== lastStars) {
-          lastStars = s;
-          window.dispatchEvent(new CustomEvent("tt:stars", { detail: s }));
-        }
-      };
-      if (els[0]) broadcast(els[0]);
-      io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            const el = e.target as HTMLElement;
-            setActive(els.indexOf(el));
-            broadcast(el);
-          }
-        },
-        { rootMargin: "-45% 0px -50% 0px" },
+      if (!els.length) {
+        setName("");
+        return;
+      }
+      broadcast(els[0]);
+      // ScrollTrigger understands pinned sections, so the active section is exact
+      triggers = els.map((el) =>
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 55%",
+          end: "bottom 55%",
+          onToggle: (self) => self.isActive && broadcast(el),
+        }),
       );
-      els.forEach((el) => io?.observe(el));
-    }, 350);
+    }, 450);
     return () => {
       window.clearTimeout(id);
-      io?.disconnect();
+      triggers.forEach((t) => t.kill());
     };
   }, [loc.pathname]);
 
-  if (!sections.length) return null;
-  const cur = sections[active];
+  if (!name) return null;
   return (
-    <>
-      <div className="tt-pill" key={"p" + cur?.name} aria-hidden="true">
-        <i /> {cur?.name}
-      </div>
-      <nav className="tt-rail" aria-label="Page sections">
-        {sections.map((s, i) => (
-          <button
-            key={s.name + i}
-            type="button"
-            className={i === active ? "on" : ""}
-            aria-label={"Go to " + s.name}
-            aria-current={i === active}
-            onClick={() => scrollToElement(s.el)}
-          >
-            {i === active && (
-              <span>
-                {String(i + 1).padStart(2, "0")} {s.name}
-              </span>
-            )}
-            <i />
-          </button>
-        ))}
-      </nav>
-    </>
+    <div className="tt-pill" key={"p" + name} aria-hidden="true">
+      <i /> {name}
+    </div>
   );
 }
 

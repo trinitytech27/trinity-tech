@@ -1,7 +1,6 @@
 import { Eye, Mail, Target, Sparkles, ArrowUpRight } from "lucide-react";
 import { audiences, brand, team, values } from "../content";
 import { PageHero, TiltCard, useRefreshOnLoad } from "../FX3D";
-import { CtaBand } from "./Shared";
 
 export default function AboutPage() {
   useRefreshOnLoad();
@@ -123,7 +122,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <CtaBand />
     </div>
   );
 }

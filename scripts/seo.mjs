@@ -34,7 +34,7 @@ const origin =
 
 const pages = [
   ["", "Build. Innovate. Transform.", seed.seoDescription],
-  ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, StarX Connect and AudioX."],
+  ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, ABPS Books, StarX Connect and AudioX."],
   ["about", "About the Business — Trinity Tech", seed.about],
   ["services", "Services — Design & Digital Development", "Web development, UI/UX design, custom web applications, e-commerce storefronts, and interactive digital experiences."],
   ["project", "Start a Project — Trinity Tech", "Choose your website type, select your features, and start your tailored web project with Trinity Tech."],
@@ -77,7 +77,7 @@ for (const [path, title, desc, projectData] of pages) {
       "logo": origin + "/media/trinity-logo.png",
       "image": origin + "/media/trinity-logo.png",
       "description": seed.seoDescription,
-      "email": "balajoseboddukuri@gmail.com",
+      "email": "trinitytech27@gmail.com",
       "sameAs": [
         "https://instagram.com/sanju_x_dev/",
         "https://github.com/Sanjay200812/Sanju-X-Dev"

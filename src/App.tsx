@@ -26,7 +26,8 @@ import {
   Smartphone,
   Expand,
 } from "lucide-react";
-import { defaults, projects as seed, contactEmails } from "./content";
+import { defaults, projects as seed, mainContact } from "./content";
+import { ContactStrip } from "./pages/Shared";
 import Contact from "./Contact";
 import Assistant from "./Assistant";
 import HomePage from "./Home";
@@ -112,13 +113,19 @@ function Footer() {
           <Link to="/privacy">Privacy</Link>
         </nav>
         <div className="tt-footer-col">
-          <b>Email us</b>
-          {contactEmails.map((c) => (
-            <a key={c.email} href={"mailto:" + c.email}>
-              <span>{c.name} · {c.role}</span>
-              {c.email}
-            </a>
-          ))}
+          <b>Contact</b>
+          <a href={"mailto:" + mainContact.email}>
+            <span>Email</span>
+            {mainContact.email}
+          </a>
+          <a href={mainContact.phoneHref}>
+            <span>Call</span>
+            {mainContact.phone}
+          </a>
+          <a href={mainContact.whatsappHref} target="_blank" rel="noreferrer">
+            <span>WhatsApp</span>
+            {mainContact.whatsapp}
+          </a>
         </div>
       </div>
       <div className="wrap tt-footer-base">
@@ -445,7 +452,7 @@ function Privacy() {
       <h2>Contact and deletion</h2>
       <p>
         Ask about your enquiry or request deletion at{" "}
-        <a href="mailto:balajoseboddukuri@gmail.com">balajoseboddukuri@gmail.com</a>.
+        <a href="mailto:trinitytech27@gmail.com">trinitytech27@gmail.com</a>.
         Information is retained only as needed for the enquiry and any
         subsequent business relationship.
       </p>
@@ -656,6 +663,8 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             </div>
+            {/* common to every page: contact + start a project */}
+            {!isOwner && loc.pathname !== "/contact" && <ContactStrip />}
           </main>
           <Footer />
           {site.assistantEnabled &&

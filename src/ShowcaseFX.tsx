@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
-import type { projects } from "./content";
+import { gsap, ScrollTrigger, prefersReducedMotion, showStars } from "./scroll";
+import { PROJECT_ICONS, type projects } from "./content";
 
 type Project = (typeof projects)[number];
 
@@ -149,6 +149,14 @@ export function VelocityMarquee({
 export function DemoStage({ items }: { items: Project[] }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const inView = useRef(false);
+  const activeRef = useRef(0);
+  activeRef.current = active;
+
+  // the stars draw a symbol for the project on screen
+  useEffect(() => {
+    if (inView.current) showStars(PROJECT_ICONS[items[active]?.slug]);
+  }, [active, items]);
 
   useLayoutEffect(() => {
     const el = root.current;
@@ -167,9 +175,14 @@ export function DemoStage({ items }: { items: Project[] }) {
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // counter follows the panel that is (mostly) on screen
+          onToggle: (self) => {
+            inView.current = self.isActive;
+            if (self.isActive) showStars(PROJECT_ICONS[items[activeRef.current]?.slug]);
+          },
+          snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
+          // which project is (mostly) on screen
           onUpdate: (self) => {
-            const t = self.animation ? self.animation.time() : 0;
+            const t = self.progress * (self.animation ? self.animation.duration() : 0);
             let idx = 0;
             marks.forEach((m, i) => {
               if (t >= m) idx = i;
@@ -199,13 +212,13 @@ export function DemoStage({ items }: { items: Project[] }) {
               scrollTrigger: { trigger: el, start: "top bottom", end: "top top", scrub: 0.8 },
             },
           );
-          tl.to({}, { duration: 0.6 }); // hold so it can be read
+          tl.addLabel("p0", 0.3).to({}, { duration: 0.6 }); // hold so it can be read
           return;
         }
 
         const prev = panels[i - 1];
         tl.fromTo(panel, { yPercent: 100 }, { yPercent: 0, duration: 1 }, ">")
-          .to(prev, { scale: 0.9, opacity: 0.3, duration: 1 }, "<")
+          .to(prev, { scale: 0.92, opacity: 0, duration: 0.8 }, "<")
           .to(prev.querySelector(".tt-demo-frame"), { yPercent: -6, duration: 1 }, "<");
         marks.push(tl.duration() - 0.5);
         tl.fromTo(
@@ -221,6 +234,7 @@ export function DemoStage({ items }: { items: Project[] }) {
             { y: 0, opacity: 1, duration: 0.6, stagger: 0.08 },
             "<+0.2",
           )
+          .addLabel("p" + i)
           .to({}, { duration: 0.6 }); // hold so the project can be read
       });
 
@@ -240,15 +254,6 @@ export function DemoStage({ items }: { items: Project[] }) {
         <div>
           <span className="tt-eyebrow">Live Demo Projects</span>
           <h2 className="tt-title light">Real work, live on the web.</h2>
-        </div>
-        <div className="tt-demos-counter" aria-hidden="true">
-          <b>{String(active + 1).padStart(2, "0")}</b>
-          <span>/ {String(items.length).padStart(2, "0")}</span>
-          <div className="tt-demos-dots">
-            {items.map((p, i) => (
-              <i key={p.slug} className={i === active ? "on" : ""} />
-            ))}
-          </div>
         </div>
       </div>
 

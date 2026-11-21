@@ -24,6 +24,36 @@ import {
 } from "./email.mjs";
 import seed from "./seed.json" with { type: "json" };
 
+/**
+ * Named admin access codes. The codes themselves never live in the source:
+ * ADMIN_PIN_VERIFIERS is a JSON object of salted scrypt verifiers, e.g.
+ * {"sanju":"salt:hash","maddy":"salt:hash","jose":"salt:hash"}
+ * (create it with: node scripts/admin-pins.mjs).
+ */
+const ADMIN_PROFILES = {
+  sanju: { name: "Sanju", fullName: "Sanjay", role: "Developer" },
+  maddy: { name: "Maddy", fullName: "Madhan Kumar", role: "Developer" },
+  jose: { name: "Jose", fullName: "Balajose", role: "Founder" },
+};
+
+function adminVerifiers() {
+  try {
+    const raw = env().ADMIN_PIN_VERIFIERS;
+    const parsed = raw ? JSON.parse(raw) : {};
+    return Object.entries(parsed).filter(([id, v]) => ADMIN_PROFILES[id] && typeof v === "string");
+  } catch {
+    return [];
+  }
+}
+
+/** Which admin (if any) this access code belongs to. */
+function matchAdmin(code) {
+  for (const [id, verifier] of adminVerifiers()) {
+    if (verifyPin(code, verifier)) return { id, ...ADMIN_PROFILES[id] };
+  }
+  return null;
+}
+
 // Projects removed from the public portfolio, even if still stored in the database.
 const RETIRED_PROJECTS = new Set(["yuva-shakti"]);
 
@@ -123,7 +153,7 @@ function extractChatLinks(question, answer) {
   }
 
   // 3. Portfolio / previous projects queries
-  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
+  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
     addLink("View Projects", "/work");
   }
 
@@ -343,7 +373,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 11. Portfolio / Previous work
   if (/work|portfolio|previous project|past work|case stud|projects/i.test(q)) {
     return {
-      answer: "We have four verified portfolio case studies: StarX Live (entertainment website), TicketX (event booking platform), StarX Connect (virtual card) and AudioX (audio utility app). Live demos of StarX Live and TicketX are featured on the homepage.",
+      answer: "We have five live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore), StarX Connect (digital card) and AudioX (audio utility app). Every one is a live demo in Our Work.",
       mode: "FAQ guide",
       links: [
         { label: "View Projects", url: "/work" }
@@ -565,7 +595,7 @@ export default async function handler(req, res) {
       if (!client)
         throw fail(
           503,
-          "Enquiries are not connected yet. Please email balajoseboddukuri@gmail.com.",
+          "Enquiries are not connected yet. Please email trinitytech27@gmail.com.",
         );
 
       await rate(client, req, "enquiry", 5);
@@ -691,7 +721,7 @@ export default async function handler(req, res) {
 
     if (path === "/api/track" && req.method === "POST") {
       if (!client)
-        throw fail(503, "Tracking service is temporarily unavailable. Please email balajoseboddukuri@gmail.com.");
+        throw fail(503, "Tracking service is temporarily unavailable. Please email trinitytech27@gmail.com.");
 
       await rate(client, req, "track", 30);
 
@@ -964,7 +994,7 @@ export default async function handler(req, res) {
               "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
               "\n8. TRACKING INTEGRATION: When asked about an SXD tracking code (e.g. SXD-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
-              "\n9. VERIFIED PORTFOLIO: Reference the real 4 case studies (StarX Live, TicketX, StarX Connect, AudioX) and direct to /work when requested." +
+              "\n9. VERIFIED PORTFOLIO: Reference the real 5 projects (StarX Live, TicketX, ABPS Books, StarX Connect, AudioX) and direct to /work when requested." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");
 
@@ -1054,7 +1084,7 @@ export default async function handler(req, res) {
         return send(200, {
           codeLockout,
           passwordLockout,
-          pinConfigured: !!verifier,
+          pinConfigured: !!verifier || adminVerifiers().length > 0,
         });
       }
 
@@ -1088,15 +1118,18 @@ export default async function handler(req, res) {
             .maybeSingle(),
         );
         const verifier = env().ADMIN_PIN_VERIFIER || config?.pin_verifier;
+        const named = adminVerifiers().length > 0;
 
-        if (!verifier) {
+        if (!verifier && !named) {
           throw fail(
             400,
-            "Secret code has not been initialized. Please sign in with 'Login with spideyy' first to configure it.",
+            "Private access codes are not configured yet. Set ADMIN_PIN_VERIFIERS on the server.",
           );
         }
 
-        const isValid = verifyPin(body.code, verifier);
+        // Named admins first (Sanju / Maddy / Jose), then the legacy owner code
+        const admin = named ? matchAdmin(String(body.code || "")) : null;
+        const isValid = !!admin || (!!verifier && verifyPin(body.code, verifier));
         if (!isValid) {
           await recordFailedAttempt(client, ipScope, 10, 15);
           const failStatus = await recordFailedAttempt(client, "code:owner", 3, 3);
@@ -1164,8 +1197,15 @@ export default async function handler(req, res) {
             (env().VERCEL ? " ; Secure" : ""),
         );
 
-        await audit(client, "Owner workspace unlocked via secret code");
-        return send(200, { ok: true, sessionToken });
+        await audit(
+          client,
+          admin ? `Workspace unlocked by ${admin.name} (${admin.fullName})` : "Owner workspace unlocked via secret code",
+        );
+        return send(200, {
+          ok: true,
+          sessionToken,
+          admin: admin ? { name: admin.name, fullName: admin.fullName, role: admin.role } : null,
+        });
       }
 
       // SECONDARY LOGIN — LOGIN WITH SPIDEYY (Email + Password)
