@@ -25,25 +25,24 @@ import {
   Monitor,
   Smartphone,
   Expand,
-  Plus,
-  Minus,
-  Phone,
-  MessageCircle,
 } from "lucide-react";
-import { defaults, projects as seed, SANJU_BUSINESS_PHONE, SANJU_WHATSAPP_NUMBER } from "./content";
+import { defaults, projects as seed, contactEmails } from "./content";
 import Contact from "./Contact";
 import Assistant from "./Assistant";
 import HomePage from "./Home";
+import WorkPage from "./pages/WorkPage";
+import ServicesPage from "./pages/ServicesPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import PageTransition from "./PageTransition";
+import { SectionLabel } from "./FX3D";
 import { ScrollProgress, useScrollReveal, useScrollState } from "./Motion";
 import { destroySmoothScroll, initSmoothScroll, resetScroll, scrollToElement, ScrollTrigger } from "./scroll";
 import { ChatProvider, useChat, STARTER_QUESTIONS } from "./chat-context";
-import {
-  InstagramIcon,
-  FacebookIcon,
-  MailIcon,
-} from "./Decorations";
 
 const Admin = lazy(() => import("./Admin"));
+// three.js loads in its own chunk after the page is interactive
+const Starfield = lazy(() => import("./Starfield"));
 const Track = lazy(() => import("./Track"));
 
 export type Site = typeof defaults;
@@ -87,152 +86,44 @@ function Brand() {
   );
 }
 
-function Affiliation() {
-  return (
-    <section className="affiliation-section wrap" aria-label="Professional Affiliation">
-      <div className="affiliation-card" data-reveal>
-        <div className="washi-tape-strip top-center" aria-hidden="true" />
-        <span className="eyebrow">Professional Affiliation</span>
-        <h2 className="affiliation-title">
-          Co-Founder at CodeXa Agency
-        </h2>
-        <p className="affiliation-desc">
-          Sanjay is a Co-Founder at CodeXa Agency — a distinct business association delivering full-scale digital agency solutions, alongside Trinity Tech.
-        </p>
-        <a
-          href="https://codxa-agency.online/"
-          target="_blank"
-          rel="noreferrer"
-          className="button secondary affiliation-btn"
-        >
-          Visit CodeXa <ArrowUpRight size={16} />
-        </a>
-      </div>
-    </section>
-  );
-}
-
-function ContactSection() {
-  const s = useSite();
-  const facebookUrl =
-    (s as any).facebook || "https://www.facebook.com/sanju.x.dev";
-  const instagramUrl =
-    s.instagram || "https://www.instagram.com/sanju_x_dev/";
-  const phone = (s as any).phone || SANJU_BUSINESS_PHONE;
-  const whatsappUrl = `https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Trinity Tech, I would like to enquire about a website.")}`;
-
-  return (
-    <section id="contact" className="final-contact-section wrap" aria-label="Contact Information">
-      <div className="final-contact-card" data-reveal>
-        <div className="washi-tape-strip top-center" aria-hidden="true" />
-        <span className="eyebrow">Get In Touch</span>
-        <h2 className="final-contact-title">Let&apos;s Connect</h2>
-        <p className="final-contact-sub">
-          Have a question, an idea, or want to discuss a custom digital project? Reach out directly.
-        </p>
-
-        <div className="final-contact-grid" data-reveal-stagger="70">
-          <a
-            href={"mailto:" + s.email}
-            className="final-contact-item" data-reveal
-            aria-label="Direct email to Trinity Tech"
-          >
-            <div className="contact-item-icon">
-              <MailIcon size={22} />
-            </div>
-            <div className="contact-item-info">
-              <span className="contact-item-label">Email</span>
-              <span className="contact-item-value">{s.email}</span>
-            </div>
-          </a>
-
-          <a
-            href={"tel:" + phone.replace(/\s+/g, "")}
-            className="final-contact-item" data-reveal
-            aria-label="Call Trinity Tech directly"
-          >
-            <div className="contact-item-icon">
-              <Phone size={20} />
-            </div>
-            <div className="contact-item-info">
-              <span className="contact-item-label">Phone</span>
-              <span className="contact-item-value">{phone}</span>
-            </div>
-          </a>
-
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="final-contact-item whatsapp-highlight" data-reveal
-            aria-label="Chat with Trinity Tech on WhatsApp"
-          >
-            <div className="contact-item-icon" style={{ color: "#25d366" }}>
-              <MessageCircle size={22} />
-            </div>
-            <div className="contact-item-info">
-              <span className="contact-item-label">WhatsApp</span>
-              <span className="contact-item-value">{phone}</span>
-            </div>
-          </a>
-
-          <a
-            href={instagramUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="final-contact-item" data-reveal
-            aria-label="Instagram profile"
-          >
-            <div className="contact-item-icon">
-              <InstagramIcon size={22} />
-            </div>
-            <div className="contact-item-info">
-              <span className="contact-item-label">Instagram</span>
-              <span className="contact-item-value">@sanju_x_dev</span>
-            </div>
-          </a>
-
-          <a
-            href={facebookUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="final-contact-item" data-reveal
-            aria-label="Facebook profile"
-          >
-            <div className="contact-item-icon">
-              <FacebookIcon size={22} />
-            </div>
-            <div className="contact-item-info">
-              <span className="contact-item-label">Facebook</span>
-              <span className="contact-item-value">sanju_x_dev</span>
-            </div>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Footer() {
   return (
-    <footer className="compact-footer">
-      <div className="compact-footer-inner wrap" data-reveal>
-        <div className="compact-footer-brand">
+    <footer className="tt-footer">
+      <div className="wrap tt-footer-grid">
+        <div className="tt-footer-brand">
           <Brand />
-          <span className="footer-tagline">
-            Your Vision. Our Technology. Infinite Possibilities.
-          </span>
+          <p>Your Vision. Our Technology. Infinite Possibilities.</p>
+          <Link to="/project" className="tt-btn tt-btn-primary sm">
+            Start Your Project <ArrowRight size={16} />
+          </Link>
         </div>
-        <div className="compact-footer-nav">
+        <nav className="tt-footer-col" aria-label="Footer">
+          <b>Explore</b>
           <Link to="/">Home</Link>
-          <Link to="/work">Projects</Link>
+          <Link to="/work">Work</Link>
+          <Link to="/services">Services</Link>
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact</Link>
+        </nav>
+        <nav className="tt-footer-col" aria-label="Projects">
+          <b>Projects</b>
           <Link to="/project">Start a Project</Link>
           <Link to="/track">Track Project</Link>
           <Link to="/privacy">Privacy</Link>
+        </nav>
+        <div className="tt-footer-col">
+          <b>Email us</b>
+          {contactEmails.map((c) => (
+            <a key={c.email} href={"mailto:" + c.email}>
+              <span>{c.name} · {c.role}</span>
+              {c.email}
+            </a>
+          ))}
         </div>
-        <small className="footer-copy">
-          © {new Date().getFullYear()} Trinity Tech. All rights reserved.
-        </small>
+      </div>
+      <div className="wrap tt-footer-base">
+        <small>© {new Date().getFullYear()} Trinity Tech. All rights reserved.</small>
+        <small>Build. Innovate. Transform.</small>
       </div>
     </footer>
   );
@@ -472,136 +363,7 @@ function HomepageAiConsole() {
 function Home() {
   const s = useSite();
   return (
-    <HomePage
-      site={s}
-      console={<HomepageAiConsole />}
-      affiliation={<Affiliation />}
-      contact={<ContactSection />}
-    />
-  );
-}
-
-function ProjectCard({
-  p,
-  index,
-}: {
-  p: (typeof seed)[number];
-  index: number;
-}) {
-  return (
-    <article className={"project-card project-" + p.slug} data-reveal>
-      <div className="card-washi-tape" aria-hidden="true" />
-      <Link
-        to={"/work/" + p.slug}
-        className="project-image"
-        style={{ "--project": p.color } as React.CSSProperties}
-      >
-        <div className="project-card-browser-bar">
-          <div className="browser-dots">
-            <span />
-            <span />
-            <span />
-          </div>
-          <span className="project-card-url">{new URL(p.url).hostname}</span>
-        </div>
-        <img
-          src={p.slug === "starx-connect" ? p.mobile : p.image}
-          alt={p.short + " live website interface"}
-          loading="lazy"
-          decoding="async"
-        />
-        <span className="project-open">
-          <Arrow />
-        </span>
-      </Link>
-      <div className="project-meta">
-        <div className="project-meta-top">
-          <span className="eyebrow">
-            {String(index).padStart(2, "0")} / {p.category}
-          </span>
-          <span className="project-badge-tag">{p.kind}</span>
-        </div>
-        <h3 className="project-card-heading">
-          <Link to={"/work/" + p.slug}>{p.name}</Link>
-        </h3>
-        <p className="project-card-summary">{p.summary}</p>
-        <div className="project-card-actions">
-          <Link to={"/work/" + p.slug} className="button project-view-btn">
-            View Project <Arrow />
-          </Link>
-          <a
-            href={p.url}
-            target="_blank"
-            rel="noreferrer"
-            className="project-external-link"
-          >
-            Live Site ↗
-          </a>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function Work() {
-  const s = useSite();
-  const [filter, setFilter] = useState("All");
-  const [q, setQ] = useState("");
-  const all = s.projects
-    .filter((p) => p.published)
-    .sort((a, b) => a.order - b.order);
-
-  const shown = all.filter((p) => {
-    const matchF = filter === "All" || p.kind === filter;
-    const matchQ =
-      !q.trim() ||
-      (p.name + p.summary + p.story)
-        .toLowerCase()
-        .includes(q.toLowerCase().trim());
-    return matchF && matchQ;
-  });
-
-  return (
-    <section className="page wrap">
-      <span className="eyebrow">Our Work</span>
-      <h1>Selected Projects</h1>
-      <p className="lede">
-        Verified public projects built for entertainment, discovery and
-        direct business action. Explore the interfaces and the thinking behind
-        them.
-      </p>
-      <div className="filters" data-reveal>
-        <div>
-          {["All", "Websites", "Applications", "Digital experiences"].map(
-            (f) => (
-              <button
-                key={f}
-                aria-pressed={filter === f}
-                onClick={() => setFilter(f)}
-              >
-                {f}
-              </button>
-            ),
-          )}
-        </div>
-        <input
-          aria-label="Search projects"
-          placeholder="Find a project…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-      <div className="work-grid" data-reveal-stagger="90">
-        {shown.map((p) => (
-          <ProjectCard key={p.slug} p={p} index={all.indexOf(p) + 1} />
-        ))}
-      </div>
-      {!shown.length && (
-        <p className="empty">
-          No matching projects. Try a different search or category.
-        </p>
-      )}
-    </section>
+    <HomePage site={s} console={<HomepageAiConsole />} />
   );
 }
 
@@ -656,102 +418,6 @@ function CaseStudy() {
   );
 }
 
-function ServiceList() {
-  const s = useSite();
-  const [open, setOpen] = useState(0);
-
-  return (
-    <div className="service-list" data-reveal-stagger="70">
-      {s.services.map((x, i) => (
-        <div
-          className={"service-row " + (open === i ? "open" : "")}
-          key={x.name}
-          data-reveal
-        >
-          <button
-            aria-expanded={open === i}
-            onClick={() => setOpen(open === i ? -1 : i)}
-          >
-            <span>0{i + 1}</span>
-            <h3>{x.name}</h3>
-            {open === i ? <Minus /> : <Plus />}
-          </button>
-          {open === i && (
-            <div className="service-detail">
-              <p>{x.description}</p>
-              <span>{x.items}</span>
-              <Link to={"/project?category=" + encodeURIComponent(x.name)}>
-                Enquire about this service <Arrow />
-              </Link>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Services() {
-  return (
-    <section className="page wrap">
-      <span className="eyebrow">Capabilities</span>
-      <h1>
-        Made for your
-        <br />
-        <em>next move.</em>
-      </h1>
-      <p className="lede">
-        A new website. A useful application. A more considered experience.
-        <br />
-        We help turn the right idea into something people can use.
-      </p>
-      <ServiceList />
-      <div className="callout" data-reveal>
-        <h2>Not sure where to start?</h2>
-        <p>Bring the problem. We’ll help define the brief.</p>
-        <CTA />
-      </div>
-    </section>
-  );
-}
-
-function About() {
-  const s = useSite();
-  return (
-    <section className="page wrap">
-      <span className="eyebrow">About the business</span>
-      <h1>
-        Small details.
-        <br />
-        <em>A bigger picture.</em>
-      </h1>
-      <div className="about-grid" data-reveal>
-        <div className="logo-object">
-          <img
-            src="/assets/trinity-logo.svg"
-            alt="Trinity Tech official logo"
-          />
-        </div>
-        <div>
-          <h2>
-            Design and development,
-            <br />
-            working together.
-          </h2>
-          <p className="lede">{s.about}</p>
-          <p>
-            Our starting point is always the business: what you offer, who you
-            serve, and how a better digital experience can help. We value clear
-            communication, practical choices and carefully finished work.
-          </p>
-          <CTA text="Explore our services" to="/services" />
-        </div>
-      </div>
-      <Affiliation />
-    </section>
-  );
-}
-
 function Privacy() {
   return (
     <section className="page wrap prose">
@@ -779,7 +445,7 @@ function Privacy() {
       <h2>Contact and deletion</h2>
       <p>
         Ask about your enquiry or request deletion at{" "}
-        <a href="mailto:sanjuxdev27@gmail.com">sanjuxdev27@gmail.com</a>.
+        <a href="mailto:balajoseboddukuri@gmail.com">balajoseboddukuri@gmail.com</a>.
         Information is retained only as needed for the enquiry and any
         subsequent business relationship.
       </p>
@@ -811,6 +477,7 @@ export default function App() {
       !matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const loc = useLocation();
+  const isOwner = loc.pathname.startsWith("/spideyy") || loc.pathname.startsWith("/admin");
   useScrollState();
   useScrollReveal(loc.pathname);
 
@@ -819,6 +486,10 @@ export default function App() {
     initSmoothScroll();
     return () => destroySmoothScroll();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("theme-owner", isOwner);
+  }, [isOwner]);
 
   const finish = () => {
     setIntro(false);
@@ -869,10 +540,10 @@ export default function App() {
             : ((
                 {
                   "/": "",
-                  "/work": "Selected Projects",
+                  "/work": "Our Work",
                   "/about": "About",
                   "/services": "Services",
-                  "/contact": "Start a Project",
+                  "/contact": "Contact",
                   "/project": "Start a Project",
                   "/track": "Track Your Project",
                   "/privacy": "Privacy",
@@ -886,6 +557,14 @@ export default function App() {
     <Context.Provider value={site}>
       <ChatProvider>
         <ScrollProgress />
+        <div className="tt-space-fallback" aria-hidden="true" />
+        {!isOwner && (
+          <Suspense fallback={null}>
+            <Starfield route={loc.pathname} />
+          </Suspense>
+        )}
+        <PageTransition />
+        {!isOwner && <SectionLabel />}
         <a className="skip" href="#main">
           Skip to content
         </a>
@@ -925,20 +604,13 @@ export default function App() {
                 <NavLink to="/" end>
                   Home
                 </NavLink>
-                {loc.pathname === "/" ? (
-                  <a href="#featured-projects">Projects</a>
-                ) : (
-                  <NavLink to="/work">Projects</NavLink>
-                )}
-                <NavLink to="/project">Start a Project</NavLink>
-                {loc.pathname === "/" ? (
-                  <a href="#contact">Contact</a>
-                ) : (
-                  <a href="/#contact">Contact</a>
-                )}
-                <Link to="/project" className="nav-cta-btn">
-                  Start Your Project <ArrowRight size={15} />
-                </Link>
+                <NavLink to="/work">Work</NavLink>
+                <NavLink to="/services">Services</NavLink>
+                <NavLink to="/about">About</NavLink>
+                <NavLink to="/contact">Contact</NavLink>
+                <NavLink to="/project" className="nav-cta-btn">
+                  Start a Project <ArrowRight size={15} />
+                </NavLink>
               </nav>
             </div>
           </header>
@@ -946,12 +618,12 @@ export default function App() {
             <div className="route-view" key={loc.pathname}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/work" element={<Work />} />
+              <Route path="/work" element={<WorkPage projects={site.projects} />} />
               <Route path="/work/:slug" element={<CaseStudy />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route path="/project" element={<Contact />} />
-              <Route path="/contact" element={<Navigate to="/project" replace />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route
                 path="/track"
                 element={

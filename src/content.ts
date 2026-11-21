@@ -775,7 +775,7 @@ export const defaults = {
   intro: "Your Vision. Our Technology. Infinite Possibilities.",
   about:
     "Trinity Tech is a modern web development and digital solutions brand helping businesses, startups, entrepreneurs and individuals build a strong online presence. We transform ideas into professional digital experiences through creative design, modern technologies and reliable web development.",
-  email: "sanjuxdev27@gmail.com",
+  email: "balajoseboddukuri@gmail.com",
   phone: SANJU_BUSINESS_PHONE,
   whatsapp: `https://wa.me/${SANJU_WHATSAPP_NUMBER}`,
   instagram: "https://www.instagram.com/sanju_x_dev/",
@@ -902,4 +902,94 @@ export const audiences = [
   "Freelancers",
   "Personal brands",
   "Growing companies",
+];
+
+
+/* ---------- Team & contact ---------- */
+export const team = [
+  {
+    name: "Balajose",
+    role: "Founder",
+    email: "balajoseboddukuri@gmail.com",
+    initials: "B",
+    bio: "Leads Trinity Tech’s vision, client relationships and project direction — making sure every build serves a real business goal.",
+    focus: ["Vision & strategy", "Client partnerships", "Project direction"],
+  },
+  {
+    name: "Madhan Kumar",
+    role: "Developer",
+    email: "madhankumarvasimalla2008@gmail.com",
+    initials: "MK",
+    bio: "Builds fast, responsive interfaces and the features that make websites work smoothly on every device.",
+    focus: ["Frontend development", "Responsive layouts", "Web features"],
+  },
+  {
+    name: "Sanjay",
+    role: "Developer",
+    email: "boddukurisanjay@gmail.com",
+    initials: "S",
+    bio: "Designs and develops premium web experiences, interactions and the systems behind project booking and tracking.",
+    focus: ["UI/UX & interaction", "Full-stack development", "Booking & tracking systems"],
+  },
+];
+
+export const contactEmails = team.map((m) => ({ name: m.name, role: m.role, email: m.email }));
+
+/* ---------- Trust-building content ---------- */
+export const deliverables = [
+  { title: "Responsive on every screen", desc: "Designed and tested for phones, tablets and desktops." },
+  { title: "Fast & optimized", desc: "Compressed images, lean code and modern hosting for quick loading." },
+  { title: "SEO-ready foundation", desc: "Clean structure, page titles, descriptions and a sitemap from day one." },
+  { title: "Secure hosting setup", desc: "HTTPS, reliable deployment and sensible security defaults." },
+  { title: "Transparent tracking", desc: "Every enquiry gets a tracking ID so you can follow progress." },
+  { title: "Support after launch", desc: "Help with updates, fixes and next steps once you’re live." },
+];
+
+export const techStack = [
+  "React",
+  "TypeScript",
+  "Vite",
+  "Three.js",
+  "GSAP",
+  "Node.js",
+  "Supabase",
+  "Vercel",
+  "Responsive CSS",
+  "SEO",
+];
+
+export const values = [
+  { title: "Modern", desc: "Current technology and design standards in every build." },
+  { title: "Innovative", desc: "Fresh ideas that help your brand stand apart." },
+  { title: "Professional", desc: "Clear communication, honest timelines and careful finishing." },
+  { title: "Creative", desc: "Interfaces and interactions people remember." },
+  { title: "Reliable", desc: "Stable, secure websites you can depend on." },
+  { title: "Premium", desc: "High-quality experiences, accessible to businesses of all sizes." },
+];
+
+export const publicFaqs = [
+  {
+    q: "How long does a website take?",
+    a: "It depends on the scope. A focused landing page or portfolio is usually much quicker than an e-commerce store or custom web app. We agree on a timeline with you before work starts.",
+  },
+  {
+    q: "How much does a website cost?",
+    a: "Pricing depends on the pages, features and integrations you need. Start a project to share your requirements and we’ll send an honest proposal — no hidden extras.",
+  },
+  {
+    q: "Will my website work on mobile?",
+    a: "Yes. Every Trinity Tech website is responsive and checked on phones, tablets and desktops.",
+  },
+  {
+    q: "Can you redesign my existing website?",
+    a: "Yes. We modernize outdated websites, improve speed and mobile experience, and keep your important content.",
+  },
+  {
+    q: "How do I follow my project’s progress?",
+    a: "When you submit an enquiry you receive a tracking ID. Use the Track Project page anytime to see its status.",
+  },
+  {
+    q: "Do you help after the website goes live?",
+    a: "Yes — we help with updates, fixes and improvements after launch so your site keeps growing with your business.",
+  },
 ];

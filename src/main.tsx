@@ -7,6 +7,7 @@ import "./style.css";
 import "./editorial.css";
 import "./theme.css";
 import "./showcase.css";
+import "./space.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

@@ -428,7 +428,7 @@ nav a.active:not(.nav-cta-btn)::after {
   gap: 8px;
   width: 100%;
   box-sizing: border-box;
-  background: #ffffff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 4px;
   padding: 4px 6px 4px 12px;
@@ -2359,7 +2359,7 @@ nav a.active:not(.nav-cta-btn)::after {
 }
 
 .builder-step-pill.active .builder-step-num {
-  background: #ffffff;
+  background: var(--paper);
   color: var(--accent);
 }
 
@@ -3354,7 +3354,7 @@ nav a.active:not(.nav-cta-btn)::after {
 }
 
 .stepper-item.active .stepper-num {
-  background: #ffffff;
+  background: var(--paper);
   color: var(--accent);
   font-weight: 700;
 }
@@ -3529,7 +3529,7 @@ nav a.active:not(.nav-cta-btn)::after {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--paper);
 }
 
 .builder-option-content {
@@ -3796,7 +3796,7 @@ nav a.active:not(.nav-cta-btn)::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: var(--paper);
   color: #ffffff;
   transition: all 0.2s ease;
 }
@@ -3822,14 +3822,14 @@ nav a.active:not(.nav-cta-btn)::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+  background: var(--paper);
   transition: all 0.2s ease;
 }
 
 .builder-option-card.active .builder-radio-dot,
 .builder-category-card.selected .builder-radio-dot {
   border-color: #4f46e5;
-  background: #ffffff;
+  background: var(--paper);
 }
 
 .builder-option-card.active .builder-radio-dot::after,
@@ -4006,7 +4006,7 @@ nav a.active:not(.nav-cta-btn)::after {
   align-items: center !important;
   justify-content: space-between !important;
   padding: 14px 18px !important;
-  background: #ffffff !important;
+  background: var(--paper) !important;
   border-bottom: 1px solid rgba(79, 70, 229, 0.14) !important;
 }
 
@@ -4083,7 +4083,7 @@ nav a.active:not(.nav-cta-btn)::after {
   padding: 6px 10px !important;
   border-radius: 6px !important;
   border: 1px solid rgba(79, 70, 229, 0.2) !important;
-  background: #ffffff !important;
+  background: var(--paper) !important;
   color: var(--text, #0b1020) !important;
   font-size: 11.5px !important;
   font-weight: 500 !important;
@@ -4269,7 +4269,7 @@ nav a.active:not(.nav-cta-btn)::after {
 }
 
 .chat-action-pill.secondary {
-  background: #ffffff !important;
+  background: var(--paper) !important;
   color: #0b1020 !important;
   border: 1.5px solid rgba(79, 70, 229, 0.25) !important;
 }
@@ -4311,7 +4311,7 @@ nav a.active:not(.nav-cta-btn)::after {
   min-height: 40px !important;
   border-radius: 8px !important;
   border: 1px solid rgba(79, 70, 229, 0.2) !important;
-  background: #ffffff !important;
+  background: var(--paper) !important;
   font-size: 13px !important;
   color: var(--text, #0b1020) !important;
   cursor: pointer !important;
@@ -4333,7 +4333,7 @@ nav a.active:not(.nav-cta-btn)::after {
   align-items: center !important;
   gap: 8px !important;
   padding: 12px 16px !important;
-  background: #ffffff !important;
+  background: var(--paper) !important;
   border-top: 1px solid rgba(79, 70, 229, 0.16) !important;
 }
 
@@ -4344,7 +4344,7 @@ nav a.active:not(.nav-cta-btn)::after {
   padding: 0 14px !important;
   border-radius: 8px !important;
   border: 1.5px solid rgba(79, 70, 229, 0.25) !important;
-  background: #ffffff !important;
+  background: var(--paper) !important;
   font-size: 13.5px !important;
   color: var(--text, #0b1020) !important;
   outline: none !important;

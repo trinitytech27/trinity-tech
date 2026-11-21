@@ -565,7 +565,7 @@ export default async function handler(req, res) {
       if (!client)
         throw fail(
           503,
-          "Enquiries are not connected yet. Please email sanjuxdev27@gmail.com.",
+          "Enquiries are not connected yet. Please email balajoseboddukuri@gmail.com.",
         );
 
       await rate(client, req, "enquiry", 5);
@@ -691,7 +691,7 @@ export default async function handler(req, res) {
 
     if (path === "/api/track" && req.method === "POST") {
       if (!client)
-        throw fail(503, "Tracking service is temporarily unavailable. Please email sanjuxdev27@gmail.com.");
+        throw fail(503, "Tracking service is temporarily unavailable. Please email balajoseboddukuri@gmail.com.");
 
       await rate(client, req, "track", 30);
 

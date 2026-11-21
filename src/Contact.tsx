@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { PageHero } from "./FX3D";
 import {
   Copy,
   Check,
@@ -513,17 +514,15 @@ export default function ProjectPage() {
   };
 
   return (
-    <div id="enquiry-top" className="page contact-page wrap">
-      {/* Page Header */}
-      <div className="page-header" style={{ marginBottom: 28 }}>
-        <span className="eyebrow">Project Enquiry & Consultation</span>
-        <h1 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: "clamp(30px, 4.5vw, 44px)", margin: "8px 0 10px" }}>
-          Start Your Project
-        </h1>
-        <p style={{ maxWidth: 680, fontSize: 16, color: "var(--muted)", margin: 0, lineHeight: 1.6 }}>
-          Complete our 4-step project guide, receive your permanent SXD tracking ID, and connect directly with Sanjay on WhatsApp.
-        </p>
-      </div>
+    <div id="enquiry-top" className="page contact-page tt-booking-page">
+      <PageHero
+        index="04"
+        kicker="Start a Project"
+        title="Let's start"
+        accent="your project."
+        sub="Complete our 4-step project guide, receive your permanent tracking ID and continue with our team on WhatsApp."
+      />
+      <div className="wrap tt-booking-body" data-section="Booking">
 
       {/* 4-Step Progress Indicator Header (01 -> 02 -> 03 -> 04) */}
       {!sent && (
@@ -1609,6 +1608,7 @@ export default function ProjectPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

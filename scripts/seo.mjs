@@ -77,7 +77,7 @@ for (const [path, title, desc, projectData] of pages) {
       "logo": origin + "/media/trinity-logo.png",
       "image": origin + "/media/trinity-logo.png",
       "description": seed.seoDescription,
-      "email": "sanjuxdev27@gmail.com",
+      "email": "balajoseboddukuri@gmail.com",
       "sameAs": [
         "https://instagram.com/sanju_x_dev/",
         "https://github.com/Sanjay200812/Sanju-X-Dev"
