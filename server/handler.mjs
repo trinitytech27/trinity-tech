@@ -24,6 +24,9 @@ import {
 } from "./email.mjs";
 import seed from "./seed.json" with { type: "json" };
 
+// Projects removed from the public portfolio, even if still stored in the database.
+const RETIRED_PROJECTS = new Set(["yuva-shakti"]);
+
 function calculateDaysRemainingIST(targetDateStr) {
   if (!targetDateStr) return null;
   const target = new Date(targetDateStr);
@@ -120,7 +123,7 @@ function extractChatLinks(question, answer) {
   }
 
   // 3. Portfolio / previous projects queries
-  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox|yuva shakti/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
+  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
     addLink("View Projects", "/work");
   }
 
@@ -263,7 +266,7 @@ function runIntelligentFallback(rawQ, history, _s) {
       };
     } else {
       return {
-        answer: "SANJU X DEV modern, responsive websites design chesthundhi. Whether you need a Business Website or an Online Store, you can share your requirements directly on our Project page (/project) to receive an accurate estimate.",
+        answer: "Trinity Tech modern, responsive websites design chesthundhi. Whether you need a Business Website or an Online Store, you can share your requirements directly on our Project page (/project) to receive an accurate estimate.",
         mode: "FAQ guide",
         links: [
           { label: "Start Your Project", url: "/project" }
@@ -275,7 +278,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 5. Casual greetings (return natural response with NO action buttons)
   if (/^(hi|hello|hey|namaste|good\s*(morning|afternoon|evening)|hola|yo)\b[\s!.?]*$/i.test(q)) {
     return {
-      answer: "Hi! Welcome to SANJU X DEV. Are you planning a new website or looking to improve an existing one?",
+      answer: "Hi! Welcome to Trinity Tech. Are you planning a new website or looking to improve an existing one?",
       mode: "FAQ guide",
       links: []
     };
@@ -329,7 +332,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   if (/price|cost|budget|pricing|rate|how much|what does a website cost/i.test(q)) {
     const budgetNote = budgetStr ? (" For a budget preference around " + budgetStr + ", we can scope a clean, focused version with essential features first.") : "";
     return {
-      answer: "At SANJU X DEV, every website is scoped individually based on your specific requirements rather than using rigid generic packages." + budgetNote + " Share your brief through Start Your Project to receive a tailored estimate.",
+      answer: "At Trinity Tech, every website is scoped individually based on your specific requirements rather than using rigid generic packages." + budgetNote + " Share your brief through Start Your Project to receive a tailored estimate.",
       mode: "FAQ guide",
       links: [
         { label: "Start Your Project", url: "/project" }
@@ -340,7 +343,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 11. Portfolio / Previous work
   if (/work|portfolio|previous project|past work|case stud|projects/i.test(q)) {
     return {
-      answer: "We have five verified portfolio case studies: StarX Live (entertainment streaming), TicketX (event booking platform), StarX Connect (virtual card), AudioX (audio utility app), and Yuva Shakti (youth community portal).",
+      answer: "We have four verified portfolio case studies: StarX Live (entertainment website), TicketX (event booking platform), StarX Connect (virtual card) and AudioX (audio utility app). Live demos of StarX Live and TicketX are featured on the homepage.",
       mode: "FAQ guide",
       links: [
         { label: "View Projects", url: "/work" }
@@ -371,7 +374,7 @@ function runIntelligentFallback(rawQ, history, _s) {
 
   // Fallback default
   return {
-    answer: "SANJU X DEV creates custom business websites, online stores, UI/UX designs, and custom web applications. You can share your project requirements directly through our Project page.",
+    answer: "Trinity Tech creates custom business websites, online stores, UI/UX designs, and custom web applications. You can share your project requirements directly through our Project page.",
     mode: "FAQ guide",
     links: [
       { label: "Start Your Project", url: "/project" }
@@ -551,7 +554,7 @@ export default async function handler(req, res) {
     if (path === "/api/site" && req.method === "GET") {
       const s = await site(client);
       return send(200, {
-        site: { ...s, projects: s.projects.filter((p) => p.published) },
+        site: { ...s, projects: s.projects.filter((p) => p.published && !RETIRED_PROJECTS.has(p.slug)) },
         backendReady: !!client,
       });
     }
@@ -905,7 +908,7 @@ export default async function handler(req, res) {
       const contentSite = await site(client);
       const s = {
         ...contentSite,
-        projects: (contentSite.projects || []).filter((p) => p.published),
+        projects: (contentSite.projects || []).filter((p) => p.published && !RETIRED_PROJECTS.has(p.slug)),
       };
 
       if (contentSite.assistantEnabled === false) {
@@ -946,7 +949,7 @@ export default async function handler(req, res) {
               .filter((m) => m.content);
 
             const systemPrompt =
-              "You are Spideyy, the official intelligent website consultant and project advisor for SANJU X DEV (a premier modern digital studio led by Sanjay, Co-Founder at CodeXa Agency)." +
+              "You are Spideyy, the official intelligent website consultant and project advisor for Trinity Tech (a premier modern digital studio led by Sanjay, Co-Founder at CodeXa Agency)." +
               "\n\nCRITICAL CONVERSATIONAL GUIDELINES:" +
               "\n1. NATURAL & AUTHENTIC TONE: Speak naturally, warmly, and professionally like an expert website consultant. Do NOT sound robotic, repetitive, or like a keyword-matching FAQ bot. Never start every answer with the same greeting." +
               "\n2. ACTIVE CONVERSATION MEMORY: Maintain complete multi-turn context. Always remember what business the customer mentioned (e.g. clothing shop, cafe, studio), their earlier answers, and their preferences across the entire conversation. If they ask 'What business did I mention earlier?' or 'What did I just ask you?', refer accurately to their previous messages." +
@@ -961,7 +964,7 @@ export default async function handler(req, res) {
               "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
               "\n8. TRACKING INTEGRATION: When asked about an SXD tracking code (e.g. SXD-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
-              "\n9. VERIFIED PORTFOLIO: Reference the real 5 case studies (StarX Live, TicketX, StarX Connect, AudioX, Yuva Shakti) and direct to /work when requested." +
+              "\n9. VERIFIED PORTFOLIO: Reference the real 4 case studies (StarX Live, TicketX, StarX Connect, AudioX) and direct to /work when requested." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");
 
@@ -1407,7 +1410,7 @@ export default async function handler(req, res) {
             port: Number(env().SMTP_PORT || 465),
             secure: env().SMTP_SECURE !== "false",
             user: env().SMTP_USER || "",
-            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"SANJU X DEV" <${env().SMTP_USER}>` : '"SANJU X DEV" <sanjuxdev27@gmail.com>'),
+            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"Trinity Tech" <${env().SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>'),
             ownerNotificationEmail: env().OWNER_NOTIFICATION_EMAIL || env().SMTP_USER || "sanjuxdev27@gmail.com",
           },
         });
@@ -1517,7 +1520,7 @@ export default async function handler(req, res) {
               const html = formatProjectAcceptedHtml(insertRes.data, env().SITE_URL);
               await sendEmail({
                 to: insertRes.data.client_email,
-                subject: `Project Accepted: ${insertRes.data.title} — ${insertRes.data.tracking_code} | SANJU X DEV`,
+                subject: `Project Accepted: ${insertRes.data.title} — ${insertRes.data.tracking_code} | Trinity Tech`,
                 html,
                 trackingCode: insertRes.data.tracking_code,
                 template: "project_accepted",
@@ -1574,11 +1577,11 @@ export default async function handler(req, res) {
 
               if (updated.status === "completed") {
                 html = formatProjectCompletedHtml(updated, env().SITE_URL);
-                subject = `Project Completed: ${updated.title} — ${updated.tracking_code} | SANJU X DEV 🎉`;
+                subject = `Project Completed: ${updated.title} — ${updated.tracking_code} | Trinity Tech 🎉`;
                 template = "project_completed";
               } else if (["on_hold", "declined"].includes(updated.status)) {
                 html = formatProjectStatusChangeHtml(updated, body.statusReason || "", env().SITE_URL);
-                subject = `Project Status Update: ${updated.title} — ${updated.tracking_code} | SANJU X DEV`;
+                subject = `Project Status Update: ${updated.title} — ${updated.tracking_code} | Trinity Tech`;
                 template = "status_change";
               } else {
                 html = formatProgressUpdatedHtml(updated, body.updateMessage || updated.public_update, env().SITE_URL);
@@ -1641,12 +1644,12 @@ export default async function handler(req, res) {
           const host = e.SMTP_HOST || "smtp.gmail.com";
           const port = e.SMTP_PORT || "465";
           const user = e.SMTP_USER || "sanjuxdev27@gmail.com";
-          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"SANJU X DEV" <${e.SMTP_USER}>` : '"SANJU X DEV" <sanjuxdev27@gmail.com>');
+          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"Trinity Tech" <${e.SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
 
           const testHtml = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #222; background: #eee5d5;">
               <div style="max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid #dcd3c4; border-radius: 8px; padding: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-                <div style="font-size: 13px; font-weight: 700; color: #852c32; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;">SANJU X DEV · System Test</div>
+                <div style="font-size: 13px; font-weight: 700; color: #852c32; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;">Trinity Tech · System Test</div>
                 <h2 style="color: #201c1b; margin: 0 0 14px 0; font-size: 20px;">Gmail SMTP Test Verification</h2>
                 <p style="margin: 0 0 16px 0; font-size: 14px; color: #444;">This message verifies that server-side email dispatch via Gmail SMTP is operating properly with SSL/TLS encryption.</p>
                 <div style="background: #fdfbf7; border: 1px solid #dcd3c4; border-left: 4px solid #852c32; padding: 14px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 13px; line-height: 1.8;">
@@ -1665,7 +1668,7 @@ export default async function handler(req, res) {
 
           const result = await sendEmail({
             to: testRecipient,
-            subject: "SANJU X DEV — Gmail SMTP Delivery Verification",
+            subject: "Trinity Tech — Gmail SMTP Delivery Verification",
             html: testHtml,
             template: "test_verification",
             options: getSmtpConfig(e),
@@ -1698,7 +1701,7 @@ export default async function handler(req, res) {
               body: JSON.stringify({
                 model: openAiModel,
                 messages: [
-                  { role: "system", content: "You are spideyy AI for SANJU X DEV. Respond in one short, energetic sentence confirming that the AI connection is verified and operational." },
+                  { role: "system", content: "You are spideyy AI for Trinity Tech. Respond in one short, energetic sentence confirming that the AI connection is verified and operational." },
                   { role: "user", content: "Test connection." },
                 ],
                 max_tokens: 100,

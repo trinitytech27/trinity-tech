@@ -35,10 +35,10 @@ test("PIN uses salted verifier and rejects invalid values", () => {
   assert.equal(verifyPin("0000", v), false);
   assert.equal(verifyPin("4718", ""), false);
 });
-test("five projects have requested initial order", () =>
+test("four projects have requested initial order", () =>
   assert.deepEqual(
     seed.projects.map((p) => p.slug),
-    ["starx-live", "ticketx", "starx-connect", "audiox", "yuva-shakti"],
+    ["starx-live", "ticketx", "starx-connect", "audiox"],
   ));
 test("content rejects unsafe image URL and duplicate slugs", () => {
   const x = structuredClone(seed);
@@ -82,7 +82,7 @@ async function request(
 test("unconfigured site returns real project content", async () => {
   const r = await request("/api/site");
   assert.equal(r.code, 200);
-  assert.equal(r.body.site.projects.length, 5);
+  assert.equal(r.body.site.projects.length, 4);
 });
 test("enquiries never claim success without persistence", async () => {
   const r = await request("/api/enquiry", "POST", valid);

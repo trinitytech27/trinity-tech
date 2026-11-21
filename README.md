@@ -1,4 +1,4 @@
-# SANJU X DEV
+# Trinity Tech
 
 Fresh business website built from the empty GitHub repository. No previous website source or visual design was reused. Official logo retained; project screenshots captured from the five supplied live sites on 22 October 2026, with TicketX interface captures refreshed on 25 October. The 25 October user reference informed the paper/editorial mood, not copied layout or imagery.
 
@@ -19,7 +19,7 @@ Node.js 22+ is required. Run `npm ci`, then `npm run dev` (http://127.0.0.1:3100
 
 ## Connected backend and private owner setup
 
-The dedicated SANJU X DEV Supabase project is `sdhhuqybwvrffvgzextd`, in Sanjay200812's Org. The migration and `studio` Edge Function are deployed. Vercel Preview calls this function through its same-origin API. Privileged credentials remain inside Supabase; Vercel only holds the public gateway key. A real browser enquiry was saved and read back from the database on 25 October 2026. The synthetic test record is labelled and closed.
+The dedicated Trinity Tech Supabase project is `sdhhuqybwvrffvgzextd`, in Sanjay200812's Org. The migration and `studio` Edge Function are deployed. Vercel Preview calls this function through its same-origin API. Privileged credentials remain inside Supabase; Vercel only holds the public gateway key. A real browser enquiry was saved and read back from the database on 25 October 2026. The synthetic test record is labelled and closed.
 
 The only authorized owner is Supabase Auth UID `3984ceee-869a-432f-a5dd-23eb615d234d`. Its existence in this dedicated project was verified. The server checks the authenticated UID, and private CRUD uses the owner's JWT so RLS independently enforces that UID, an unexpired secondary-code unlock and a live Supabase Auth session. All other users are denied. Session hashes, rate data and PIN verifiers have no browser grants. The private helper uses a fixed search path and checks auth identity; user-editable metadata never grants authority.
 
@@ -36,7 +36,7 @@ The Vercel Preview variables (`STUDIO_EDGE_URL`, `STUDIO_EDGE_ANON_KEY`, `SITE_U
 
 ### Alternative local or direct Vercel backend setup
 
-Use a dedicated SANJU X DEV Supabase project, not CodeXa or another application's database. Apply all SQL files in `supabase/migrations` in timestamp order to that project. Disable public sign-ups and create/invite the owner through Supabase. Complete the password setup privately; use only the exact owner UID enforced in the source and migration.
+Use a dedicated Trinity Tech Supabase project, not CodeXa or another application's database. Apply all SQL files in `supabase/migrations` in timestamp order to that project. Disable public sign-ups and create/invite the owner through Supabase. Complete the password setup privately; use only the exact owner UID enforced in the source and migration.
 
 Copy `.env.example` to ignored `.env.local` for development. Set the same variables in Vercel:
 
@@ -50,7 +50,7 @@ Copy `.env.example` to ignored `.env.local` for development. Set the same variab
 | RATE_LIMIT_SALT               | Long random secret for hashed rate identifiers                                   |
 | SITE_URL                      | Exact deployment origin; local default is http://127.0.0.1:3100                  |
 | RESEND_API_KEY                | Optional server-only Resend API key for instant enquiry notification emails     |
-| RESEND_FROM_EMAIL             | Optional verified sender address (e.g. `SANJU X DEV <onboarding@resend.dev>`)   |
+| RESEND_FROM_EMAIL             | Optional verified sender address (e.g. `Trinity Tech <onboarding@resend.dev>`)   |
 | OWNER_NOTIFICATION_EMAIL      | Owner email for enquiry alerts (default: `sanjuxdev27@gmail.com`)               |
 | OPENAI_API_KEY                | Optional server-only AI credential                                               |
 | OPENAI_MODEL                  | Optional enabled Responses model name                                            |

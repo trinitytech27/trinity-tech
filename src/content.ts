@@ -95,30 +95,6 @@ export const projects = [
     published: true,
     order: 4,
   },
-  {
-    slug: "yuva-shakti",
-    name: "Yuva Shakti Youth Satulur — Lucky Draw",
-    short: "Yuva Shakti",
-    category: "Community Event / Interactive Website",
-    kind: "Digital experiences",
-    url: "https://yuva-shakti-youth-satulur-lucky-dra.vercel.app/",
-    image: "/media/yuva.webp",
-    mobile: "/media/yuva-mobile.webp",
-    color: "#956d2d",
-    headline: "A community event, clearly connected.",
-    summary:
-      "Event information, participant details and coupon-verification entry points.",
-    story:
-      "The public experience brings event information, a quantity selector, participant form, pass preview and coupon lookup into a guided page. This case study focuses on interface design and information architecture.",
-    features: [
-      "Event and prize information",
-      "Quantity selection and pass preview",
-      "Coupon verification and support entry points",
-    ],
-    note: "Public interface inspected only. Purchases, payment verification and draw outcomes were not tested or endorsed.",
-    published: true,
-    order: 5,
-  },
 ];
 
 export const services = [
@@ -717,7 +693,7 @@ export interface DetailedEnquiryData {
 
 export function buildDetailedWhatsAppMessage(d: DetailedEnquiryData): string {
   const lines: string[] = [
-    "SANJU X DEV — NEW PROJECT ENQUIRY",
+    "Trinity Tech — NEW PROJECT ENQUIRY",
     "",
     `• Tracking ID: ${d.trackingCode}`,
     `• Customer Name: ${d.name}`,
@@ -777,7 +753,7 @@ export function getWhatsAppEnquiryUrl(trackingCode: string, websiteType: string,
   const text = details
     ? buildDetailedWhatsAppMessage(details)
     : [
-        "SANJU X DEV — NEW PROJECT ENQUIRY",
+        "Trinity Tech — NEW PROJECT ENQUIRY",
         "",
         `• Tracking ID: ${trackingCode}`,
         `• Website Type: ${websiteType}`,
@@ -790,15 +766,15 @@ export function getWhatsAppEnquiryUrl(trackingCode: string, websiteType: string,
 }
 
 export function getGeneralWhatsAppUrl(customText?: string): string {
-  const msg = customText || "Hello SANJU X DEV, I would like to discuss a website / digital project.";
+  const msg = customText || "Hello Trinity Tech, I would like to discuss a website / digital project.";
   return `https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 }
 
 export const defaults = {
   headline: "Thoughtful Design.\nPowerful Digital Experiences.",
-  intro: "SANJU X DEV builds professional digital experiences for individuals, businesses and organizations.",
+  intro: "Trinity Tech builds professional digital experiences for individuals, businesses and organizations.",
   about:
-    "SANJU X DEV is a web development and digital solutions business. We bring design and engineering together to create clear, engaging experiences for businesses and their customers.",
+    "Trinity Tech is a web development and digital solutions business. We bring design and engineering together to create clear, engaging experiences for businesses and their customers.",
   email: "sanjuxdev27@gmail.com",
   phone: SANJU_BUSINESS_PHONE,
   whatsapp: `https://wa.me/${SANJU_WHATSAPP_NUMBER}`,
@@ -818,7 +794,7 @@ export const defaults = {
     },
     {
       q: "Can I see your work?",
-      a: "Explore StarX Live, TicketX, StarX Connect, AudioX and Yuva Shakti in Our Work. Each has a case study and live link.",
+      a: "Explore StarX Live, TicketX, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
     },
     {
       q: "How much does a website cost?",
@@ -826,8 +802,8 @@ export const defaults = {
     },
   ],
   knowledge:
-    "SANJU X DEV provides professional web development and digital solutions. Sanjay is Co-Founder at CodeXa Agency, a separate affiliation, not a sixth project.",
-  seoTitle: "SANJU X DEV — Websites with distinction",
+    "Trinity Tech provides professional web development and digital solutions. Sanjay is Co-Founder at CodeXa Agency, a separate affiliation, not a sixth project.",
+  seoTitle: "Trinity Tech — Websites with distinction",
   seoDescription:
     "Business websites, thoughtful digital experiences and custom applications. Explore five real projects and start a conversation.",
   assistantWelcome:

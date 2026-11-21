@@ -288,7 +288,7 @@ export default function Admin() {
 
   return (
     <section className="page wrap admin-shell">
-      <span className="eyebrow">Private / SANJU X DEV</span>
+      <span className="eyebrow">Private / Trinity Tech</span>
       <h1>Spideyy — Private Access</h1>
 
       {stage !== "workspace" ? (
@@ -890,7 +890,7 @@ export default function Admin() {
                     a.href = URL.createObjectURL(
                       new Blob([csv], { type: "text/csv" }),
                     );
-                    a.download = `sanju-x-dev-enquiries-${new Date().toISOString().slice(0, 10)}.csv`;
+                    a.download = `trinity-tech-enquiries-${new Date().toISOString().slice(0, 10)}.csv`;
                     a.click();
                     URL.revokeObjectURL(a.href);
                   }}
@@ -1412,8 +1412,8 @@ export default function Admin() {
                           </button>
                           {(() => {
                             const clientWa = (r.data.whatsapp || r.phone || r.data.phone || "").replace(/[^0-9]/g, "");
-                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Sanju X Dev regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'SXD'}).`)}` : null;
-                            const clientEmailUrl = r.data.email ? `mailto:${r.data.email}?subject=${encodeURIComponent(`Sanju X Dev — Regarding your enquiry ${r.tracking_code || r.data?.tracking_code || ''}`)}` : null;
+                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Trinity Tech regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'SXD'}).`)}` : null;
+                            const clientEmailUrl = r.data.email ? `mailto:${r.data.email}?subject=${encodeURIComponent(`Trinity Tech — Regarding your enquiry ${r.tracking_code || r.data?.tracking_code || ''}`)}` : null;
                             return (
                               <>
                                 {waChatUrl && (
@@ -2147,7 +2147,7 @@ export default function Admin() {
             <div className="admin-card" style={{ marginBottom: 20 }}>
               <h3>Primary Brand Theme & Display</h3>
               <p style={{ fontSize: 13, color: "var(--muted)", margin: "0 0 14px 0" }}>
-                Active Theme: <strong>SANJU X DEV Primary (Silver, White &amp; Metallic Crimson)</strong>.
+                Active Theme: <strong>Trinity Tech Primary (Silver, White &amp; Metallic Crimson)</strong>.
                 Theme-switching has been consolidated into this single refined identity.
               </p>
               <label className="check">

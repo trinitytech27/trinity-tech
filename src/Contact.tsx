@@ -1577,7 +1577,7 @@ export default function ProjectPage() {
                     onChange={(e) => update("consent", e.target.checked)}
                   />
                   <span className="builder-consent-text">
-                    I agree to let SANJU X DEV contact me regarding this enquiry and store my submitted project details. <span className="req">*</span>
+                    I agree to let Trinity Tech contact me regarding this enquiry and store my submitted project details. <span className="req">*</span>
                   </span>
                 </label>
 

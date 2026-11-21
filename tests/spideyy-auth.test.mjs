@@ -134,7 +134,7 @@ test("sendEnquiryNotification dispatches via Gmail SMTP transporter, sending own
       smtpPort: 465,
       smtpSecure: true,
       smtpUser: "sanjuxdev27@gmail.com",
-      fromEmail: '"SANJU X DEV" <sanjuxdev27@gmail.com>',
+      fromEmail: '"Trinity Tech" <sanjuxdev27@gmail.com>',
       toEmail: "sanjuxdev27@gmail.com",
       siteUrl: "https://sanju-x-dev.vercel.app",
     }
@@ -146,7 +146,7 @@ test("sendEnquiryNotification dispatches via Gmail SMTP transporter, sending own
 
   // Email 1: Owner inbox notification
   assert.equal(sentMessages[0].to, "sanjuxdev27@gmail.com");
-  assert.ok(sentMessages[0].subject.includes("New SANJU X DEV Enquiry — SXD-108"));
+  assert.ok(sentMessages[0].subject.includes("New Trinity Tech Enquiry — SXD-108"));
   assert.ok(sentMessages[0].html.includes("StarX Corp"));
   assert.ok(sentMessages[0].html.includes("https://sanju-x-dev.vercel.app/spideyy"));
 

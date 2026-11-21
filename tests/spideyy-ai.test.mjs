@@ -48,7 +48,7 @@ function createMockFetch(responses) {
 
 test("spideyy AI handles 'Hi spideyy' and returns mode 'AI assistant'", async () => {
   const mockFetch = createMockFetch({
-    content: "Hi there! I am spideyy, your AI assistant for SANJU X DEV. How can I help you with your web project today?",
+    content: "Hi there! I am spideyy, your AI assistant for Trinity Tech. How can I help you with your web project today?",
   });
 
   configureEnvironment({
@@ -153,7 +153,7 @@ test("spideyy AI answers 'Can customers pay online?' with UPI and gateway integr
 
 test("spideyy AI answers 'How much will it cost?' by explaining custom scoping without inventing quotes", async () => {
   const mockFetch = createMockFetch({
-    content: "At SANJU X DEV, we scope every project individually based on your specific requirements rather than using rigid generic packages. You can share your project brief on our Contact page to receive an accurate, tailored estimate.",
+    content: "At Trinity Tech, we scope every project individually based on your specific requirements rather than using rigid generic packages. You can share your project brief on our Contact page to receive an accurate, tailored estimate.",
   });
 
   configureEnvironment({
@@ -247,7 +247,7 @@ test("spideyy AI directs 'How do I track SXD-001?' to secure /track without expo
 
 test("spideyy AI shows verified portfolio case studies for 'Can you show your previous projects?'", async () => {
   const mockFetch = createMockFetch({
-    content: "We have five verified portfolio case studies: StarX Live (entertainment streaming), TicketX (event/cinema booking), StarX Connect (digital virtual card), AudioX (audio utility app), and Yuva Shakti (community portal). Explore them in Our Work!",
+    content: "We have four verified portfolio case studies: StarX Live (entertainment website), TicketX (event/cinema booking), StarX Connect (digital virtual card) and AudioX (audio utility app). Explore them in Our Work!",
   });
 
   configureEnvironment({
@@ -571,7 +571,7 @@ test("Phase 10 - Test 9: User 'Hello.' responds naturally without unnecessary ad
     }
   );
 
-  assert.match(body.answer, /Welcome to SANJU X DEV/i);
+  assert.match(body.answer, /Welcome to Trinity Tech/i);
   // Pure greeting should have zero or at most no pushy marketing buttons
   assert.equal(body.links.length, 0);
 });

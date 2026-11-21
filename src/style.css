@@ -14,7 +14,7 @@ html {
   --shadow: #21212622;
   color-scheme: light;
 }
-/* Single primary SANJU X DEV visual identity */
+/* Single primary Trinity Tech visual identity */
 body {
   margin: 0;
   background: var(--bg);
@@ -1535,7 +1535,7 @@ dialog {
 }
 
 /* =============================================================================
- * SANJU X DEV — SINGLE PREMIUM THEME & SUBTLE GLASSMORPHISM
+ * Trinity Tech — SINGLE PREMIUM THEME & SUBTLE GLASSMORPHISM
  * ============================================================================= */
 
 .brand-text-wrap {

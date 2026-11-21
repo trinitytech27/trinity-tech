@@ -42,10 +42,10 @@ function emailShell(title, preheader, content) {
 <body>
   <div style="display:none;font-size:1px;color:#eee5d5;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${escape(preheader)}</div>
   <div class="card">
-    <div class="brand">SANJU X DEV · Digital Solutions</div>
+    <div class="brand">Trinity Tech · Digital Solutions</div>
     ${content}
     <div class="footer">
-      SANJU X DEV — Design with distinction & powerful digital experiences.<br>
+      Trinity Tech — Design with distinction & powerful digital experiences.<br>
       Direct enquiries: <a href="mailto:sanjuxdev27@gmail.com" style="color: #852c32;">sanjuxdev27@gmail.com</a>
     </div>
   </div>
@@ -116,7 +116,7 @@ export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
   const content = `
     <h1>We’ve received your enquiry</h1>
     <p>Hello ${escape(enquiry.name)},</p>
-    <p>Thank you for considering <strong>SANJU X DEV</strong>. We’ve received your project requirements and will review them thoroughly.</p>
+    <p>Thank you for considering <strong>Trinity Tech</strong>. We’ve received your project requirements and will review them thoroughly.</p>
 
     <div style="text-align: center; margin: 20px 0;">
       <div style="font-size: 12px; color: #706044; text-transform: uppercase; letter-spacing: 0.1em;">Your Permanent Tracking ID</div>
@@ -152,7 +152,7 @@ export function formatProjectAcceptedHtml(project, siteUrl) {
   const content = `
     <h1>Project Accepted!</h1>
     <p>Hello ${escape(project.client_name)},</p>
-    <p>We are excited to let you know that your project <strong>${escape(project.title)}</strong> has been officially accepted by SANJU X DEV.</p>
+    <p>We are excited to let you know that your project <strong>${escape(project.title)}</strong> has been officially accepted by Trinity Tech.</p>
 
     <div class="code-badge">${escape(project.tracking_code)}</div>
 
@@ -235,7 +235,7 @@ export function formatProjectCompletedHtml(project, siteUrl) {
       <div class="box">${escape(project.delivery_notes)}</div>
     ` : ""}
 
-    <p style="margin-top: 16px;">Thank you for partnering with SANJU X DEV. Please review your deliverable and let us know if you need any follow-up adjustments or support.</p>
+    <p style="margin-top: 16px;">Thank you for partnering with Trinity Tech. Please review your deliverable and let us know if you need any follow-up adjustments or support.</p>
 
     <div style="margin-top: 20px;">
       <a href="${trackUrl}" class="btn">View Final Project Summary →</a>
@@ -380,7 +380,7 @@ export async function sendEmail({
   const fromEmail =
     options.fromEmail ||
     process.env.SMTP_FROM_EMAIL ||
-    (user ? `"SANJU X DEV" <${user}>` : '"SANJU X DEV" <sanjuxdev27@gmail.com>');
+    (user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
 
   // Priority 1: Gmail SMTP Transporter
   const transporter = options.transporter || createSmtpTransport(options);
@@ -548,7 +548,7 @@ export async function sendEnquiryNotification(enquiry, options = {}, client = nu
 
   // 1. Send Immediate Notification to Owner's Gmail Inbox
   const ownerHtml = formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl);
-  const ownerSubject = `New SANJU X DEV Enquiry — ${trackingCode} (${enquiry.name})`;
+  const ownerSubject = `New Trinity Tech Enquiry — ${trackingCode} (${enquiry.name})`;
   const ownerResult = await sendEmail({
     to: toEmail,
     subject: ownerSubject,
@@ -562,7 +562,7 @@ export async function sendEnquiryNotification(enquiry, options = {}, client = nu
   // 2. Send SXD Tracking Code Confirmation to Customer
   if (enquiry.email && /^\S+@\S+\.\S+$/.test(enquiry.email)) {
     const customerHtml = formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl);
-    const customerSubject = `Your Enquiry Has Been Received — ${trackingCode} | SANJU X DEV`;
+    const customerSubject = `Your Enquiry Has Been Received — ${trackingCode} | Trinity Tech`;
     await sendEmail({
       to: enquiry.email,
       subject: customerSubject,

@@ -1,7 +1,7 @@
 {
   "headline": "Thoughtful Design.\nPowerful Digital Experiences.",
-  "intro": "SANJU X DEV builds professional digital experiences for individuals, businesses and organizations.",
-  "about": "SANJU X DEV is a web development and digital solutions business. We bring design and engineering together to create clear, engaging experiences for businesses and their customers.",
+  "intro": "Trinity Tech builds professional digital experiences for individuals, businesses and organizations.",
+  "about": "Trinity Tech is a web development and digital solutions business. We bring design and engineering together to create clear, engaging experiences for businesses and their customers.",
   "email": "sanjuxdev27@gmail.com",
   "instagram": "https://www.instagram.com/sanju_x_dev/",
   "defaultTheme": "silver",
@@ -167,28 +167,6 @@
       "note": "Interface inspected. Conversion and completed downloads were not tested.",
       "published": true,
       "order": 4
-    },
-    {
-      "slug": "yuva-shakti",
-      "name": "Yuva Shakti Youth Satulur — Lucky Draw",
-      "short": "Yuva Shakti",
-      "category": "Community Event / Interactive Website",
-      "kind": "Digital experiences",
-      "url": "https://yuva-shakti-youth-satulur-lucky-dra.vercel.app/",
-      "image": "/media/yuva.webp",
-      "mobile": "/media/yuva-mobile.webp",
-      "color": "#956d2d",
-      "headline": "A community event, clearly connected.",
-      "summary": "Event information, participant details and coupon-verification entry points.",
-      "story": "The public experience brings event information, a quantity selector, participant form, pass preview and coupon lookup into a guided page. This case study focuses on interface design and information architecture.",
-      "features": [
-        "Event and prize information",
-        "Quantity selection and pass preview",
-        "Coupon verification and support entry points"
-      ],
-      "note": "Public interface inspected only. Purchases, payment verification and draw outcomes were not tested or endorsed.",
-      "published": true,
-      "order": 5
     }
   ],
   "faqs": [
@@ -198,15 +176,15 @@
     },
     {
       "q": "Can I see your work?",
-      "a": "Explore StarX Live, TicketX, StarX Connect, AudioX and Yuva Shakti in Our Work. Each has a case study and live link."
+      "a": "Explore StarX Live, TicketX, StarX Connect and AudioX in Our Work. Each has a case study and live link."
     },
     {
       "q": "How much does a website cost?",
       "a": "Pricing depends on scope, integrations and content. Share a brief for a tailored discussion. We confirm timelines after understanding the work."
     }
   ],
-  "knowledge": "SANJU X DEV provides professional web development and digital solutions. Sanjay is Co-Founder at CodeXa Agency, a separate affiliation, not a sixth project.",
-  "seoTitle": "SANJU X DEV — Websites with distinction",
+  "knowledge": "Trinity Tech provides professional web development and digital solutions. Sanjay is Co-Founder at CodeXa Agency, a separate affiliation, not a sixth project.",
+  "seoTitle": "Trinity Tech — Websites with distinction",
   "seoDescription": "Business websites, thoughtful digital experiences and custom applications. Explore five real projects and start a conversation.",
   "assistantWelcome": "Hi, I’m spideyy! I can help you understand our services, suggest the right website for your business, explain features, or check your project status.",
   "homepageQuestions": [

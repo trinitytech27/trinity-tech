@@ -34,13 +34,13 @@ const origin =
 
 const pages = [
   ["", "Websites with distinction", seed.seoDescription],
-  ["work", "Our Work — Five Selected Case Studies", "Explore live websites and web applications built by SANJU X DEV including StarX Live, TicketX, StarX Connect, AudioX and Yuva Shakti."],
-  ["about", "About the Business — SANJU X DEV", seed.about],
+  ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, StarX Connect and AudioX."],
+  ["about", "About the Business — Trinity Tech", seed.about],
   ["services", "Services — Design & Digital Development", "Web development, UI/UX design, custom web applications, e-commerce storefronts, and interactive digital experiences."],
-  ["project", "Start a Project — SANJU X DEV", "Choose your website type, select your features, and start your tailored web project with SANJU X DEV."],
-  ["contact", "Start a Project — SANJU X DEV", "Submit a project brief to start a conversation about tailored web development and design for your business."],
-  ["track", "Track Project — SANJU X DEV", "Check live project status, milestones, and development updates for your SANJU X DEV project."],
-  ["privacy", "Privacy, Clearly — SANJU X DEV", "Learn how customer enquiries and visitor privacy are respected and stored securely at SANJU X DEV."],
+  ["project", "Start a Project — Trinity Tech", "Choose your website type, select your features, and start your tailored web project with Trinity Tech."],
+  ["contact", "Start a Project — Trinity Tech", "Submit a project brief to start a conversation about tailored web development and design for your business."],
+  ["track", "Track Project — Trinity Tech", "Check live project status, milestones, and development updates for your Trinity Tech project."],
+  ["privacy", "Privacy, Clearly — Trinity Tech", "Learn how customer enquiries and visitor privacy are respected and stored securely at Trinity Tech."],
   ...seed.projects.map((p) => [
     "work/" + p.slug,
     p.name,
@@ -53,7 +53,7 @@ const pages = [
 for (const [path, title, desc, projectData] of pages) {
   let out = html.replace(
     /<title>.*?<\/title>/,
-    "<title>" + escape(title) + " — SANJU X DEV</title>",
+    "<title>" + escape(title) + " — Trinity Tech</title>",
   );
 
   const canonicalUrl = origin + (path ? "/" + path : "/");
@@ -72,7 +72,7 @@ for (const [path, title, desc, projectData] of pages) {
     structuredData = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
-      "name": "SANJU X DEV",
+      "name": "Trinity Tech",
       "url": origin + "/",
       "logo": origin + "/media/official-logo.png",
       "image": origin + "/media/official-logo.png",
@@ -105,14 +105,14 @@ for (const [path, title, desc, projectData] of pages) {
     `<meta name="description" content="${escape(desc)}"/>` +
     robotsTag +
     `<link rel="canonical" href="${canonicalUrl}"/>` +
-    `<meta property="og:title" content="${escape(title)} — SANJU X DEV"/>` +
+    `<meta property="og:title" content="${escape(title)} — Trinity Tech"/>` +
     `<meta property="og:description" content="${escape(desc)}"/>` +
     `<meta property="og:type" content="website"/>` +
     `<meta property="og:url" content="${canonicalUrl}"/>` +
     `<meta property="og:image" content="${imageUrl}"/>` +
-    `<meta property="og:site_name" content="SANJU X DEV"/>` +
+    `<meta property="og:site_name" content="Trinity Tech"/>` +
     `<meta name="twitter:card" content="summary_large_image"/>` +
-    `<meta name="twitter:title" content="${escape(title)} — SANJU X DEV"/>` +
+    `<meta name="twitter:title" content="${escape(title)} — Trinity Tech"/>` +
     `<meta name="twitter:description" content="${escape(desc)}"/>` +
     `<meta name="twitter:image" content="${imageUrl}"/>` +
     (structuredData ? `<script type="application/ld+json">${structuredData}</script>` : "");
@@ -125,7 +125,7 @@ for (const [path, title, desc, projectData] of pages) {
 // Generate private /spideyy entry with strict noindex
 const spideyyHtml = html.replace(
   /<title>.*?<\/title>/,
-  "<title>spideyy — Private Access — SANJU X DEV</title>",
+  "<title>spideyy — Private Access — Trinity Tech</title>",
 ).replace(
   "</head>",
   '<meta name="robots" content="noindex,nofollow,noarchive"/><link rel="canonical" href="' + origin + '/spideyy"/></head>'

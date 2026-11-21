@@ -506,7 +506,7 @@ export default function Track() {
               {/* Action Buttons */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
                 <a
-                  href={`https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello SANJU X DEV, I have a question regarding my project ${project.trackingCode} (${project.title}).`)}`}
+                  href={`https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello Trinity Tech, I have a question regarding my project ${project.trackingCode} (${project.title}).`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="button"

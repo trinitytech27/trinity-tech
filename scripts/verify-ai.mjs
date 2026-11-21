@@ -34,7 +34,7 @@ const apiKey = (env("OPENAI_API_KEY", "")).trim();
 const model = env("OPENAI_MODEL", "gpt-4o-mini").trim();
 
 console.log("\n=======================================================");
-console.log("  SANJU X DEV — SPIDEYY AI DIAGNOSTIC & TEST TOOL");
+console.log("  Trinity Tech — SPIDEYY AI DIAGNOSTIC & TEST TOOL");
 console.log("=======================================================\n");
 
 console.log("Target AI Configuration:");
@@ -71,7 +71,7 @@ const promptsToTest = process.argv.includes("--all")
       "Can you show your previous projects?",
       "What did I just ask you?",
     ]
-  : ["Hi spideyy, please confirm in one sentence that you are online for SANJU X DEV."];
+  : ["Hi spideyy, please confirm in one sentence that you are online for Trinity Tech."];
 
 try {
   let history = [];
@@ -80,11 +80,11 @@ try {
     console.log(`\n[${i + 1}/${promptsToTest.length}] Prompt: "${prompt}"`);
 
     const systemPrompt =
-      "You are spideyy, the intelligent AI website assistant for SANJU X DEV (web design and development studio led by Sanjay). " +
+      "You are spideyy, the intelligent AI website assistant for Trinity Tech (web design and development studio led by Sanjay). " +
       "Owner/Developer: Sanjay. Professional affiliation: Co-Founder at CodeXa Agency. " +
       "Explain services naturally. Understand Telugu-English phrasing. Recommend from 5 categories: " +
       "Personal Portfolio, Blog / Content Website, Business Website, Agency Website, E-Commerce Website. " +
-      "Portfolio case studies: StarX Live, TicketX, StarX Connect, AudioX, Yuva Shakti. " +
+      "Portfolio case studies: StarX Live, TicketX, StarX Connect, AudioX. " +
       "Track codes: clients track at /track with tracking code and email. Never invent prices or delivery guarantees.";
 
     const messages = [

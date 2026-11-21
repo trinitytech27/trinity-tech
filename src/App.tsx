@@ -33,6 +33,7 @@ import {
 import { defaults, projects as seed, SANJU_BUSINESS_PHONE, SANJU_WHATSAPP_NUMBER } from "./content";
 import Contact, { EnquiryPreview } from "./Contact";
 import Assistant from "./Assistant";
+import { ScrollProgress, useScrollReveal, useScrollState } from "./Motion";
 import { ChatProvider, useChat, STARTER_QUESTIONS } from "./chat-context";
 import {
   InstagramIcon,
@@ -68,14 +69,14 @@ export function CTA({
 
 function Brand() {
   return (
-    <Link to="/" className="brand" aria-label="SANJU X DEV home">
+    <Link to="/" className="brand" aria-label="Trinity Tech home">
       <img
         src="/assets/official-logo.webp"
-        alt="SANJU X DEV official logo"
+        alt="Trinity Tech official logo"
         className="brand-logo-img"
       />
       <span className="brand-copy">
-        <span className="brand-title">SANJU X DEV</span>
+        <span className="brand-title">Trinity Tech</span>
         <span className="brand-sub">Thoughtful Design · Powerful Digital Experiences</span>
       </span>
     </Link>
@@ -85,14 +86,14 @@ function Brand() {
 function Affiliation() {
   return (
     <section className="affiliation-section wrap" aria-label="Professional Affiliation">
-      <div className="affiliation-card">
+      <div className="affiliation-card" data-reveal>
         <div className="washi-tape-strip top-center" aria-hidden="true" />
         <span className="eyebrow">Professional Affiliation</span>
         <h2 className="affiliation-title">
           Co-Founder at CodeXa Agency
         </h2>
         <p className="affiliation-desc">
-          Sanjay is a Co-Founder at CodeXa Agency — a distinct business association delivering full-scale digital agency solutions, alongside SANJU X DEV.
+          Sanjay is a Co-Founder at CodeXa Agency — a distinct business association delivering full-scale digital agency solutions, alongside Trinity Tech.
         </p>
         <a
           href="https://codxa-agency.online/"
@@ -114,11 +115,11 @@ function ContactSection() {
   const instagramUrl =
     s.instagram || "https://www.instagram.com/sanju_x_dev/";
   const phone = (s as any).phone || SANJU_BUSINESS_PHONE;
-  const whatsappUrl = `https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello SANJU X DEV, I would like to enquire about a website.")}`;
+  const whatsappUrl = `https://wa.me/${SANJU_WHATSAPP_NUMBER}?text=${encodeURIComponent("Hello Trinity Tech, I would like to enquire about a website.")}`;
 
   return (
     <section id="contact" className="final-contact-section wrap" aria-label="Contact Information">
-      <div className="final-contact-card">
+      <div className="final-contact-card" data-reveal>
         <div className="washi-tape-strip top-center" aria-hidden="true" />
         <span className="eyebrow">Get In Touch</span>
         <h2 className="final-contact-title">Let&apos;s Connect</h2>
@@ -126,11 +127,11 @@ function ContactSection() {
           Have a question, an idea, or want to discuss a custom digital project? Reach out directly.
         </p>
 
-        <div className="final-contact-grid">
+        <div className="final-contact-grid" data-reveal-stagger="70">
           <a
             href={"mailto:" + s.email}
-            className="final-contact-item"
-            aria-label="Direct email to SANJU X DEV"
+            className="final-contact-item" data-reveal
+            aria-label="Direct email to Trinity Tech"
           >
             <div className="contact-item-icon">
               <MailIcon size={22} />
@@ -143,8 +144,8 @@ function ContactSection() {
 
           <a
             href={"tel:" + phone.replace(/\s+/g, "")}
-            className="final-contact-item"
-            aria-label="Call SANJU X DEV directly"
+            className="final-contact-item" data-reveal
+            aria-label="Call Trinity Tech directly"
           >
             <div className="contact-item-icon">
               <Phone size={20} />
@@ -159,8 +160,8 @@ function ContactSection() {
             href={whatsappUrl}
             target="_blank"
             rel="noreferrer"
-            className="final-contact-item whatsapp-highlight"
-            aria-label="Chat with SANJU X DEV on WhatsApp"
+            className="final-contact-item whatsapp-highlight" data-reveal
+            aria-label="Chat with Trinity Tech on WhatsApp"
           >
             <div className="contact-item-icon" style={{ color: "#25d366" }}>
               <MessageCircle size={22} />
@@ -175,7 +176,7 @@ function ContactSection() {
             href={instagramUrl}
             target="_blank"
             rel="noreferrer"
-            className="final-contact-item"
+            className="final-contact-item" data-reveal
             aria-label="Instagram profile"
           >
             <div className="contact-item-icon">
@@ -191,7 +192,7 @@ function ContactSection() {
             href={facebookUrl}
             target="_blank"
             rel="noreferrer"
-            className="final-contact-item"
+            className="final-contact-item" data-reveal
             aria-label="Facebook profile"
           >
             <div className="contact-item-icon">
@@ -211,7 +212,7 @@ function ContactSection() {
 function Footer() {
   return (
     <footer className="compact-footer">
-      <div className="compact-footer-inner wrap">
+      <div className="compact-footer-inner wrap" data-reveal>
         <div className="compact-footer-brand">
           <Brand />
           <span className="footer-tagline">
@@ -226,7 +227,7 @@ function Footer() {
           <Link to="/privacy">Privacy</Link>
         </div>
         <small className="footer-copy">
-          © {new Date().getFullYear()} SANJU X DEV. All rights reserved.
+          © {new Date().getFullYear()} Trinity Tech. All rights reserved.
         </small>
       </div>
     </footer>
@@ -297,6 +298,7 @@ export function Device({
             " website screenshot"
           }
           loading={hero ? "eager" : "lazy"}
+          decoding="async"
         />
       </div>
       <span className="image-caption">
@@ -469,23 +471,22 @@ function Home() {
     .filter((p) => p.published)
     .sort((a, b) => a.order - b.order);
 
-  // Exactly three featured projects: TicketX, StarX Connect, AudioX
+  // Live demo projects shown on the homepage: StarX Live and TicketX
   const featuredCards = [
+    p.find((x) => x.slug === "starx-live") || seed[0],
     p.find((x) => x.slug === "ticketx") || seed[1],
-    p.find((x) => x.slug === "starx-connect") || seed[2],
-    p.find((x) => x.slug === "audiox") || seed[3],
   ];
 
   return (
     <div className="homepage-five-sections">
       {/* ==============================================================
           SECTION 1 — LANDING / HERO
-          Only: SANJU X DEV + Spideyy AI Console + Start Your Project
+          Only: Trinity Tech + Spideyy AI Console + Start Your Project
           ============================================================== */}
-      <section className="hero-landing-section wrap" aria-label="SANJU X DEV Landing">
-        <div className="hero-landing-container">
+      <section className="hero-landing-section wrap" aria-label="Trinity Tech Landing">
+        <div className="hero-landing-container hero-enter">
           <div className="hero-main-header">
-            <h1 className="hero-studio-name">SANJU X DEV</h1>
+            <h1 className="hero-studio-name">Trinity Tech</h1>
           </div>
 
           {/* Working Spideyy AI Console */}
@@ -503,13 +504,13 @@ function Home() {
       </section>
 
       {/* ==============================================================
-          SECTION 2 — THREE FEATURED PROJECTS (Varun Portfolio Presentation)
-          TicketX, StarX Connect, AudioX
+          SECTION 2 — LIVE DEMO PROJECTS
+          StarX Live, TicketX
           ============================================================== */}
       <section id="featured-projects" className="featured-projects-section wrap" aria-label="Featured Projects">
-        <div className="featured-section-header">
+        <div className="featured-section-header" data-reveal>
           <div>
-            <span className="eyebrow">Featured Work</span>
+            <span className="eyebrow">Live Demo Projects</span>
             <h2 className="featured-section-title">Selected Projects</h2>
           </div>
           <Link to="/work" className="featured-all-link">
@@ -517,9 +518,9 @@ function Home() {
           </Link>
         </div>
 
-        <div className="featured-projects-grid">
+        <div className="featured-projects-grid featured-two" data-reveal-stagger="120">
           {featuredCards.map((card) => (
-            <article key={card.slug} className="varun-project-card">
+            <article key={card.slug} className="varun-project-card" data-reveal>
               <div className="project-card-tape" aria-hidden="true" />
 
               {/* Large, uncropped screenshot preview */}
@@ -541,6 +542,7 @@ function Home() {
                     src={card.slug === "starx-connect" ? card.mobile : card.image}
                     alt={card.name + " real website showcase"}
                     loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </Link>
@@ -562,7 +564,7 @@ function Home() {
                     rel="noreferrer"
                     className="varun-live-link"
                   >
-                    Live Site ↗
+                    Live Demo ↗
                   </a>
                 </div>
               </div>
@@ -581,10 +583,10 @@ function Home() {
 
       {/* ==============================================================
           SECTION 4 — CHOOSE YOUR WEBSITE / PROJECT ENQUIRY
-          Interactive 3-Step Wizard with CodeXa Structure & SANJU X DEV Theme
+          Interactive 3-Step Wizard with CodeXa Structure & Trinity Tech Theme
           ============================================================== */}
       <section id="choose-website" className="homepage-enquiry-section wrap" aria-label="Choose Your Website">
-        <div className="homepage-enquiry-header">
+        <div className="homepage-enquiry-header" data-reveal>
           <span className="eyebrow">Project Enquiry</span>
           <h2 className="homepage-enquiry-title">Choose Your Website</h2>
           <p className="homepage-enquiry-sub">
@@ -592,7 +594,7 @@ function Home() {
           </p>
         </div>
 
-        <div className="homepage-enquiry-card-wrapper">
+        <div className="homepage-enquiry-card-wrapper" data-reveal>
           <EnquiryPreview />
         </div>
       </section>
@@ -614,7 +616,7 @@ function ProjectCard({
   index: number;
 }) {
   return (
-    <article className={"project-card project-" + p.slug}>
+    <article className={"project-card project-" + p.slug} data-reveal>
       <div className="card-washi-tape" aria-hidden="true" />
       <Link
         to={"/work/" + p.slug}
@@ -633,6 +635,7 @@ function ProjectCard({
           src={p.slug === "starx-connect" ? p.mobile : p.image}
           alt={p.short + " live website interface"}
           loading="lazy"
+          decoding="async"
         />
         <span className="project-open">
           <Arrow />
@@ -694,7 +697,7 @@ function Work() {
         direct business action. Explore the interfaces and the thinking behind
         them.
       </p>
-      <div className="filters">
+      <div className="filters" data-reveal>
         <div>
           {["All", "Websites", "Applications", "Digital experiences"].map(
             (f) => (
@@ -715,7 +718,7 @@ function Work() {
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
-      <div className="work-grid">
+      <div className="work-grid" data-reveal-stagger="90">
         {shown.map((p) => (
           <ProjectCard key={p.slug} p={p} index={all.indexOf(p) + 1} />
         ))}
@@ -748,8 +751,10 @@ function CaseStudy() {
           Visit Live Site <Arrow />
         </a>
       </div>
-      <Device p={p} />
-      <section className="case-story">
+      <div data-reveal>
+        <Device p={p} />
+      </div>
+      <section className="case-story" data-reveal>
         <div>
           <span className="eyebrow">Experience overview</span>
           <h2>{p.headline}</h2>
@@ -783,11 +788,12 @@ function ServiceList() {
   const [open, setOpen] = useState(0);
 
   return (
-    <div className="service-list">
+    <div className="service-list" data-reveal-stagger="70">
       {s.services.map((x, i) => (
         <div
           className={"service-row " + (open === i ? "open" : "")}
           key={x.name}
+          data-reveal
         >
           <button
             aria-expanded={open === i}
@@ -827,7 +833,7 @@ function Services() {
         We help turn the right idea into something people can use.
       </p>
       <ServiceList />
-      <div className="callout">
+      <div className="callout" data-reveal>
         <h2>Not sure where to start?</h2>
         <p>Bring the problem. We’ll help define the brief.</p>
         <CTA />
@@ -846,11 +852,11 @@ function About() {
         <br />
         <em>A bigger picture.</em>
       </h1>
-      <div className="about-grid">
+      <div className="about-grid" data-reveal>
         <div className="logo-object">
           <img
             src="/media/official-logo.webp"
-            alt="SANJU X DEV official logo"
+            alt="Trinity Tech official logo"
           />
         </div>
         <div>
@@ -879,7 +885,7 @@ function Privacy() {
       <span className="eyebrow">Your information</span>
       <h1>Privacy, clearly.</h1>
       <p>
-        When you submit a project enquiry, SANJU X DEV uses your contact details
+        When you submit a project enquiry, Trinity Tech uses your contact details
         and project requirements to respond and discuss the requested work.
         Please do not submit passwords, payment details or confidential
         documents.
@@ -932,6 +938,8 @@ export default function App() {
       !matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const loc = useLocation();
+  useScrollState();
+  useScrollReveal(loc.pathname);
 
   const finish = () => {
     setIntro(false);
@@ -943,7 +951,12 @@ export default function App() {
       .then((r) => r.json())
       .then((d) => {
         if (d.site) {
-          setSite(d.site);
+          setSite({
+            ...d.site,
+            projects: (d.site.projects || []).filter(
+              (p: { slug: string }) => p.slug !== "yuva-shakti",
+            ),
+          });
           if (!d.site.introEnabled) setIntro(false);
         }
       })
@@ -952,14 +965,15 @@ export default function App() {
 
   useEffect(() => {
     if (!intro) return;
-    const id = setTimeout(finish, 3600);
+    const id = setTimeout(finish, 2200);
     return () => clearTimeout(id);
   }, [intro]);
 
   useEffect(() => {
     setMenu(false);
     if (!loc.hash) {
-      window.scrollTo(0, 0);
+      // Jump (not smooth-scroll) to the top when changing pages.
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
     } else {
       const el = document.getElementById(loc.hash.replace("#", ""));
       if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -988,6 +1002,7 @@ export default function App() {
   return (
     <Context.Provider value={site}>
       <ChatProvider>
+        <ScrollProgress />
         <a className="skip" href="#main">
           Skip to content
         </a>
@@ -995,15 +1010,15 @@ export default function App() {
           <div
             className="intro"
             role="dialog"
-            aria-label="SANJU X DEV introduction"
+            aria-label="Trinity Tech introduction"
             aria-modal="true"
           >
             <div className="intro-mark">
               <img
                 src="/media/official-logo.webp"
-                alt="SANJU X DEV official logo"
+                alt="Trinity Tech official logo"
               />
-              <h2>SANJU X DEV</h2>
+              <h2>Trinity Tech</h2>
               <p>Digital Experiences. Designed to Stand Out.</p>
             </div>
             <button autoFocus onClick={finish}>
@@ -1045,6 +1060,7 @@ export default function App() {
             </div>
           </header>
           <main id="main">
+            <div className="route-view" key={loc.pathname}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/work" element={<Work />} />
@@ -1084,6 +1100,7 @@ export default function App() {
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </div>
           </main>
           <Footer />
           {site.assistantEnabled &&

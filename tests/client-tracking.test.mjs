@@ -167,7 +167,7 @@ test("/api/chat handles Telugu-English enquiries with polite guidance", async ()
   await handler(req, res);
   assert.equal(status, 200);
   assert.equal(body.mode, "FAQ guide");
-  assert.match(body.answer, /SANJU X DEV/);
+  assert.match(body.answer, /Trinity Tech/);
   assert.ok(body.links.some((l) => l.url === "/project" || l.url === "/contact"));
 });
 

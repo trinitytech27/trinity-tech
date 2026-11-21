@@ -36,11 +36,11 @@ const port = Number(env("SMTP_PORT", "465"));
 const secure = env("SMTP_SECURE", "true") !== "false";
 const user = env("SMTP_USER", "").trim();
 const pass = env("SMTP_PASS", "").replace(/\s+/g, "");
-const fromEmail = env("SMTP_FROM_EMAIL", user ? `"SANJU X DEV" <${user}>` : '"SANJU X DEV" <sanjuxdev27@gmail.com>');
+const fromEmail = env("SMTP_FROM_EMAIL", user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
 const ownerNotificationEmail = env("OWNER_NOTIFICATION_EMAIL", user || "sanjuxdev27@gmail.com");
 
 console.log("\n=======================================================");
-console.log("  SANJU X DEV — GMAIL SMTP DELIVERY DIAGNOSTIC TOOL");
+console.log("  Trinity Tech — GMAIL SMTP DELIVERY DIAGNOSTIC TOOL");
 console.log("=======================================================\n");
 
 console.log("Target Server Configuration:");
@@ -60,7 +60,7 @@ if (!user || !pass) {
   console.log("  1. Go to your Google Account: https://myaccount.google.com/security");
   console.log("  2. Verify that '2-Step Verification' is turned ON.");
   console.log("  3. Navigate to 'App passwords': https://myaccount.google.com/apppasswords");
-  console.log("  4. Generate a new password under the name 'SANJU X DEV Website'.");
+  console.log("  4. Generate a new password under the name 'Trinity Tech Website'.");
   console.log("  5. Copy the 16-character password into your .env.local file:");
   console.log("     SMTP_USER=" + (user || "your-gmail-account@gmail.com"));
   console.log("     SMTP_PASS=xxxx xxxx xxxx xxxx");
@@ -100,13 +100,13 @@ try {
     const info = await transporter.sendMail({
       from: fromEmail,
       to: testRecipient,
-      subject: "SANJU X DEV — Live Gmail SMTP Delivery Test Verification",
+      subject: "Trinity Tech — Live Gmail SMTP Delivery Test Verification",
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #222; background: #eee5d5;">
           <div style="max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid #dcd3c4; border-radius: 8px; padding: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-            <div style="font-size: 13px; font-weight: 700; color: #852c32; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;">SANJU X DEV · Live Verification</div>
+            <div style="font-size: 13px; font-weight: 700; color: #852c32; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;">Trinity Tech · Live Verification</div>
             <h2 style="color: #201c1b; margin: 0 0 14px 0; font-size: 20px;">Gmail SMTP Connected Successfully 🎉</h2>
-            <p style="margin: 0 0 16px 0; font-size: 14px; color: #444;">This email confirms that your SANJU X DEV portfolio website is actively connected to Gmail SMTP.</p>
+            <p style="margin: 0 0 16px 0; font-size: 14px; color: #444;">This email confirms that your Trinity Tech portfolio website is actively connected to Gmail SMTP.</p>
             <div style="background: #fdfbf7; border: 1px solid #dcd3c4; border-left: 4px solid #852c32; padding: 14px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 13px; line-height: 1.8;">
               <div><strong>Host & Port:</strong> ${host}:${port} (SSL/TLS direct)</div>
               <div><strong>Authenticated Account:</strong> ${user}</div>
@@ -118,7 +118,7 @@ try {
           </div>
         </div>
       `,
-      text: "SANJU X DEV Live Gmail SMTP Delivery Test Verification. Delivered at " + timeIST,
+      text: "Trinity Tech Live Gmail SMTP Delivery Test Verification. Delivered at " + timeIST,
     });
 
     console.log("🎉 Test email delivered successfully!");

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SANJU X DEV — PREMIUM VINTAGE EDITORIAL SCRAPBOOK DESIGN SYSTEM
+   Trinity Tech — PREMIUM VINTAGE EDITORIAL SCRAPBOOK DESIGN SYSTEM
    Faithfully inspired by Image 2: Creative Paper Collage & Editorial Typography
    ========================================================================== */
 
@@ -3194,7 +3194,7 @@ nav a.active:not(.nav-cta-btn)::after {
 
 @media (max-width: 768px) {
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
   }
 
@@ -3283,7 +3283,7 @@ nav a.active:not(.nav-cta-btn)::after {
 
 
 /* ==========================================================================
-   SANJU X DEV — 4-STEP PROJECT ENQUIRY & CLIENT UPGRADE STYLES
+   Trinity Tech — 4-STEP PROJECT ENQUIRY & CLIENT UPGRADE STYLES
    ========================================================================== */
 
 /* 4-Step Progress Indicator Header (01 -> 02 -> 03 -> 04) */
@@ -4416,5 +4416,175 @@ nav a.active:not(.nav-cta-btn)::after {
   .typing-dots .dot {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   MOTION SYSTEM — calm, professional scroll transitions
+   One easing curve, short distances, opacity + transform only (GPU friendly).
+   Reveal styles apply only once JS has added `.motion-ready`, so content is
+   never hidden if scripts fail or the visitor prefers reduced motion.
+   ========================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-distance: 18px;
+  --reveal-duration: 720ms;
+}
+
+/* Scroll reveal */
+.motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-distance), 0);
+  transition:
+    opacity var(--reveal-duration) var(--ease-out),
+    transform var(--reveal-duration) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.motion-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cards keep their own hover transitions once revealed */
+.motion-ready .varun-project-card[data-reveal].is-revealed,
+.motion-ready .project-card[data-reveal].is-revealed,
+.motion-ready .final-contact-item[data-reveal].is-revealed {
+  transition:
+    opacity var(--reveal-duration) var(--ease-out) var(--reveal-delay, 0ms),
+    transform 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out);
+}
+
+/* Hero load-in: a short, sequenced fade-up on first paint */
+.hero-enter > * {
+  animation: heroEnter 0.8s var(--ease-out) both;
+}
+.hero-enter > *:nth-child(2) { animation-delay: 0.12s; }
+.hero-enter > *:nth-child(3) { animation-delay: 0.24s; }
+
+@keyframes heroEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Page-to-page transition */
+.route-view {
+  animation: routeEnter 0.45s var(--ease-out) both;
+}
+
+@keyframes routeEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reading progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 120;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Header: no live blur while scrolling (expensive repaint); subtle depth once scrolled */
+.scrapbook-header {
+  background: rgba(237, 228, 212, 0.97);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  transition: box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+}
+.is-scrolled .scrapbook-header {
+  box-shadow: 0 6px 20px rgba(45, 30, 18, 0.08);
+}
+
+/* Smoother, consistent hover motion on project cards */
+.varun-project-card {
+  transition:
+    transform 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    border-color 0.35s var(--ease-out);
+}
+.varun-project-card:hover {
+  transform: translateY(-4px);
+}
+.preview-image-canvas img {
+  transition: transform 0.6s var(--ease-out);
+}
+
+/* Two live demo projects: wider, more readable cards */
+.featured-projects-grid.featured-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+@media (max-width: 860px) {
+  .featured-projects-grid.featured-two {
+    grid-template-columns: 100%;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+}
+
+/* Scrolling performance: smooth anchor jumps that clear the sticky header,
+   and no expensive blur on decorative tape strips */
+html {
+  scroll-padding-top: 96px;
+}
+.washi-tape {
+  backdrop-filter: none;
+}
+
+/* Calmer intro: soft fade instead of a 3D sweep */
+.intro-mark {
+  animation: introFade 2.2s var(--ease-out) both;
+}
+.intro h2 {
+  animation: none;
+  background: none;
+  color: #26262b;
+}
+@keyframes introFade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  25%,
+  78% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .scroll-progress {
+    display: none;
   }
 }

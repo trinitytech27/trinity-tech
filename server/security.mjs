@@ -333,7 +333,7 @@ export function validateSite(s) {
  * 1. Production origin: https://sanju-x-dev.vercel.app
  * 2. Local development: http://127.0.0.1:3100, http://127.0.0.1:3101, http://localhost:3100, http://localhost:3101, http://localhost:5173, etc.
  * 3. Environment SITE_URL and VERCEL_URL when present.
- * 4. Legitimate Vercel preview deployments for SANJU X DEV (matching sanju-x-dev and sanjay200812's Vercel scope).
+ * 4. Legitimate Vercel preview deployments for Trinity Tech (matching sanju-x-dev and sanjay200812's Vercel scope).
  */
 export function isAllowedOrigin(origin, env = process.env) {
   if (!origin || typeof origin !== "string") return false;
@@ -364,7 +364,7 @@ export function isAllowedOrigin(origin, env = process.env) {
 
   if (explicit.includes(clean)) return true;
 
-  // Legitimate Vercel preview deployments for SANJU X DEV (sanjay200812)
+  // Legitimate Vercel preview deployments for Trinity Tech (sanjay200812)
   const previewRegexes = [
     /^https:\/\/sanju-x-dev(-[a-z0-9-]+)?\.vercel\.app$/i,
     /^https:\/\/sanju-x-dev-git-[a-z0-9-]+-sanjay200812s-projects\.vercel\.app$/i,
