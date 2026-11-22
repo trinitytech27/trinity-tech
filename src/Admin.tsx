@@ -663,7 +663,7 @@ export default function Admin() {
                   className="button"
                   style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px" }}
                   onClick={() => {
-                    const defaultTracking = "SXD-" + String((data?.projects?.length || 0) + 1).padStart(3, "0");
+                    const defaultTracking = "TT-" + String((data?.projects?.length || 0) + 1).padStart(3, "0");
                     setEditingProject({
                       tracking_code: defaultTracking,
                       title: "",
@@ -1054,7 +1054,7 @@ export default function Admin() {
                           borderRadius: 4,
                         }}
                       >
-                        {r.tracking_code || r.data?.tracking_code || "SXD-001"}
+                        {r.tracking_code || r.data?.tracking_code || "TT-001"}
                       </span>
                       <span>
                         <strong>{r.data.name}</strong> · {r.data.service}
@@ -1102,9 +1102,9 @@ export default function Admin() {
                       }}
                     >
                       <div>
-                        <small style={{ color: "var(--muted)", display: "block" }}>SXD Tracking ID</small>
+                        <small style={{ color: "var(--muted)", display: "block" }}>Tracking ID</small>
                         <div style={{ fontFamily: "ui-monospace, Menlo, monospace", fontWeight: 700, color: "var(--accent)" }}>
-                          {r.tracking_code || r.data?.tracking_code || "SXD-001"}
+                          {r.tracking_code || r.data?.tracking_code || "TT-001"}
                         </div>
                       </div>
 
@@ -1447,7 +1447,7 @@ export default function Admin() {
                           </button>
                           {(() => {
                             const clientWa = (r.data.whatsapp || r.phone || r.data.phone || "").replace(/[^0-9]/g, "");
-                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Trinity Tech regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'SXD'}).`)}` : null;
+                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Trinity Tech regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'TT'}).`)}` : null;
                             const clientEmailUrl = r.data.email ? `mailto:${r.data.email}?subject=${encodeURIComponent(`Trinity Tech — Regarding your enquiry ${r.tracking_code || r.data?.tracking_code || ''}`)}` : null;
                             return (
                               <>
@@ -1515,7 +1515,7 @@ export default function Admin() {
                             style={{ padding: "8px 16px", borderColor: "var(--accent)", color: "var(--accent)" }}
                             onClick={() => {
                               setEditingProject({
-                                tracking_code: r.tracking_code || "SXD-001",
+                                tracking_code: r.tracking_code || "TT-001",
                                 title: (r.data.company || r.data.name) + " — " + r.data.service,
                                 client_name: r.data.name,
                                 client_email: r.data.email,

@@ -58,7 +58,7 @@ export function localAnswer(raw: string): Answer {
       links: [start],
     };
   }
-  if (has(q, "track", "status", "tracking", "sxd")) {
+  if (has(q, "track", "status", "tracking", "tt-", "sxd")) {
     return {
       text: "You can follow your project any time on the Track page with your tracking ID and email.",
       links: [{ label: "Track a Project", url: "/track" }],

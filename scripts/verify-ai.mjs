@@ -67,7 +67,7 @@ const promptsToTest = process.argv.includes("--all")
       "Can customers pay online?",
       "How much will it cost?",
       "Naku business website kavali.",
-      "How do I track SXD-001?",
+      "How do I track TT-001?",
       "Can you show your previous projects?",
       "What did I just ask you?",
     ]

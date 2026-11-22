@@ -148,7 +148,7 @@ function extractChatLinks(question, answer) {
   }
 
   // 2. Project tracking queries
-  if (/sxd-|track|tracking|project status|check my project/i.test(q)) {
+  if (/tt-\d|sxd-|track|tracking|project status|check my project/i.test(q)) {
     addLink("Track My Project", "/track");
   }
 
@@ -317,7 +317,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 6. Direct request to start or submit project
   if (/submit\s+(my\s+)?project|start\s+(a\s+|my\s+)?project|get\s+started|start\s+now|how\s+do\s+i\s+start/i.test(q)) {
     return {
-      answer: "Starting is simple and takes just 4 easy steps on our Project page (/project). Select your website category, choose features, set design preferences, and connect directly on WhatsApp. You'll immediately receive your sequential SXD Tracking ID.",
+      answer: "Starting is simple and takes just 4 easy steps on our Project page (/project). Select your website category, choose features, set design preferences, and connect directly on WhatsApp. You'll immediately receive your sequential Tracking ID.",
       mode: "FAQ guide",
       links: [
         { label: "Start Your Project", url: "/project" }
@@ -326,9 +326,9 @@ function runIntelligentFallback(rawQ, history, _s) {
   }
 
   // 7. Project tracking queries
-  if (/sxd-|track|tracking|project status|check my project|status/i.test(q)) {
+  if (/tt-\d|sxd-|track|tracking|project status|check my project|status/i.test(q)) {
     return {
-      answer: "You can track your project anytime on our Track Project page at /track. Enter your unique SXD Tracking ID (such as SXD-001) and your registered email address to view real-time countdown days, milestone progress, and updates.",
+      answer: "You can track your project anytime on our Track Project page at /track. Enter your unique Tracking ID (such as TT-001) and your registered email address to view real-time countdown days, milestone progress, and updates.",
       mode: "FAQ guide",
       links: [
         { label: "Track My Project", url: "/track" }
@@ -625,7 +625,7 @@ export default async function handler(req, res) {
         }
       }
 
-      // Generate sequential tracking code SXD-001, SXD-002, etc.
+      // Generate sequential tracking code TT-001, TT-002, etc.
       let trackingCode = null;
       try {
         const { data: codeData, error: codeErr } = await client.rpc("studio_generate_tracking_code");
@@ -639,7 +639,7 @@ export default async function handler(req, res) {
         try {
           const { count } = await client.from("studio_enquiries").select("id", { count: "exact", head: true });
           const nextNum = (count || 0) + 1;
-          trackingCode = nextNum < 1000 ? `SXD-${String(nextNum).padStart(3, "0")}` : `SXD-${nextNum}`;
+          trackingCode = nextNum < 1000 ? `TT-${String(nextNum).padStart(3, "0")}` : `TT-${nextNum}`;
         } catch {
           try {
             const { data: latest } = await client
@@ -648,11 +648,11 @@ export default async function handler(req, res) {
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            const match = latest?.tracking_code?.match(/SXD-(\d+)/);
+            const match = latest?.tracking_code?.match(/(?:TT|SXD)-(\d+)/);
             const nextNum = match ? parseInt(match[1], 10) + 1 : 1;
-            trackingCode = nextNum < 1000 ? `SXD-${String(nextNum).padStart(3, "0")}` : `SXD-${nextNum}`;
+            trackingCode = nextNum < 1000 ? `TT-${String(nextNum).padStart(3, "0")}` : `TT-${nextNum}`;
           } catch {
-            trackingCode = "SXD-001";
+            trackingCode = "TT-001";
           }
         }
       }
@@ -734,8 +734,8 @@ export default async function handler(req, res) {
         const rawCode = String(body.trackingCode || "").trim().toUpperCase();
         const rawEmail = String(body.email || "").trim().toLowerCase();
 
-        if (!/^SXD-\d+$/i.test(rawCode) || !/^\S+@\S+\.\S+$/.test(rawEmail)) {
-          throw fail(400, "Please enter a valid Tracking ID (e.g. SXD-001) and your registered email address.");
+        if (!/^(TT|SXD)-\d+$/i.test(rawCode) || !/^\S+@\S+\.\S+$/.test(rawEmail)) {
+          throw fail(400, "Please enter a valid Tracking ID (e.g. TT-001) and your registered email address.");
         }
 
         let matched = false;
@@ -996,7 +996,7 @@ export default async function handler(req, res) {
               "\n   - Agency Website: Creative studios, multidisciplinary teams, case studies (/project?category=Agency%20Website)." +
               "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
-              "\n8. TRACKING INTEGRATION: When asked about an SXD tracking code (e.g. SXD-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
+              "\n8. TRACKING INTEGRATION: When asked about a tracking code (e.g. TT-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
               "\n9. VERIFIED PORTFOLIO: Reference the real 5 projects (StarX Live, TicketX, ABPS Books, StarX Connect, AudioX) and direct to /work when requested." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");

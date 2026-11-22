@@ -14,18 +14,18 @@ import seed from "../server/seed.json" with { type: "json" };
 
 test("tracking code format function handles 1 to 1000+ sequentially", () => {
   const formatCode = (seq) =>
-    seq < 1000 ? "SXD-" + String(seq).padStart(3, "0") : "SXD-" + seq;
+    seq < 1000 ? "TT-" + String(seq).padStart(3, "0") : "TT-" + seq;
 
-  assert.equal(formatCode(1), "SXD-001");
-  assert.equal(formatCode(42), "SXD-042");
-  assert.equal(formatCode(999), "SXD-999");
-  assert.equal(formatCode(1000), "SXD-1000");
-  assert.equal(formatCode(1050), "SXD-1050");
+  assert.equal(formatCode(1), "TT-001");
+  assert.equal(formatCode(42), "TT-042");
+  assert.equal(formatCode(999), "TT-999");
+  assert.equal(formatCode(1000), "TT-1000");
+  assert.equal(formatCode(1050), "TT-1050");
 });
 
 test("all lifecycle transactional email templates format with tracking links and security escaping", () => {
   const sampleProject = {
-    tracking_code: "SXD-007",
+    tracking_code: "TT-007",
     title: "StarX Connect & AudioX <script>alert(1)</script>",
     client_name: "Alex Designer",
     client_email: "alex@example.com",
@@ -43,17 +43,17 @@ test("all lifecycle transactional email templates format with tracking links and
   // 1. Customer Confirmation
   const confirmHtml = formatCustomerConfirmationHtml(
     { name: "Alex", email: "alex@example.com", service: "Web App" },
-    "SXD-007",
+    "TT-007",
     "https://sanju-x-dev.vercel.app",
   );
-  assert.ok(confirmHtml.includes("SXD-007"));
-  assert.ok(confirmHtml.includes("https://sanju-x-dev.vercel.app/track?code=SXD-007"));
+  assert.ok(confirmHtml.includes("TT-007"));
+  assert.ok(confirmHtml.includes("https://sanju-x-dev.vercel.app/track?code=TT-007"));
   assert.ok(!confirmHtml.includes("<script>"));
 
   // 2. Project Accepted
   const acceptedHtml = formatProjectAcceptedHtml(sampleProject, "https://sanju-x-dev.vercel.app");
   assert.ok(acceptedHtml.includes("Project Accepted!"));
-  assert.ok(acceptedHtml.includes("SXD-007"));
+  assert.ok(acceptedHtml.includes("TT-007"));
   assert.ok(acceptedHtml.includes("&lt;script&gt;alert(1)&lt;/script&gt;"));
 
   // 3. Progress Update
@@ -92,6 +92,7 @@ test("client tracking migration creates sequence, functions, and active project 
     "20261025080553_owner_authorization.sql",
     "20261025140000_spideyy_upgrade.sql",
     "20261025160000_client_tracking_outbox.sql",
+    "20261122013000_tt_tracking_codes.sql",
   ];
 
   for (const file of migrations) {
@@ -103,8 +104,8 @@ test("client tracking migration creates sequence, functions, and active project 
   const code1 = (await db.query("select public.studio_generate_tracking_code() as code")).rows[0].code;
   const code2 = (await db.query("select public.studio_generate_tracking_code() as code")).rows[0].code;
 
-  assert.equal(code1, "SXD-001");
-  assert.equal(code2, "SXD-002");
+  assert.equal(code1, "TT-001");
+  assert.equal(code2, "TT-002");
 
   // Verify studio_projects and studio_emails tables exist with row level security
   const rlsTables = (
@@ -223,7 +224,7 @@ test("/api/chat explains project starting and tracking clearly", async () => {
     },
   );
   assert.match(startBody.answer, /Contact|Project/i);
-  assert.match(startBody.answer, /SXD/);
+  assert.match(startBody.answer, /TT-|[Tt]racking/);
 
   // Track status
   let trackBody = {};
@@ -241,7 +242,7 @@ test("/api/chat explains project starting and tracking clearly", async () => {
     },
   );
   assert.match(trackBody.answer, /track/i);
-  assert.match(trackBody.answer, /SXD-001/);
+  assert.match(trackBody.answer, /TT-001/);
 });
 
 test("enquiry builder defaults have 11 website categories with correct features", () => {

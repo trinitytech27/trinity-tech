@@ -481,7 +481,7 @@ export default function ProjectPage() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "Unable to send your enquiry. Please check your information and try again.");
 
-      const generatedCode = d.trackingCode || "SXD-001";
+      const generatedCode = d.trackingCode || "TT-001";
       setTrackingCode(generatedCode);
 
       // Build rich WhatsApp URL with all requirements

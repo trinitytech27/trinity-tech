@@ -108,7 +108,7 @@ export function formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl) {
   return emailShell("New Enquiry — " + trackingCode, "New project enquiry from " + enquiry.name, content);
 }
 
-// EMAIL B: Confirmation to Customer with SXD Tracking Code
+// EMAIL B: Confirmation to Customer with Tracking Code
 export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
   const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(trackingCode)}`;
@@ -532,13 +532,13 @@ async function logOutbox(client, record) {
 
 // Backward-compatible wrapper for initial enquiry notification
 export function formatEnquiryHtml(enquiry, siteUrl) {
-  return formatNewEnquiryOwnerHtml(enquiry, enquiry.tracking_code || "SXD-001", siteUrl);
+  return formatNewEnquiryOwnerHtml(enquiry, enquiry.tracking_code || "TT-001", siteUrl);
 }
 
 // Automatic Notification Pipeline: Owner Alert + Customer Tracking Confirmation
 export async function sendEnquiryNotification(enquiry, options = {}, client = null) {
   const siteUrl = options.siteUrl || process.env.SITE_URL || "https://trinity-tech.in";
-  const trackingCode = enquiry.tracking_code || "SXD-001";
+  const trackingCode = enquiry.tracking_code || "TT-001";
   const toEmail =
     options.toEmail ||
     process.env.OWNER_NOTIFICATION_EMAIL ||
@@ -559,7 +559,7 @@ export async function sendEnquiryNotification(enquiry, options = {}, client = nu
     client,
   });
 
-  // 2. Send SXD Tracking Code Confirmation to Customer
+  // 2. Send Tracking Code Confirmation to Customer
   if (enquiry.email && /^\S+@\S+\.\S+$/.test(enquiry.email)) {
     const customerHtml = formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl);
     const customerSubject = `Your Enquiry Has Been Received — ${trackingCode} | Trinity Tech`;
