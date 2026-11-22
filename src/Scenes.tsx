@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Mail, Radar } from "lucide-react";
 import { gsap, ScrollTrigger, showStars } from "./scroll";
-import { team, siteTypes, PROJECT_ICONS, type projects } from "./content";
+import { team, siteTypes, PROJECT_ICONS, PROJECT_SCENES, type projects } from "./content";
 import { BOOKING_STEPS } from "./Home";
 
 type Project = (typeof projects)[number];
@@ -139,6 +139,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       </div>
       {cur && (
         <div className={"tt-pf-caption on-" + opposite(side)} key={cur.slug}>
+          {PROJECT_SCENES[cur.slug] && <img className="tt-scene-bg" src={PROJECT_SCENES[cur.slug]} alt="" aria-hidden="true" />}
           <span className="tt-pf-kicker">{cur.category}</span>
           <h3>{cur.short}</h3>
           <p className="tt-pf-quote">“{(cur as Project & { quote?: string }).quote || cur.headline}”</p>
@@ -280,6 +281,7 @@ export function LayerStack({ n = "03" }: { n?: string }) {
           <div className="tt-stack-plane">
             {siteTypes.map((t, k) => (
               <div className="tt-layer" key={t.title} style={{ zIndex: N - k } as React.CSSProperties}>
+                <img className="tt-layer-art" src={t.art} alt="" loading="lazy" />
                 <span className="tt-layer-n">{String(k + 1).padStart(2, "0")}</span>
                 <b>{t.title}</b>
                 <small>{t.sub}</small>
@@ -380,6 +382,7 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
         </h2>
         <p className="tt-lede">One founder, two developers — and one shared obsession with building things that work beautifully.</p>
       </header>
+      <div className="tt-atom-scene" aria-hidden="true" />
       <div className="tt-fan-stage">
         {ORDER.map((idx) => {
           const m = team[idx];

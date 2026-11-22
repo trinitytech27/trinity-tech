@@ -862,3 +862,143 @@ html[data-route="/project"] .tt-starfield {
   opacity: 0.38;
   transition: opacity 0.8s var(--ease-out);
 }
+
+/* ==========================================================================
+   Gold illustration art (from the brand sheet, recoloured to our gold)
+   ========================================================================== */
+/* project scenes: a soft, faded mood image behind the copy */
+.tt-pf-caption,
+.tt-demo { position: relative; isolation: isolate; }
+.tt-scene-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -1; pointer-events: none;
+  opacity: .22; filter: saturate(1.05);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+          mask-image: radial-gradient(ellipse at center, #000 30%, transparent 78%);
+  animation: tt-scene-in .9s ease both;
+}
+.tt-pf-caption .tt-scene-bg { inset: -18% -12%; width: 124%; height: 136%; opacity: .26; border-radius: 24px; }
+.tt-demo .tt-scene-bg { opacity: .14; }
+@keyframes tt-scene-in { from { opacity: 0; transform: scale(1.06); } }
+
+/* team meeting scene behind the fan of cards */
+.tt-atom { position: relative; isolation: isolate; }
+.tt-atom-scene {
+  position: absolute; inset: 12% 0 0; z-index: -1; pointer-events: none;
+  background: url("/brand/scenes/team.webp") center 40% / min(1100px, 110%) auto no-repeat;
+  opacity: .16;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 25%, transparent 72%);
+          mask-image: radial-gradient(ellipse at center, #000 25%, transparent 72%);
+}
+
+/* domains stack: each layer carries its category art */
+.tt-layer { overflow: hidden; }
+.tt-layer-art {
+  position: absolute; right: -4%; bottom: -6%; width: 58%; height: auto;
+  opacity: .5; pointer-events: none; z-index: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 40%);
+          mask-image: linear-gradient(90deg, transparent, #000 40%);
+}
+.tt-layer > :not(.tt-layer-art) { position: relative; z-index: 1; }
+
+/* booking category cards: line-art banner on top */
+.builder-category-card { overflow: hidden; }
+.builder-cat-art {
+  display: block; width: calc(100% + 28px); max-width: none;
+  margin: -12px -14px 8px; height: 96px; object-fit: cover; object-position: center 55%;
+  opacity: .78; transition: opacity .3s ease, transform .5s ease;
+  -webkit-mask-image: linear-gradient(#000 55%, transparent);
+          mask-image: linear-gradient(#000 55%, transparent);
+}
+@media (max-width: 640px) { .builder-cat-art { height: 72px; } }
+.builder-category-card:hover .builder-cat-art,
+.builder-category-card.selected .builder-cat-art { opacity: 1; transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) {
+  .tt-scene-bg { animation: none; }
+  .builder-cat-art { transition: none; }
+}
+
+/* ==========================================================================
+   ADMIN WORKSPACE (/spideyy) — dark gold, same language as the public site
+   ========================================================================== */
+html.tt-admin .tt-starfield { opacity: .35; }
+html.tt-admin .admin-shell { max-width: 1180px; padding-bottom: 80px; }
+html.tt-admin .admin-shell > .eyebrow { color: var(--gold-2, #e8a33d); letter-spacing: .22em; }
+html.tt-admin .admin-shell h1 {
+  font-family: var(--font-head); background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html.tt-admin .admin-card {
+  position: relative; border-radius: 18px; padding: 24px;
+  background: linear-gradient(160deg, rgba(232,163,61,.07), rgba(12,9,5,.82) 42%);
+  border: 1px solid rgba(232,163,61,.18);
+  box-shadow: 0 18px 50px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,220,160,.06);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  animation: tt-admin-rise .55s cubic-bezier(.2,.8,.2,1) both;
+}
+html.tt-admin .admin-card h3 { font-family: var(--font-head); color: #f6d28a; }
+html.tt-admin .admin-login {
+  max-width: 460px; text-align: left;
+  background: linear-gradient(160deg, rgba(232,163,61,.12), rgba(10,8,5,.9) 55%);
+}
+html.tt-admin .admin-login::before {
+  content: ""; display: block; width: 58px; height: 44px; margin-bottom: 14px;
+  background: url("/brand/mark.webp") center / contain no-repeat;
+  filter: drop-shadow(0 0 14px rgba(232,163,61,.45));
+}
+html.tt-admin .admin-tabs {
+  position: sticky; top: 76px; z-index: 5; gap: 6px; padding: 6px;
+  border-radius: 999px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none;
+  background: rgba(10,8,5,.78); border: 1px solid rgba(232,163,61,.18);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+html.tt-admin .admin-tabs::-webkit-scrollbar { display: none; }
+html.tt-admin .admin-tabs button {
+  flex: none; border: 0; border-radius: 999px; padding: 9px 16px;
+  font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+  color: rgba(246,226,190,.72); background: transparent;
+  transition: background .25s ease, color .25s ease, transform .2s ease;
+}
+html.tt-admin .admin-tabs button:hover { color: #f6d28a; background: rgba(232,163,61,.1); }
+html.tt-admin .admin-tabs .active { background: var(--brand-grad); color: #1a1206; }
+html.tt-admin .admin-summary { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+html.tt-admin .admin-summary div {
+  border-radius: 14px; padding: 20px;
+  background: rgba(232,163,61,.06); border: 1px solid rgba(232,163,61,.16);
+  animation: tt-admin-rise .6s cubic-bezier(.2,.8,.2,1) both;
+}
+html.tt-admin .admin-summary div:nth-child(2) { animation-delay: .06s; }
+html.tt-admin .admin-summary div:nth-child(3) { animation-delay: .12s; }
+html.tt-admin .admin-summary div:nth-child(4) { animation-delay: .18s; }
+html.tt-admin .admin-summary b {
+  font-family: var(--font-head); background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html.tt-admin .admin-row { border-bottom-color: rgba(232,163,61,.12); transition: background .2s ease; }
+html.tt-admin .admin-row:hover { background: rgba(232,163,61,.04); }
+html.tt-admin .admin-card details { border-top-color: rgba(232,163,61,.14); }
+html.tt-admin .admin-card summary { color: #f6d28a; font-weight: 600; }
+html.tt-admin .admin-card pre { background: rgba(0,0,0,.35); border-radius: 10px; padding: 12px; color: #e9dcc4; }
+html.tt-admin .admin-card button,
+html.tt-admin .admin-card .button { border-radius: 999px; }
+html.tt-admin .admin-shell :is(input, textarea, select) {
+  background: rgba(0,0,0,.4); color: #f3e7d2; border: 1px solid rgba(232,163,61,.22); border-radius: 10px;
+}
+html.tt-admin .admin-shell :is(input, textarea, select):focus {
+  outline: none; border-color: #e8a33d; box-shadow: 0 0 0 3px rgba(232,163,61,.18);
+}
+html.tt-admin .admin-shell label { color: rgba(246,226,190,.8); }
+html.tt-admin .tt-admin-welcome { animation: tt-admin-rise .6s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes tt-admin-rise { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) {
+  html.tt-admin :is(.admin-card, .admin-summary div, .tt-admin-welcome) { animation: none; }
+}
+@media (max-width: 640px) {
+  html.tt-admin .admin-tabs { top: 64px; }
+  html.tt-admin .admin-card { padding: 18px; }
+}
+html.tt-admin .admin-login :is(button[type="submit"], .button:not(.secondary)) {
+  background: var(--brand-grad); color: #1a1206; border: 0; font-weight: 700;
+  box-shadow: 0 10px 30px -12px rgba(232,163,61,.6);
+}
+html.tt-admin .admin-shell h1 { font-family: var(--font-head); }

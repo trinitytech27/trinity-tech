@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import {
   DEFAULT_WEBSITE_CATEGORIES,
+  categoryArt,
   PRIMARY_PURPOSE_OPTIONS,
   LOGIN_OPTIONS,
   LOGIN_METHODS,
@@ -736,6 +737,7 @@ export default function ProjectPage() {
                         }
                       }}
                     >
+                      {categoryArt(cat.id) && <img className="builder-cat-art" src={categoryArt(cat.id)} alt="" loading="lazy" />}
                       <div className="builder-cat-header">
                         <div className="builder-cat-icon">{renderCategoryIcon(cat.id)}</div>
                         <div className="builder-radio-dot" aria-hidden="true" />
@@ -1802,6 +1804,7 @@ export function EnquiryPreview() {
             style={{ cursor: "pointer" }}
             onClick={() => navigate(`/project?category=${encodeURIComponent(cat.label)}`)}
           >
+            {categoryArt(cat.id) && <img className="builder-cat-art" src={categoryArt(cat.id)} alt="" loading="lazy" />}
             <div className="builder-cat-header">
               <div className="builder-cat-icon">
                 {cat.id === "portfolio" && <User size={20} />}

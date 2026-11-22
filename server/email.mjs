@@ -55,7 +55,7 @@ function emailShell(title, preheader, content) {
 
 // EMAIL A: New Enquiry to Owner
 export function formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const dashboardUrl = origin + "/spideyy";
   const cleanPhone = (enquiry.phone || "").replace(/[^0-9]/g, "");
   const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
@@ -110,7 +110,7 @@ export function formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl) {
 
 // EMAIL B: Confirmation to Customer with SXD Tracking Code
 export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(trackingCode)}`;
 
   const content = `
@@ -146,7 +146,7 @@ export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
 
 // EMAIL C: Project Accepted
 export function formatProjectAcceptedHtml(project, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(project.tracking_code)}`;
 
   const content = `
@@ -180,7 +180,7 @@ export function formatProjectAcceptedHtml(project, siteUrl) {
 
 // EMAIL D: Progress Update
 export function formatProgressUpdatedHtml(project, updateMessage, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(project.tracking_code)}`;
 
   const content = `
@@ -211,7 +211,7 @@ export function formatProgressUpdatedHtml(project, updateMessage, siteUrl) {
 
 // EMAIL E: Project Completed
 export function formatProjectCompletedHtml(project, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(project.tracking_code)}`;
 
   const content = `
@@ -247,7 +247,7 @@ export function formatProjectCompletedHtml(project, siteUrl) {
 
 // EMAIL F: Project On Hold / Declined
 export function formatProjectStatusChangeHtml(project, reason, siteUrl) {
-  const origin = (siteUrl || "https://sanju-x-dev.vercel.app").replace(/\/$/, "");
+  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
   const trackUrl = `${origin}/track?code=${encodeURIComponent(project.tracking_code)}`;
 
   const content = `
@@ -266,7 +266,7 @@ export function formatProjectStatusChangeHtml(project, reason, siteUrl) {
       <div class="box">${escape(reason)}</div>
     ` : ""}
 
-    <p style="margin-top: 16px;">If you have any questions or would like to discuss next steps, please reply to this email or reach us at <a href="mailto:sanjuxdev27@gmail.com" style="color: #852c32;">sanjuxdev27@gmail.com</a>.</p>
+    <p style="margin-top: 16px;">If you have any questions or would like to discuss next steps, please reply to this email or reach us at <a href="mailto:trinitytech27@gmail.com" style="color: #852c32;">trinitytech27@gmail.com</a>.</p>
 
     <div style="margin-top: 20px;">
       <a href="${trackUrl}" class="btn">View Project Tracking →</a>
@@ -380,7 +380,7 @@ export async function sendEmail({
   const fromEmail =
     options.fromEmail ||
     process.env.SMTP_FROM_EMAIL ||
-    (user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
+    (user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <trinitytech27@gmail.com>');
 
   // Priority 1: Gmail SMTP Transporter
   const transporter = options.transporter || createSmtpTransport(options);
@@ -537,14 +537,14 @@ export function formatEnquiryHtml(enquiry, siteUrl) {
 
 // Automatic Notification Pipeline: Owner Alert + Customer Tracking Confirmation
 export async function sendEnquiryNotification(enquiry, options = {}, client = null) {
-  const siteUrl = options.siteUrl || process.env.SITE_URL || "https://sanju-x-dev.vercel.app";
+  const siteUrl = options.siteUrl || process.env.SITE_URL || "https://trinity-tech.in";
   const trackingCode = enquiry.tracking_code || "SXD-001";
   const toEmail =
     options.toEmail ||
     process.env.OWNER_NOTIFICATION_EMAIL ||
     options.smtpUser ||
     process.env.SMTP_USER ||
-    "sanjuxdev27@gmail.com";
+    "trinitytech27@gmail.com";
 
   // 1. Send Immediate Notification to Owner's Gmail Inbox
   const ownerHtml = formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl);

@@ -690,7 +690,7 @@ export default async function handler(req, res) {
           siteUrl: env().SITE_URL,
           resendApiKey: env().RESEND_API_KEY,
           fromEmail: env().RESEND_FROM_EMAIL,
-          toEmail: env().OWNER_NOTIFICATION_EMAIL || "sanjuxdev27@gmail.com",
+          toEmail: env().OWNER_NOTIFICATION_EMAIL || "trinitytech27@gmail.com",
         }, client);
 
         if (emailResult.success) {
@@ -1450,8 +1450,8 @@ export default async function handler(req, res) {
             port: Number(env().SMTP_PORT || 465),
             secure: env().SMTP_SECURE !== "false",
             user: env().SMTP_USER || "",
-            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"Trinity Tech" <${env().SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>'),
-            ownerNotificationEmail: env().OWNER_NOTIFICATION_EMAIL || env().SMTP_USER || "sanjuxdev27@gmail.com",
+            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"Trinity Tech" <${env().SMTP_USER}>` : '"Trinity Tech" <trinitytech27@gmail.com>'),
+            ownerNotificationEmail: env().OWNER_NOTIFICATION_EMAIL || env().SMTP_USER || "trinitytech27@gmail.com",
           },
         });
       }
@@ -1679,12 +1679,12 @@ export default async function handler(req, res) {
 
         case "test-email": {
           const e = env();
-          const testRecipient = body.recipient || e.OWNER_NOTIFICATION_EMAIL || e.SMTP_USER || "sanjuxdev27@gmail.com";
+          const testRecipient = body.recipient || e.OWNER_NOTIFICATION_EMAIL || e.SMTP_USER || "trinitytech27@gmail.com";
           const timeIST = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" }) + " IST";
           const host = e.SMTP_HOST || "smtp.gmail.com";
           const port = e.SMTP_PORT || "465";
-          const user = e.SMTP_USER || "sanjuxdev27@gmail.com";
-          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"Trinity Tech" <${e.SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
+          const user = e.SMTP_USER || "trinitytech27@gmail.com";
+          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"Trinity Tech" <${e.SMTP_USER}>` : '"Trinity Tech" <trinitytech27@gmail.com>');
 
           const testHtml = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #222; background: #eee5d5;">

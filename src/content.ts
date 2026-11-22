@@ -972,6 +972,17 @@ export const mainContact = {
 };
 
 /** Star symbol shown in the background for each project. */
+/** Gold illustration scenes that set the mood behind each project. */
+export const PROJECT_SCENES: Record<string, string> = {
+  "starx-live": "/brand/scenes/band.webp",
+  ticketx: "/brand/scenes/cinema.webp",
+  "abps-books": "/brand/scenes/library.webp",
+};
+
+/** Gold line-art for each website category (booking cards, domains stack). */
+const CATEGORY_ART_IDS = ["portfolio", "blog", "business", "agency", "ecommerce", "restaurant", "shop", "booking", "educational", "custom"];
+export const categoryArt = (id?: string) => (id && CATEGORY_ART_IDS.includes(id) ? `/brand/types/${id}.webp` : "");
+
 export const PROJECT_ICONS: Record<string, string> = {
   "starx-live": "icon:music",
   ticketx: "icon:ticket",
@@ -1044,6 +1055,7 @@ export const publicFaqs = [
 export const siteTypes = [
   {
     icon: "icon:briefcase",
+    art: "/brand/types/business.webp",
     category: "Business Website",
     title: "Business & Company",
     sub: "Your brand, services and contact in one place",
@@ -1052,6 +1064,7 @@ export const siteTypes = [
   },
   {
     icon: "icon:shopping-cart",
+    art: "/brand/types/ecommerce.webp",
     category: "E-Commerce Website",
     title: "E-Commerce Store",
     sub: "Sell products online, day and night",
@@ -1060,6 +1073,7 @@ export const siteTypes = [
   },
   {
     icon: "icon:calendar-check",
+    art: "/brand/types/booking.webp",
     category: "Booking / Appointment Website",
     title: "Booking & Events",
     sub: "Tickets, appointments and reservations",
@@ -1068,6 +1082,7 @@ export const siteTypes = [
   },
   {
     icon: "icon:user",
+    art: "/brand/types/portfolio.webp",
     category: "Personal Portfolio",
     title: "Portfolio & Personal Brand",
     sub: "Show your work, skills and story",
@@ -1076,6 +1091,7 @@ export const siteTypes = [
   },
   {
     icon: "icon:utensils",
+    art: "/brand/types/restaurant.webp",
     category: "Restaurant Website",
     title: "Restaurants & Local Shops",
     sub: "Menus, offers and orders for local businesses",
@@ -1084,6 +1100,7 @@ export const siteTypes = [
   },
   {
     icon: "icon:code-xml",
+    art: "/brand/types/custom.webp",
     category: "Other / Custom Website",
     title: "Custom Web Apps",
     sub: "Tools and platforms built around your idea",

@@ -497,7 +497,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("theme-owner", isOwner);
+    // the admin workspace now shares the dark gold Trinity Tech theme
+    document.documentElement.classList.toggle("tt-admin", isOwner);
   }, [isOwner]);
 
   // lets pages tune the star background (e.g. calmer behind the booking form)

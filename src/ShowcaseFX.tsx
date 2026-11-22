@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { gsap, ScrollTrigger, prefersReducedMotion, showStars } from "./scroll";
-import { PROJECT_ICONS, type projects } from "./content";
+import { PROJECT_ICONS, PROJECT_SCENES, type projects } from "./content";
 
 type Project = (typeof projects)[number];
 
@@ -238,6 +238,7 @@ export function DemoStage({ items }: { items: Project[] }) {
             key={p.slug}
             style={{ "--project-color": p.color, zIndex: i + 1 } as React.CSSProperties}
           >
+            {PROJECT_SCENES[p.slug] && <img className="tt-scene-bg" src={PROJECT_SCENES[p.slug]} alt="" aria-hidden="true" loading="lazy" />}
             <div className="tt-demo-inner wrap">
               <div className="tt-demo-copy">
                 <span className="tt-demo-index">{String(i + 1).padStart(2, "0")}</span>
