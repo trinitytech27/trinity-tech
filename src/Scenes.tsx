@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Mail, Radar } from "lucide-react";
 import { gsap, ScrollTrigger, showStars } from "./scroll";
-import { team, siteTypes, PROJECT_ICONS, PROJECT_SCENES, type projects } from "./content";
+import { team, siteTypes, PROJECT_ICONS, type projects } from "./content";
 import { BOOKING_STEPS } from "./Home";
 
 type Project = (typeof projects)[number];
@@ -22,16 +22,13 @@ export function SectionTag({ n, label }: { n: string; label: string }) {
 }
 
 /* ==========================================================================
-   PROJECTS — fly-through, alternating sides. Each project comes out of deep
-   space onto its own side (right, then left, then right…), the caption sits
-   on the other side, and the stars draw the project's symbol opposite the
-   image. When the next one arrives, the current screen rushes past the
-   visitor and blurs away.
+   LIVE PROJECTS — a calm fly-through (same on laptop, tablet and phone).
+   One screenshot sits in the middle in front of a big headline; the next one
+   waits small behind it. Scrolling flies the current screen past the visitor
+   (it grows, blurs and fades) while the next glides forward into place.
+   A compact caption sits bottom-left and a counter bottom-right, so the
+   starfield behind stays visible.
    ========================================================================== */
-// every project shows its screenshot on the right, copy on the left
-const sideOf = (_i: number) => "right" as const;
-const opposite = (s: string) => (s === "right" ? "left" : "right");
-
 export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
@@ -39,7 +36,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
   const activeRef = useRef(0);
   activeRef.current = active;
 
-  const starsFor = (i: number) => `${PROJECT_ICONS[items[i]?.slug] || "galaxy"}@${opposite(sideOf(i))}`;
+  const starsFor = (i: number) => `${PROJECT_ICONS[items[i]?.slug] || "galaxy"}@left`;
 
   useEffect(() => {
     if (inView.current) showStars(starsFor(active));
@@ -51,12 +48,9 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
     const mm = gsap.matchMedia();
     mm.add(DESKTOP, () => {
       el.classList.add("is-flying");
-      const cards = gsap.utils.toArray<HTMLElement>(".tt-pf-card", el);
+      const cards = gsap.utils.toArray<HTMLElement>(".tt-fly-card", el);
       const narrow = window.innerWidth < 760;
-      // laptops: the screen sits on the right half (info card owns the left half)
-      const sx = (_i: number) => (narrow ? 0 : 23); // vw
-      const FROM_X = narrow ? 0 : -38; // next screen waits on the left…
-      const EXIT_X = narrow ? 0 : 62; // …and the current one leaves to the right
+      const Y = narrow ? 3 : -2; // vh (phones: below the headline)
       const pose = (x: number, y: number, z: number, scale: number, opacity: number, blur = 0) => ({
         xPercent: -50,
         yPercent: -50,
@@ -65,20 +59,23 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
         z,
         scale,
         opacity,
-        filter: `blur(${blur}px)`,
+        filter: blur ? `blur(${blur}px)` : "blur(0px)",
       });
-      const MAIN_Y = narrow ? -9 : -3;
-      // waiting far away, small, on the project's own side
-      cards.forEach((c) => gsap.set(c, pose(FROM_X, MAIN_Y - 6, -1800, 0.5, 0)));
+      const CENTER = pose(narrow ? 0 : -3, Y, 0, 1, 1);
+      const WAIT = pose(narrow ? 34 : 31, Y - 4, -700, 0.5, 0.9); // small, peeking behind
+      const HIDDEN = pose(narrow ? 40 : 38, Y - 5, -1400, 0.32, 0);
+      const PAST = pose(narrow ? 0 : -6, Y + 4, 650, 2.1, 0, 14); // rushes past the visitor
 
-      const marks: number[] = [];
+      cards.forEach((c, i) => gsap.set(c, { ...(i === 0 ? CENTER : i === 1 ? WAIT : HIDDEN), zIndex: 50 - i }));
+
+      const marks: number[] = [0];
       const tl = gsap.timeline({
         defaults: { ease: "power2.inOut" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * (cards.length * 0.95),
-          scrub: 0.8,
+          end: () => "+=" + window.innerHeight * (cards.length * 0.8),
+          scrub: 0.9,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -89,26 +86,19 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
           onUpdate: (self) => {
             const t = self.progress * (self.animation ? self.animation.duration() : 0);
             let idx = 0;
-            marks.forEach((m, i) => t >= m - 0.05 && (idx = i));
+            marks.forEach((m, i) => t >= m - 0.45 && (idx = i));
             setActive(idx);
           },
         },
       });
-      cards.forEach((card, i) => {
-        if (i > 0) {
-          // the current screen rushes toward the visitor and blurs away
-          tl.to(cards[i - 1], { ...pose(narrow ? 0 : EXIT_X, MAIN_Y + 4, narrow ? 900 : 300, narrow ? 1.6 : 1.15, 0, 14), duration: 1, ease: "power2.in" }, ">");
-        }
-        // the first project is already in place when the section arrives;
-        // each next screen glides in from deep space
-        if (i === 0) gsap.set(card, pose(sx(0), MAIN_Y, 0, 1, 1, 0));
-        else tl.to(card, { ...pose(sx(i), MAIN_Y, 0, 1, 1, 0), duration: 1.1, ease: "power3.out" }, "<0.15");
-        // and the one after it appears far behind, waiting
-        if (cards[i + 1]) tl.to(cards[i + 1], { ...pose(FROM_X, MAIN_Y - 5, -1300, 0.55, 0.35, 2), duration: 0.8 }, "<0.3");
+      tl.to({}, { duration: 0.5 }); // a moment to look at the first one
+      for (let i = 1; i < cards.length; i++) {
+        tl.to(cards[i - 1], { ...PAST, duration: 1, ease: "power2.in" }, ">");
+        tl.to(cards[i], { ...CENTER, duration: 1, ease: "power2.out" }, "<0.1");
+        if (cards[i + 1]) tl.to(cards[i + 1], { ...WAIT, duration: 0.9 }, "<0.15");
         marks.push(tl.duration());
-        tl.addLabel("p" + i);
         tl.to({}, { duration: 0.5 });
-      });
+      }
       return () => {
         el.classList.remove("is-flying");
         gsap.set(cards, { clearProps: "all" });
@@ -118,63 +108,64 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
   }, [items.length]);
 
   const cur = items[active];
-  const side = sideOf(active);
+  const pad = (x: number) => String(x).padStart(2, "0");
   return (
-    <section ref={root} className="tt-pfly" data-section="Our Work" aria-label="Our live projects">
-      <header className="tt-pfly-head wrap">
+    <section ref={root} className="tt-fly" data-section="Our Work" aria-label="Our live projects">
+      <header className="tt-fly-head wrap">
         <SectionTag n={n} label="Live Projects" />
       </header>
-      <div className="tt-pfly-stage">
+      <div className="tt-fly-title" aria-hidden="true">
+        <h2>
+          Step inside <em>our live work.</em>
+        </h2>
+        <p>Keep scrolling — every project is a doorway.</p>
+      </div>
+      <div className="tt-fly-stage">
         {items.map((p, i) => (
           <a
             key={p.slug}
             href={p.url}
             target="_blank"
             rel="noreferrer"
-            className={"tt-pf-card" + (i === active ? " is-active" : "")}
-            style={{ zIndex: items.length - Math.abs(i - active) } as React.CSSProperties}
+            className={"tt-fly-card" + (i === active ? " is-active" : "")}
+            style={{ zIndex: 50 - i } as React.CSSProperties}
             aria-label={"Visit the " + p.short + " live site"}
+            tabIndex={i === active ? 0 : -1}
           >
-            <span className="tt-pf-chip">
-              <b>{String(i + 1).padStart(2, "0")}</b> {p.category.split("/")[0].trim()}
+            <span className="tt-fly-chip">
+              <b>{pad(i + 1)}</b> {p.category.split("/")[0].trim()}
             </span>
             <img src={p.image} alt={p.name + " live website"} loading="eager" decoding="async" />
           </a>
         ))}
       </div>
       {cur && (
-        <div className={"tt-pf-caption on-" + opposite(side)} key={cur.slug}>
-          {PROJECT_SCENES[cur.slug] && <img className="tt-scene-bg" src={PROJECT_SCENES[cur.slug]} alt="" aria-hidden="true" />}
-          <span className="tt-pf-kicker">{cur.category}</span>
+        <div className="tt-fly-caption" key={cur.slug}>
+          <span className="tt-fly-kicker">{cur.category}</span>
           <h3>{cur.short}</h3>
-          <p className="tt-pf-quote">“{(cur as Project & { quote?: string }).quote || cur.headline}”</p>
           <p>{cur.summary}</p>
-          <div className="tt-pf-actions">
-            <a href={cur.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary">
-              Visit Live Site <ArrowUpRight size={17} />
+          <div className="tt-fly-links">
+            <a href={cur.url} target="_blank" rel="noreferrer">
+              Visit live site <ArrowUpRight size={15} />
             </a>
-            <Link to={"/work/" + cur.slug} className="tt-btn tt-btn-ghost">
-              View Full Details <ArrowRight size={16} />
+            <Link to={"/work/" + cur.slug}>
+              Details <ArrowRight size={15} />
             </Link>
           </div>
         </div>
       )}
-      <div className={"tt-pf-progress on-" + side} aria-hidden="true">
-        <b>{String(active + 1).padStart(2, "0")}</b>
+      <div className="tt-fly-count" aria-hidden="true">
+        <b>{pad(active + 1)}</b>
         <i>
           <span style={{ transform: `scaleX(${(active + 1) / items.length})` }} />
         </i>
+        <b>{pad(items.length)}</b>
       </div>
-      <ul className="tt-pf-list">
-        {items.map((p) => (
-          <li key={p.slug}>
-            <a href={p.url} target="_blank" rel="noreferrer">
-              {p.short}
-            </a>{" "}
-            · <Link to={"/work/" + p.slug}>Details</Link>
-          </li>
+      <ol className="tt-fly-rail" aria-hidden="true">
+        {items.map((p, i) => (
+          <li key={p.slug} className={i === active ? "on" : ""} />
         ))}
-      </ul>
+      </ol>
     </section>
   );
 }

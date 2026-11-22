@@ -537,7 +537,7 @@ function whoIs(row) {
     ? { id: row.admin_id, name: p.name, fullName: p.fullName, role: p.role, access: p.access }
     : { id: "owner", name: "Owner", fullName: "Trinity Tech", role: "Owner", access: "superadmin" };
 }
-const SUPER_ONLY = new Set(["send-mail", "delete-enquiry", "delete-project", "delete-media", "test-email", "verify-smtp"]);
+const SUPER_ONLY = new Set(["send-mail", "delete-enquiry", "delete-project", "delete-media", "test-email", "verify-smtp", "retry-email", "setup-code", "test-ai"]);
 
 async function audit(client, action) {
   try {

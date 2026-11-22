@@ -12,9 +12,11 @@ import {
   Plus,
   ExternalLink,
   Send,
+  Menu,
+  X,
 } from "lucide-react";
 import { defaults } from "./content";
-import { AdminOverview, ComposeMail, UpdatesEditor, accessLabel, isSuper, type Me } from "./AdminExtras";
+import { AdminOverview, AdminSettings, ComposeMail, UpdatesEditor, accessLabel, allowedTab, isSuper, labelOf, navFor, readPrefs, type Me } from "./AdminExtras";
 
 const auth =
   import.meta.env.VITE_SUPABASE_URL &&
@@ -42,6 +44,7 @@ export default function Admin() {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState("Overview");
+  const [navOpen, setNavOpen] = useState(false);
   // compose-email panel (Super Admin) and which project's updates are open
   const [compose, setCompose] = useState<null | { to?: string; name?: string; trackingCode?: string }>(null);
   const [openUpdates, setOpenUpdates] = useState<string | null>(null);
@@ -200,10 +203,11 @@ export default function Admin() {
     setStage("workspace");
   }
 
-  async function logout() {
+  async function logout(everywhere = false) {
     await run(async () => {
-      await api({ action: "logout" });
-      await auth?.auth.signOut({ scope: "global" });
+      if (everywhere) await api({ action: "logout" });
+      await auth?.auth.signOut({ scope: everywhere ? "global" : "local" });
+      setTab("Overview");
       setStage("code");
       setData(null);
       setSecretCode("");
@@ -307,6 +311,51 @@ export default function Admin() {
     return data?.enquiries?.filter((e: any) => !e.read).length || 0;
   }, [data?.enquiries]);
 
+  // open a section (closes the phone menu, scrolls to top)
+  function goTo(t: string) {
+    setTab(t);
+    setNavOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Admins only see the pages their role allows
+  useEffect(() => {
+    if (data?.me && !allowedTab(tab, me)) setTab("Overview");
+  }, [tab, data?.me]);
+
+  // chime / desktop alert when a new enquiry arrives (Settings → Notifications)
+  const lastUnread = useRef<number | null>(null);
+  useEffect(() => {
+    if (!data) return;
+    const prev = lastUnread.current;
+    lastUnread.current = unreadCount;
+    if (prev === null || unreadCount <= prev) return;
+    const prefs = readPrefs();
+    if (prefs.sound) {
+      try {
+        const ctx = new AudioContext();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+        o.connect(g).connect(ctx.destination);
+        o.start();
+        o.stop(ctx.currentTime + 0.62);
+      } catch {
+        /* audio blocked */
+      }
+    }
+    if (prefs.desktop && document.hidden && "Notification" in window && Notification.permission === "granted") {
+      try {
+        new Notification("New enquiry — Trinity Tech", { body: "A client just sent an enquiry.", icon: "/brand/mark.png" });
+      } catch {
+        /* not supported */
+      }
+    }
+  }, [unreadCount, data]);
+
   // Copy email to clipboard helper
   function copyEmail(emailToCopy: string, id: string) {
     void navigator.clipboard.writeText(emailToCopy);
@@ -315,9 +364,13 @@ export default function Admin() {
   }
 
   return (
-    <section className="page wrap admin-shell">
-      <span className="eyebrow">Private · Admins only</span>
-      <h1>Admin Workspace</h1>
+    <section className={"page wrap admin-shell" + (stage === "workspace" ? " tt-adm" : "")}>
+      {stage !== "workspace" && (
+        <>
+          <span className="eyebrow">Private · Admins only</span>
+          <h1>Admin Workspace</h1>
+        </>
+      )}
 
       {stage !== "workspace" ? (
         <div className="admin-card admin-login">
@@ -468,166 +521,112 @@ export default function Admin() {
       ) : (
         /* AUTHENTICATED WORKSPACE */
         <>
-          <div className="tt-admin-welcome">
-            <div className="tt-admin-avatar">{(adminName?.name || "A").slice(0, 1)}</div>
-            <div>
-              <span className="tt-admin-kicker">
-                {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
-              </span>
-              <h2>
-                Welcome back, {me?.name || adminName?.name || "Admin"}.{" "}
-                <span className={"tt-role" + (superUser ? " super" : "")}>{accessLabel(me)}</span>
-              </h2>
-              <p>
-                {adminName ? adminName.fullName + " · " + adminName.role + " · " : ""}
-                Manage enquiries, projects and site content for Trinity Tech.
-              </p>
-            </div>
-          </div>
-          <div className="admin-tabs" style={{ position: "relative" }}>
-            {tabs.filter((t) => superUser || t !== "Security").map((t) => (
-              <button
-                key={t}
-                className={tab === t ? "active" : ""}
-                onClick={() => {
-                  setTab(t);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-              >
-                {TAB_LABELS[t] || t}
-                {t === "Enquiries" && unreadCount > 0 && (
-                  <span
-                    style={{
-                      marginLeft: 6,
-                      background: "var(--accent)",
-                      color: "#fff",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      padding: "2px 6px",
-                      borderRadius: 10,
-                    }}
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-            ))}
-
-            {/* REAL-TIME NOTIFICATION BELL */}
-            <div ref={notificationRef} style={{ position: "relative", display: "inline-block" }}>
-              <button
-                aria-label="Enquiry notifications"
-                onClick={() => setShowNotifications(!showNotifications)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  position: "relative",
-                  padding: "8px 12px",
-                  borderRadius: 4,
-                  border: "1px solid var(--line)",
-                  background: showNotifications ? "var(--paper)" : "transparent",
-                }}
-              >
-                <Bell size={18} />
-                {unreadCount > 0 && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: "var(--accent)",
-                    }}
-                  />
-                )}
-              </button>
-
-              {showNotifications && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    top: "100%",
-                    marginTop: 8,
-                    width: 320,
-                    maxHeight: 380,
-                    overflowY: "auto",
-                    background: "var(--paper)",
-                    border: "1px solid var(--line)",
-                    borderRadius: 6,
-                    boxShadow: "0 8px 24px var(--shadow)",
-                    padding: 12,
-                    zIndex: 50,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderBottom: "1px solid var(--line)",
-                      paddingBottom: 8,
-                      marginBottom: 8,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>
-                      Enquiries ({unreadCount} unread)
-                    </span>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={() =>
-                          void run(async () => {
-                            await api({ action: "mark-all-read" });
-                            await loadSilently();
-                          })
-                        }
-                        style={{ fontSize: 11, color: "var(--accent)" }}
-                      >
-                        Mark all read
-                      </button>
+          {/* WORKSPACE CHROME: top bar (notifications first) + sidebar */}
+          <header className="tt-adm-top">
+            <button type="button" className="tt-adm-burger" aria-label={navOpen ? "Close menu" : "Open menu"} aria-expanded={navOpen} onClick={() => setNavOpen(!navOpen)}>
+              {navOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <a className="tt-adm-brand" href="/" target="_blank" rel="noreferrer" aria-label="Open the public site">
+              <img src="/brand/mark.webp" alt="" width={34} height={26} />
+              <span><b>Trinity Tech</b><small>Admin</small></span>
+            </a>
+            <h1 className="tt-adm-title">{labelOf(tab)}</h1>
+            <div className="tt-adm-tools">
+              <div ref={notificationRef} className="tt-adm-bellwrap">
+                <button type="button" className={"tt-adm-bell" + (unreadCount ? " has" : "")} aria-label={`Notifications, ${unreadCount} unread`} aria-expanded={showNotifications} onClick={() => setShowNotifications(!showNotifications)}>
+                  <Bell size={19} />
+                  {unreadCount > 0 && <span className="tt-adm-count">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                </button>
+                {showNotifications && (
+                  <div className="tt-adm-pop" role="dialog" aria-label="Notifications">
+                    <div className="tt-adm-pop-head">
+                      <b>Notifications</b>
+                      {unreadCount > 0 && (
+                        <button type="button" onClick={() => void run(async () => { await api({ action: "mark-all-read" }); await loadSilently(); })}>
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    {(data?.enquiries || []).filter((e: any) => !e.read).length === 0 ? (
+                      <p className="tt-adm-pop-empty">You are all caught up. New enquiries appear here instantly.</p>
+                    ) : (
+                      <ul>
+                        {(data?.enquiries || []).filter((e: any) => !e.read).slice(0, 8).map((e: any) => (
+                          <li key={e.id}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                goTo("Enquiries");
+                                setStatusFilter("unread");
+                                setShowNotifications(false);
+                                void api({ action: "enquiry-read", id: e.id, read: true }).then(loadSilently);
+                              }}
+                            >
+                              <span className="tt-adm-pop-dot" />
+                              <span>
+                                <b>{e.data?.name || "New client"}</b> sent an enquiry
+                                <small>{e.tracking_code ? e.tracking_code + " · " : ""}{e.data?.service || "Website"} · {new Date(e.created_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
-
-                  {data.enquiries.filter((e: any) => !e.read).length === 0 ? (
-                    <p style={{ fontSize: 12, color: "var(--muted)", margin: "12px 0" }}>
-                      No new unread customer enquiries.
-                    </p>
-                  ) : (
-                    data.enquiries
-                      .filter((e: any) => !e.read)
-                      .slice(0, 5)
-                      .map((e: any) => (
-                        <div
-                          key={e.id}
-                          onClick={() => {
-                            setTab("Enquiries");
-                            setStatusFilter("unread");
-                            setShowNotifications(false);
-                            void api({ action: "enquiry-read", id: e.id, read: true });
-                            void loadSilently();
-                          }}
-                          style={{
-                            padding: "8px 0",
-                            borderBottom: "1px solid var(--line)",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <div style={{ fontWeight: 600, fontSize: 13 }}>{e.data.name}</div>
-                          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                            {e.data.service} · {new Date(e.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                      ))
-                  )}
-                </div>
-              )}
+                )}
+              </div>
+              <button type="button" className="tt-adm-me" onClick={() => goTo("Settings")} aria-label="Account settings">
+                <span>{(me?.name || adminName?.name || "A").slice(0, 1)}</span>
+              </button>
             </div>
+          </header>
 
-            <button onClick={() => void logout()}>Sign out everywhere</button>
-          </div>
+          <nav className={"tt-adm-side" + (navOpen ? " open" : "")} aria-label="Admin sections">
+            {navFor(me).map((g) => (
+              <div key={g.title} className="tt-adm-group">
+                <span className="tt-adm-gtitle">{g.title}</span>
+                {g.items.map((it) => (
+                  <button
+                    key={it.id}
+                    type="button"
+                    className={"tt-adm-link" + (tab === it.id ? " active" : "")}
+                    onClick={() => goTo(it.id)}
+                    title={it.label}
+                    aria-current={tab === it.id ? "page" : undefined}
+                  >
+                    {it.icon}
+                    <span>{it.label}</span>
+                    {it.id === "Enquiries" && unreadCount > 0 && <i className="tt-adm-badge">{unreadCount}</i>}
+                  </button>
+                ))}
+              </div>
+            ))}
+            <button type="button" className="tt-adm-who" onClick={() => goTo("Settings")}>
+              <span className="tt-adm-av">{(me?.name || adminName?.name || "A").slice(0, 1)}</span>
+              <span><b>{me?.name || adminName?.name || "Admin"}</b><small>{accessLabel(me)}</small></span>
+            </button>
+          </nav>
+          {navOpen && <div className="tt-adm-scrim" onClick={() => setNavOpen(false)} />}
+
+          {tab === "Overview" && (
+            <div className="tt-admin-welcome">
+              <div className="tt-admin-avatar">{(me?.name || adminName?.name || "A").slice(0, 1)}</div>
+              <div>
+                <span className="tt-admin-kicker">
+                  {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+                <h2>
+                  Welcome back, {me?.name || adminName?.name || "Admin"}.{" "}
+                  <span className={"tt-role" + (superUser ? " super" : "")}>{accessLabel(me)}</span>
+                </h2>
+                <p>{superUser ? "You have full control of Trinity Tech." : "Manage enquiries, client projects and the portfolio."}</p>
+              </div>
+            </div>
+          )}
+
+          {tab === "Settings" && (
+            <AdminSettings me={me} profile={adminName} busy={busy} onSignOut={(all) => void logout(all)} goTo={goTo} />
+          )}
 
           {/* OVERVIEW TAB */}
           {compose && superUser && (
@@ -3155,7 +3154,7 @@ export default function Admin() {
             </div>
           )}
 
-          {!["Overview", "Active Projects", "Email Outbox", "Enquiries", "Analytics", "Media", "Security"].includes(tab) && (
+          {!["Overview", "Active Projects", "Email Outbox", "Enquiries", "Analytics", "Media", "Security", "Settings"].includes(tab) && (
             <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 24, flexWrap: "wrap" }}>
               <button
                 className="button"
