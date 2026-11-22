@@ -395,7 +395,7 @@ export default function Admin() {
                     try {
                       await auth.auth.setSession({
                         access_token: res.sessionToken,
-                        refresh_token: "",
+                        refresh_token: res.sessionRefresh || "",
                       });
                     } catch {
                       /* ignore */

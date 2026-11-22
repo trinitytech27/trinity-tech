@@ -441,11 +441,14 @@ const fail = (status, message) => Object.assign(new Error(message), { status });
 
 const checked = async (query) => {
   const r = await query;
-  if (r.error)
+  if (r.error) {
+    // server log only — visitors see the friendly message below
+    console.error("[db]", r.error.code || "", r.error.message || r.error);
     throw fail(
       503,
       "The database is not ready. Please contact the business by email.",
     );
+  }
   return r.data;
 };
 
@@ -1153,6 +1156,7 @@ export default async function handler(req, res) {
         // Issue official Supabase session for owner so RLS is satisfied
         let userSessionId = randomBytes(16).toString("hex");
         let sessionToken = null;
+        let sessionRefresh = null;
         try {
           if (client.auth?.admin) {
             const { data: userData } = await client.auth.admin.getUserById(OWNER_UID);
@@ -1162,12 +1166,16 @@ export default async function handler(req, res) {
                 email: userData.user.email,
               });
               if (linkData?.properties?.hashed_token) {
-                const { data: authData } = await client.auth.verifyOtp({
+                // sign in on a throwaway client: verifying on the shared
+                // service-role client would switch its later queries to the
+                // owner's (restricted) role and break the session insert
+                const { data: authData } = await (db() || client).auth.verifyOtp({
                   token_hash: linkData.properties.hashed_token,
                   type: "magiclink",
                 });
                 if (authData?.session) {
                   sessionToken = authData.session.access_token;
+                  sessionRefresh = authData.session.refresh_token || null;
                   userSessionId = JSON.parse(
                     Buffer.from(sessionToken.split(".")[1], "base64url").toString(),
                   ).session_id || userSessionId;
@@ -1204,6 +1212,7 @@ export default async function handler(req, res) {
         return send(200, {
           ok: true,
           sessionToken,
+          sessionRefresh,
           admin: admin ? { name: admin.name, fullName: admin.fullName, role: admin.role } : null,
         });
       }
@@ -1234,7 +1243,8 @@ export default async function handler(req, res) {
           throw fail(400, "Email and password are required.");
         }
 
-        const { data: authData, error: authError } = await client.auth.signInWithPassword({
+        // separate client, so the shared service-role client keeps its role
+        const { data: authData, error: authError } = await (db() || client).auth.signInWithPassword({
           email: String(body.email).trim(),
           password: String(body.password),
         });
