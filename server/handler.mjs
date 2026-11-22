@@ -24,6 +24,36 @@ import {
 } from "./email.mjs";
 import seed from "./seed.json" with { type: "json" };
 
+/**
+ * Named admin access codes. The codes themselves never live in the source:
+ * ADMIN_PIN_VERIFIERS is a JSON object of salted scrypt verifiers, e.g.
+ * {"sanju":"salt:hash","maddy":"salt:hash","jose":"salt:hash"}
+ * (create it with: node scripts/admin-pins.mjs).
+ */
+const ADMIN_PROFILES = {
+  sanju: { name: "Sanju", fullName: "Sanjay", role: "Developer" },
+  maddy: { name: "Maddy", fullName: "Madhan Kumar", role: "Developer" },
+  jose: { name: "Jose", fullName: "Balajose", role: "Founder" },
+};
+
+function adminVerifiers() {
+  try {
+    const raw = env().ADMIN_PIN_VERIFIERS;
+    const parsed = raw ? JSON.parse(raw) : {};
+    return Object.entries(parsed).filter(([id, v]) => ADMIN_PROFILES[id] && typeof v === "string");
+  } catch {
+    return [];
+  }
+}
+
+/** Which admin (if any) this access code belongs to. */
+function matchAdmin(code) {
+  for (const [id, verifier] of adminVerifiers()) {
+    if (verifyPin(code, verifier)) return { id, ...ADMIN_PROFILES[id] };
+  }
+  return null;
+}
+
 // Projects removed from the public portfolio, even if still stored in the database.
 const RETIRED_PROJECTS = new Set(["yuva-shakti"]);
 
@@ -118,12 +148,12 @@ function extractChatLinks(question, answer) {
   }
 
   // 2. Project tracking queries
-  if (/sxd-|track|tracking|project status|check my project/i.test(q)) {
+  if (/tt-\d|sxd-|track|tracking|project status|check my project/i.test(q)) {
     addLink("Track My Project", "/track");
   }
 
   // 3. Portfolio / previous projects queries
-  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
+  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
     addLink("View Projects", "/work");
   }
 
@@ -287,7 +317,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 6. Direct request to start or submit project
   if (/submit\s+(my\s+)?project|start\s+(a\s+|my\s+)?project|get\s+started|start\s+now|how\s+do\s+i\s+start/i.test(q)) {
     return {
-      answer: "Starting is simple and takes just 4 easy steps on our Project page (/project). Select your website category, choose features, set design preferences, and connect directly on WhatsApp. You'll immediately receive your sequential SXD Tracking ID.",
+      answer: "Starting is simple and takes just 4 easy steps on our Project page (/project). Select your website category, choose features, set design preferences, and connect directly on WhatsApp. You'll immediately receive your sequential Tracking ID.",
       mode: "FAQ guide",
       links: [
         { label: "Start Your Project", url: "/project" }
@@ -296,9 +326,9 @@ function runIntelligentFallback(rawQ, history, _s) {
   }
 
   // 7. Project tracking queries
-  if (/sxd-|track|tracking|project status|check my project|status/i.test(q)) {
+  if (/tt-\d|sxd-|track|tracking|project status|check my project|status/i.test(q)) {
     return {
-      answer: "You can track your project anytime on our Track Project page at /track. Enter your unique SXD Tracking ID (such as SXD-001) and your registered email address to view real-time countdown days, milestone progress, and updates.",
+      answer: "You can track your project anytime on our Track Project page at /track. Enter your unique Tracking ID (such as TT-001) and your registered email address to view real-time countdown days, milestone progress, and updates.",
       mode: "FAQ guide",
       links: [
         { label: "Track My Project", url: "/track" }
@@ -343,7 +373,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 11. Portfolio / Previous work
   if (/work|portfolio|previous project|past work|case stud|projects/i.test(q)) {
     return {
-      answer: "We have four verified portfolio case studies: StarX Live (entertainment website), TicketX (event booking platform), StarX Connect (virtual card) and AudioX (audio utility app). Live demos of StarX Live and TicketX are featured on the homepage.",
+      answer: "We have five live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore), StarX Connect (digital card) and AudioX (audio utility app). Every one is a live demo in Our Work.",
       mode: "FAQ guide",
       links: [
         { label: "View Projects", url: "/work" }
@@ -411,11 +441,14 @@ const fail = (status, message) => Object.assign(new Error(message), { status });
 
 const checked = async (query) => {
   const r = await query;
-  if (r.error)
+  if (r.error) {
+    // server log only — visitors see the friendly message below
+    console.error("[db]", r.error.code || "", r.error.message || r.error);
     throw fail(
       503,
       "The database is not ready. Please contact the business by email.",
     );
+  }
   return r.data;
 };
 
@@ -565,7 +598,7 @@ export default async function handler(req, res) {
       if (!client)
         throw fail(
           503,
-          "Enquiries are not connected yet. Please email balajoseboddukuri@gmail.com.",
+          "Enquiries are not connected yet. Please email trinitytech27@gmail.com.",
         );
 
       await rate(client, req, "enquiry", 5);
@@ -592,7 +625,7 @@ export default async function handler(req, res) {
         }
       }
 
-      // Generate sequential tracking code SXD-001, SXD-002, etc.
+      // Generate sequential tracking code TT-001, TT-002, etc.
       let trackingCode = null;
       try {
         const { data: codeData, error: codeErr } = await client.rpc("studio_generate_tracking_code");
@@ -606,7 +639,7 @@ export default async function handler(req, res) {
         try {
           const { count } = await client.from("studio_enquiries").select("id", { count: "exact", head: true });
           const nextNum = (count || 0) + 1;
-          trackingCode = nextNum < 1000 ? `SXD-${String(nextNum).padStart(3, "0")}` : `SXD-${nextNum}`;
+          trackingCode = nextNum < 1000 ? `TT-${String(nextNum).padStart(3, "0")}` : `TT-${nextNum}`;
         } catch {
           try {
             const { data: latest } = await client
@@ -615,11 +648,11 @@ export default async function handler(req, res) {
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle();
-            const match = latest?.tracking_code?.match(/SXD-(\d+)/);
+            const match = latest?.tracking_code?.match(/(?:TT|SXD)-(\d+)/);
             const nextNum = match ? parseInt(match[1], 10) + 1 : 1;
-            trackingCode = nextNum < 1000 ? `SXD-${String(nextNum).padStart(3, "0")}` : `SXD-${nextNum}`;
+            trackingCode = nextNum < 1000 ? `TT-${String(nextNum).padStart(3, "0")}` : `TT-${nextNum}`;
           } catch {
-            trackingCode = "SXD-001";
+            trackingCode = "TT-001";
           }
         }
       }
@@ -660,7 +693,7 @@ export default async function handler(req, res) {
           siteUrl: env().SITE_URL,
           resendApiKey: env().RESEND_API_KEY,
           fromEmail: env().RESEND_FROM_EMAIL,
-          toEmail: env().OWNER_NOTIFICATION_EMAIL || "sanjuxdev27@gmail.com",
+          toEmail: env().OWNER_NOTIFICATION_EMAIL || "trinitytech27@gmail.com",
         }, client);
 
         if (emailResult.success) {
@@ -691,7 +724,7 @@ export default async function handler(req, res) {
 
     if (path === "/api/track" && req.method === "POST") {
       if (!client)
-        throw fail(503, "Tracking service is temporarily unavailable. Please email balajoseboddukuri@gmail.com.");
+        throw fail(503, "Tracking service is temporarily unavailable. Please email trinitytech27@gmail.com.");
 
       await rate(client, req, "track", 30);
 
@@ -701,8 +734,8 @@ export default async function handler(req, res) {
         const rawCode = String(body.trackingCode || "").trim().toUpperCase();
         const rawEmail = String(body.email || "").trim().toLowerCase();
 
-        if (!/^SXD-\d+$/i.test(rawCode) || !/^\S+@\S+\.\S+$/.test(rawEmail)) {
-          throw fail(400, "Please enter a valid Tracking ID (e.g. SXD-001) and your registered email address.");
+        if (!/^(TT|SXD)-\d+$/i.test(rawCode) || !/^\S+@\S+\.\S+$/.test(rawEmail)) {
+          throw fail(400, "Please enter a valid Tracking ID (e.g. TT-001) and your registered email address.");
         }
 
         let matched = false;
@@ -963,8 +996,8 @@ export default async function handler(req, res) {
               "\n   - Agency Website: Creative studios, multidisciplinary teams, case studies (/project?category=Agency%20Website)." +
               "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
-              "\n8. TRACKING INTEGRATION: When asked about an SXD tracking code (e.g. SXD-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
-              "\n9. VERIFIED PORTFOLIO: Reference the real 4 case studies (StarX Live, TicketX, StarX Connect, AudioX) and direct to /work when requested." +
+              "\n8. TRACKING INTEGRATION: When asked about a tracking code (e.g. TT-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
+              "\n9. VERIFIED PORTFOLIO: Reference the real 5 projects (StarX Live, TicketX, ABPS Books, StarX Connect, AudioX) and direct to /work when requested." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");
 
@@ -1054,7 +1087,7 @@ export default async function handler(req, res) {
         return send(200, {
           codeLockout,
           passwordLockout,
-          pinConfigured: !!verifier,
+          pinConfigured: !!verifier || adminVerifiers().length > 0,
         });
       }
 
@@ -1088,15 +1121,18 @@ export default async function handler(req, res) {
             .maybeSingle(),
         );
         const verifier = env().ADMIN_PIN_VERIFIER || config?.pin_verifier;
+        const named = adminVerifiers().length > 0;
 
-        if (!verifier) {
+        if (!verifier && !named) {
           throw fail(
             400,
-            "Secret code has not been initialized. Please sign in with 'Login with spideyy' first to configure it.",
+            "Private access codes are not configured yet. Set ADMIN_PIN_VERIFIERS on the server.",
           );
         }
 
-        const isValid = verifyPin(body.code, verifier);
+        // Named admins first (Sanju / Maddy / Jose), then the legacy owner code
+        const admin = named ? matchAdmin(String(body.code || "")) : null;
+        const isValid = !!admin || (!!verifier && verifyPin(body.code, verifier));
         if (!isValid) {
           await recordFailedAttempt(client, ipScope, 10, 15);
           const failStatus = await recordFailedAttempt(client, "code:owner", 3, 3);
@@ -1120,6 +1156,7 @@ export default async function handler(req, res) {
         // Issue official Supabase session for owner so RLS is satisfied
         let userSessionId = randomBytes(16).toString("hex");
         let sessionToken = null;
+        let sessionRefresh = null;
         try {
           if (client.auth?.admin) {
             const { data: userData } = await client.auth.admin.getUserById(OWNER_UID);
@@ -1129,12 +1166,16 @@ export default async function handler(req, res) {
                 email: userData.user.email,
               });
               if (linkData?.properties?.hashed_token) {
-                const { data: authData } = await client.auth.verifyOtp({
+                // sign in on a throwaway client: verifying on the shared
+                // service-role client would switch its later queries to the
+                // owner's (restricted) role and break the session insert
+                const { data: authData } = await (db() || client).auth.verifyOtp({
                   token_hash: linkData.properties.hashed_token,
                   type: "magiclink",
                 });
                 if (authData?.session) {
                   sessionToken = authData.session.access_token;
+                  sessionRefresh = authData.session.refresh_token || null;
                   userSessionId = JSON.parse(
                     Buffer.from(sessionToken.split(".")[1], "base64url").toString(),
                   ).session_id || userSessionId;
@@ -1164,8 +1205,16 @@ export default async function handler(req, res) {
             (env().VERCEL ? " ; Secure" : ""),
         );
 
-        await audit(client, "Owner workspace unlocked via secret code");
-        return send(200, { ok: true, sessionToken });
+        await audit(
+          client,
+          admin ? `Workspace unlocked by ${admin.name} (${admin.fullName})` : "Owner workspace unlocked via secret code",
+        );
+        return send(200, {
+          ok: true,
+          sessionToken,
+          sessionRefresh,
+          admin: admin ? { name: admin.name, fullName: admin.fullName, role: admin.role } : null,
+        });
       }
 
       // SECONDARY LOGIN — LOGIN WITH SPIDEYY (Email + Password)
@@ -1194,7 +1243,8 @@ export default async function handler(req, res) {
           throw fail(400, "Email and password are required.");
         }
 
-        const { data: authData, error: authError } = await client.auth.signInWithPassword({
+        // separate client, so the shared service-role client keeps its role
+        const { data: authData, error: authError } = await (db() || client).auth.signInWithPassword({
           email: String(body.email).trim(),
           password: String(body.password),
         });
@@ -1410,8 +1460,8 @@ export default async function handler(req, res) {
             port: Number(env().SMTP_PORT || 465),
             secure: env().SMTP_SECURE !== "false",
             user: env().SMTP_USER || "",
-            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"Trinity Tech" <${env().SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>'),
-            ownerNotificationEmail: env().OWNER_NOTIFICATION_EMAIL || env().SMTP_USER || "sanjuxdev27@gmail.com",
+            fromEmail: env().SMTP_FROM_EMAIL || (env().SMTP_USER ? `"Trinity Tech" <${env().SMTP_USER}>` : '"Trinity Tech" <trinitytech27@gmail.com>'),
+            ownerNotificationEmail: env().OWNER_NOTIFICATION_EMAIL || env().SMTP_USER || "trinitytech27@gmail.com",
           },
         });
       }
@@ -1639,12 +1689,12 @@ export default async function handler(req, res) {
 
         case "test-email": {
           const e = env();
-          const testRecipient = body.recipient || e.OWNER_NOTIFICATION_EMAIL || e.SMTP_USER || "sanjuxdev27@gmail.com";
+          const testRecipient = body.recipient || e.OWNER_NOTIFICATION_EMAIL || e.SMTP_USER || "trinitytech27@gmail.com";
           const timeIST = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "full", timeStyle: "medium" }) + " IST";
           const host = e.SMTP_HOST || "smtp.gmail.com";
           const port = e.SMTP_PORT || "465";
-          const user = e.SMTP_USER || "sanjuxdev27@gmail.com";
-          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"Trinity Tech" <${e.SMTP_USER}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
+          const user = e.SMTP_USER || "trinitytech27@gmail.com";
+          const fromDisplay = e.SMTP_FROM_EMAIL || (e.SMTP_USER ? `"Trinity Tech" <${e.SMTP_USER}>` : '"Trinity Tech" <trinitytech27@gmail.com>');
 
           const testHtml = `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #222; background: #eee5d5;">

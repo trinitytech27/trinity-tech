@@ -1,13 +1,14 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
-import type { projects } from "./content";
+import { gsap, ScrollTrigger, prefersReducedMotion, showStars } from "./scroll";
+import { PROJECT_ICONS, PROJECT_SCENES, type projects } from "./content";
 
 type Project = (typeof projects)[number];
 
 /** Desktop-only choreography (pins, horizontal rolls). Phones get simple reveals. */
-const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
+// Same choreography on laptops, tablets and phones (only reduced-motion opts out)
+const DESKTOP = "(prefers-reduced-motion: no-preference)";
 const ANY_MOTION = "(prefers-reduced-motion: no-preference)";
 
 const host = (url: string) => {
@@ -142,12 +143,25 @@ export function VelocityMarquee({
 }
 
 /* --------------------------------------------------------------------------
-   Live demos stage (pinned): each project's screen tilts up and zooms in,
-   then the next project slides over it like a stack of cards.
+   Work page stage (pinned): projects alternate sides — image right, then
+   left, then right… Each new project slides in from its image's side while
+   the previous one leaves the other way. The heading is the project's own
+   quote, and the stars draw its symbol on the side opposite the image.
    -------------------------------------------------------------------------- */
 export function DemoStage({ items }: { items: Project[] }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const inView = useRef(false);
+  const activeRef = useRef(0);
+  activeRef.current = active;
+  const imgSide = (i: number) => (i % 2 === 0 ? "right" : "left");
+  const starsFor = (i: number) =>
+    `${PROJECT_ICONS[items[i]?.slug] || "helix"}@${imgSide(i) === "right" ? "left" : "right"}`;
+
+  useEffect(() => {
+    if (inView.current) showStars(starsFor(active));
+    // starsFor only depends on items
+  }, [active, items]);
 
   useLayoutEffect(() => {
     const el = root.current;
@@ -156,110 +170,77 @@ export function DemoStage({ items }: { items: Project[] }) {
     mm.add(DESKTOP, () => {
       el.classList.add("is-staged");
       const panels = gsap.utils.toArray<HTMLElement>(".tt-demo", el);
+      const dir = (i: number) => (imgSide(i) === "right" ? 1 : -1);
+      panels.forEach((p, i) => i > 0 && gsap.set(p, { xPercent: 100 * dir(i), opacity: 0 }));
+      const marks: number[] = [0];
       const tl = gsap.timeline({
-        defaults: { ease: "none" },
+        defaults: { ease: "power2.inOut" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => "+=" + window.innerHeight * (panels.length * 1.15),
+          end: () => "+=" + window.innerHeight * (panels.length * 1.05),
           scrub: 0.8,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          // counter follows the panel that is (mostly) on screen
+          onToggle: (self) => {
+            inView.current = self.isActive;
+            if (self.isActive) showStars(starsFor(activeRef.current));
+          },
+          snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
           onUpdate: (self) => {
-            const t = self.animation ? self.animation.time() : 0;
+            const t = self.progress * (self.animation ? self.animation.duration() : 0);
             let idx = 0;
-            marks.forEach((m, i) => {
-              if (t >= m) idx = i;
-            });
+            marks.forEach((m, i) => t >= m - 0.05 && (idx = i));
             setActive(idx);
           },
         },
       });
-      const marks: number[] = [0];
-
+      tl.addLabel("p0", 0).to({}, { duration: 0.5 });
       panels.forEach((panel, i) => {
-        const frame = panel.querySelector(".tt-demo-frame");
-        const img = panel.querySelector(".tt-browser-view img");
-        const copy = panel.querySelectorAll(".tt-demo-copy > *");
-
-        if (i === 0) {
-          // First project is already on stage: its screen tilts up and zooms
-          // in while the section scrolls into place, before the pin starts.
-          gsap.fromTo(
-            frame,
-            { scale: 0.82, rotateX: 16, yPercent: 10 },
-            {
-              scale: 1,
-              rotateX: 0,
-              yPercent: 0,
-              ease: "none",
-              scrollTrigger: { trigger: el, start: "top bottom", end: "top top", scrub: 0.8 },
-            },
-          );
-          tl.to({}, { duration: 0.6 }); // hold so it can be read
-          return;
-        }
-
+        if (i === 0) return;
         const prev = panels[i - 1];
-        tl.fromTo(panel, { yPercent: 100 }, { yPercent: 0, duration: 1 }, ">")
-          .to(prev, { scale: 0.9, opacity: 0.3, duration: 1 }, "<")
-          .to(prev.querySelector(".tt-demo-frame"), { yPercent: -6, duration: 1 }, "<");
-        marks.push(tl.duration() - 0.5);
-        tl.fromTo(
-          frame,
-          { scale: 0.8, rotateX: 14, yPercent: 8 },
-          { scale: 1, rotateX: 0, yPercent: 0, duration: 1.1 },
-          ">-0.45",
-        )
-          .fromTo(img, { yPercent: -6, scale: 1.1 }, { yPercent: 0, scale: 1, duration: 1.1 }, "<")
-          .fromTo(
-            copy,
-            { y: 50, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, stagger: 0.08 },
-            "<+0.2",
-          )
-          .to({}, { duration: 0.6 }); // hold so the project can be read
+        const frame = panel.querySelector(".tt-demo-frame");
+        const copy = panel.querySelectorAll(".tt-demo-copy > *");
+        // previous project leaves toward the opposite side…
+        tl.to(prev, { xPercent: -70 * dir(i), opacity: 0, duration: 1 }, ">")
+          // …while this one slides in from its image's side
+          .fromTo(panel, { xPercent: 100 * dir(i), opacity: 0 }, { xPercent: 0, opacity: 1, duration: 1 }, "<")
+          .fromTo(frame, { rotateY: -22 * dir(i), scale: 0.86 }, { rotateY: 0, scale: 1, duration: 1 }, "<")
+          .fromTo(copy, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.06 }, "<0.35");
+        marks.push(tl.duration());
+        tl.addLabel("p" + i).to({}, { duration: 0.5 });
       });
-
-      return () => el.classList.remove("is-staged");
+      return () => {
+        el.classList.remove("is-staged");
+        gsap.set(panels, { clearProps: "all" });
+      };
     });
     return () => mm.revert();
   }, [items.length]);
 
+  const cur = items[active] as (Project & { quote?: string }) | undefined;
   return (
-    <section
-      ref={root}
-      id="featured-projects"
-      className="tt-demos"
-      aria-label="Live demo projects"
-    >
+    <section ref={root} id="featured-projects" className="tt-demos" aria-label="Live demo projects">
       <div className="tt-demos-head wrap">
         <div>
           <span className="tt-eyebrow">Live Demo Projects</span>
-          <h2 className="tt-title light">Real work, live on the web.</h2>
-        </div>
-        <div className="tt-demos-counter" aria-hidden="true">
-          <b>{String(active + 1).padStart(2, "0")}</b>
-          <span>/ {String(items.length).padStart(2, "0")}</span>
-          <div className="tt-demos-dots">
-            {items.map((p, i) => (
-              <i key={p.slug} className={i === active ? "on" : ""} />
-            ))}
-          </div>
+          <h2 className="tt-title light tt-demo-quote" key={cur?.slug}>
+            {cur?.quote || "Real work, live on the web."}
+          </h2>
         </div>
       </div>
 
       <div className="tt-demos-stage">
         {items.map((p, i) => (
           <article
-            className="tt-demo"
+            className={"tt-demo" + (imgSide(i) === "left" ? " is-reverse" : "")}
             key={p.slug}
             style={{ "--project-color": p.color, zIndex: i + 1 } as React.CSSProperties}
           >
+            {PROJECT_SCENES[p.slug] && <img className="tt-scene-bg" src={PROJECT_SCENES[p.slug]} alt="" aria-hidden="true" loading="lazy" />}
             <div className="tt-demo-inner wrap">
-              <div className="tt-demo-copy" data-reveal="from-left">
+              <div className="tt-demo-copy">
                 <span className="tt-demo-index">{String(i + 1).padStart(2, "0")}</span>
                 <span className="tt-eyebrow">{p.category}</span>
                 <h3>{p.short}</h3>
@@ -273,10 +254,10 @@ export function DemoStage({ items }: { items: Project[] }) {
                 </ul>
                 <div className="tt-showcase-actions">
                   <a href={p.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary">
-                    Open Live Demo <ArrowUpRight size={17} />
+                    Visit Live Site <ArrowUpRight size={17} />
                   </a>
                   <Link to={"/work/" + p.slug} className="tt-btn tt-btn-ghost">
-                    Case study
+                    View Full Details
                   </Link>
                 </div>
               </div>
@@ -285,7 +266,6 @@ export function DemoStage({ items }: { items: Project[] }) {
                 target="_blank"
                 rel="noreferrer"
                 className="tt-demo-frame"
-                data-reveal="wipe"
                 aria-label={"Open the " + p.short + " live demo"}
               >
                 <Browser p={p} eager={i === 0} />
@@ -297,6 +277,7 @@ export function DemoStage({ items }: { items: Project[] }) {
     </section>
   );
 }
+
 
 /* --------------------------------------------------------------------------
    Statement (pinned on desktop): an outlined line slides one way while a
@@ -329,7 +310,6 @@ export function Statement({
         .fromTo(b.current, { backgroundPosition: "100% 0" }, { backgroundPosition: "0% 0" }, 0);
     };
     mm.add(DESKTOP, () => build(true));
-    mm.add("(max-width: 959px) and (prefers-reduced-motion: no-preference)", () => build(false));
     return () => mm.revert();
   }, []);
 

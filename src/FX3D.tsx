@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "./scroll";
+import { gsap, ScrollTrigger, prefersReducedMotion, showStars } from "./scroll";
 
-const DESKTOP = "(min-width: 960px) and (prefers-reduced-motion: no-preference)";
+// Same choreography on laptops, tablets and phones (only reduced-motion opts out)
+const DESKTOP = "(prefers-reduced-motion: no-preference)";
 const finePointer = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(pointer: fine)").matches &&
@@ -161,7 +162,7 @@ export function FlyThrough({
           invalidateOnRefresh: true,
           // the caption follows the screen that is currently closest
           onUpdate: (self) => {
-            const t = self.animation ? self.animation.time() : 0;
+            const t = self.progress * (self.animation ? self.animation.duration() : 0);
             setActive(Math.max(0, Math.min(cards.length - 1, Math.round((t - 0.8) / gap))));
           },
         },
@@ -343,41 +344,44 @@ export function SpinRing({
    -------------------------------------------------------------------------- */
 export function SectionLabel() {
   const loc = useLocation();
-  const [label, setLabel] = useState<{ n: number; text: string } | null>(null);
+  const [name, setName] = useState("");
 
   useEffect(() => {
-    let io: IntersectionObserver | null = null;
+    let triggers: ScrollTrigger[] = [];
+    // showStars remembers the real current shape (scenes change it too)
+    const broadcast = (el: HTMLElement) => {
+      setName(el.dataset.section || "");
+      if (el.dataset.stars) showStars(el.dataset.stars);
+    };
+    // Scenes can also ask for a star symbol directly (e.g. per project / domain)
     const id = window.setTimeout(() => {
       const els = Array.from(document.querySelectorAll<HTMLElement>("main [data-section]"));
       if (!els.length) {
-        setLabel(null);
+        setName("");
         return;
       }
-      io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            const i = els.indexOf(e.target as HTMLElement);
-            setLabel({ n: i + 1, text: (e.target as HTMLElement).dataset.section || "" });
-          }
-        },
-        { rootMargin: "-45% 0px -50% 0px" },
+      broadcast(els[0]);
+      // ScrollTrigger understands pinned sections, so the active section is exact
+      triggers = els.map((el) =>
+        ScrollTrigger.create({
+          trigger: el,
+          // switch early, so the stars are already re-forming as the section arrives
+          start: "top 85%",
+          end: "bottom 40%",
+          onToggle: (self) => self.isActive && broadcast(el),
+        }),
       );
-      els.forEach((el) => io?.observe(el));
-      setLabel({ n: 1, text: els[0].dataset.section || "" });
-    }, 300);
+    }, 450);
     return () => {
       window.clearTimeout(id);
-      io?.disconnect();
+      triggers.forEach((t) => t.kill());
     };
   }, [loc.pathname]);
 
-  if (!label) return null;
+  if (!name) return null;
   return (
-    <div className="tt-sectionlabel" aria-hidden="true" key={label.text}>
-      <span>{String(label.n).padStart(2, "0")}</span>
-      <i />
-      <b>{label.text}</b>
+    <div className="tt-pill" key={"p" + name} aria-hidden="true">
+      <i /> {name}
     </div>
   );
 }

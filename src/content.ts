@@ -1,6 +1,7 @@
 export const projects = [
   {
     slug: "starx-live",
+    quote: "Lost in the noise. Found in the sound.",
     name: "StarX Live — Official Website",
     short: "StarX Live",
     category: "Interactive Website / Entertainment",
@@ -25,6 +26,7 @@ export const projects = [
   },
   {
     slug: "ticketx",
+    quote: "Every great show begins with the right seat.",
     name: "TicketX",
     short: "TicketX",
     category: "Booking Platform / Web Application",
@@ -48,7 +50,31 @@ export const projects = [
     order: 2,
   },
   {
+    slug: "abps-books",
+    quote: "A new chapter in learning.",
+    name: "ABPS Books — Learning Bookstore",
+    short: "ABPS Books",
+    category: "E-Commerce / Online Bookstore",
+    kind: "Websites",
+    url: "https://abps-books.vercel.app/",
+    image: "/media/abps.webp",
+    mobile: "/media/abps-mobile.webp",
+    color: "#1e3a5f",
+    headline: "A new chapter in learning.",
+    summary: "An online bookstore for textbooks, reference books and learning resources for every class.",
+    story: "Students and parents can search by title, ISBN, subject or class, browse categories, add books to a cart with bulk discounts, and follow their orders and branch details — all in a calm, readable storefront.",
+    features: [
+      "Search by title, ISBN, subject or class",
+      "Class-wise catalogue and categories",
+      "Cart, bulk discounts and order tracking",
+    ],
+    note: "Demo catalogue inspected. Titles, prices and availability on the live demo are illustrative; purchases were not tested.",
+    published: true,
+    order: 3,
+  },
+  {
     slug: "starx-connect",
+    quote: "One tap. Every connection that matters.",
     name: "StarX Connect — Digital Card",
     short: "StarX Connect",
     category: "Digital Business Card / Smart Links",
@@ -69,10 +95,11 @@ export const projects = [
     ],
     note: "Visible controls inspected. External messages were not sent.",
     published: true,
-    order: 3,
+    order: 4,
   },
   {
     slug: "audiox",
+    quote: "Your media. Your terms. Anywhere.",
     name: "AudioX",
     short: "AudioX",
     category: "Web Application / Media Utility",
@@ -93,7 +120,7 @@ export const projects = [
     ],
     note: "Interface inspected. Conversion and completed downloads were not tested.",
     published: true,
-    order: 4,
+    order: 5,
   },
 ];
 
@@ -775,7 +802,7 @@ export const defaults = {
   intro: "Your Vision. Our Technology. Infinite Possibilities.",
   about:
     "Trinity Tech is a modern web development and digital solutions brand helping businesses, startups, entrepreneurs and individuals build a strong online presence. We transform ideas into professional digital experiences through creative design, modern technologies and reliable web development.",
-  email: "balajoseboddukuri@gmail.com",
+  email: "trinitytech27@gmail.com",
   phone: SANJU_BUSINESS_PHONE,
   whatsapp: `https://wa.me/${SANJU_WHATSAPP_NUMBER}`,
   instagram: "https://www.instagram.com/sanju_x_dev/",
@@ -794,7 +821,7 @@ export const defaults = {
     },
     {
       q: "Can I see your work?",
-      a: "Explore StarX Live, TicketX, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
+      a: "Explore StarX Live, TicketX, ABPS Books, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
     },
     {
       q: "How much does a website cost?",
@@ -935,6 +962,35 @@ export const team = [
 
 export const contactEmails = team.map((m) => ({ name: m.name, role: m.role, email: m.email }));
 
+/** Main Trinity Tech contact (used site-wide; personal emails stay on team cards). */
+export const mainContact = {
+  email: "trinitytech27@gmail.com",
+  phone: "+91 70754 52718",
+  phoneHref: "tel:+917075452718",
+  whatsapp: "+91 70754 52718",
+  whatsappHref: "https://wa.me/917075452718?text=" + encodeURIComponent("Hello Trinity Tech, I would like to discuss a website."),
+};
+
+/** Star symbol shown in the background for each project. */
+/** Gold illustration scenes that set the mood behind each project. */
+export const PROJECT_SCENES: Record<string, string> = {
+  "starx-live": "/brand/scenes/band.webp",
+  ticketx: "/brand/scenes/cinema.webp",
+  "abps-books": "/brand/scenes/library.webp",
+};
+
+/** Gold line-art for each website category (booking cards, domains stack). */
+const CATEGORY_ART_IDS = ["portfolio", "blog", "business", "agency", "ecommerce", "restaurant", "shop", "booking", "educational", "custom"];
+export const categoryArt = (id?: string) => (id && CATEGORY_ART_IDS.includes(id) ? `/brand/types/${id}.webp` : "");
+
+export const PROJECT_ICONS: Record<string, string> = {
+  "starx-live": "icon:music",
+  ticketx: "icon:ticket",
+  "abps-books": "icon:book-open",
+  "starx-connect": "icon:contact",
+  audiox: "icon:headphones",
+};
+
 /* ---------- Trust-building content ---------- */
 export const deliverables = [
   { title: "Responsive on every screen", desc: "Designed and tested for phones, tablets and desktops." },
@@ -991,5 +1047,64 @@ export const publicFaqs = [
   {
     q: "Do you help after the website goes live?",
     a: "Yes — we help with updates, fixes and improvements after launch so your site keeps growing with your business.",
+  },
+];
+
+
+/* ---------- Website types (homepage layered stack) ---------- */
+export const siteTypes = [
+  {
+    icon: "icon:briefcase",
+    art: "/brand/types/business.webp",
+    category: "Business Website",
+    title: "Business & Company",
+    sub: "Your brand, services and contact in one place",
+    desc: "A professional home for your business — services, about, gallery, enquiries and location, built to earn trust and bring customers in.",
+    tags: ["Company profile", "Services", "Enquiry forms", "Google Maps"],
+  },
+  {
+    icon: "icon:shopping-cart",
+    art: "/brand/types/ecommerce.webp",
+    category: "E-Commerce Website",
+    title: "E-Commerce Store",
+    sub: "Sell products online, day and night",
+    desc: "Product catalogues, cart and checkout flows, order management and an admin dashboard to run your store.",
+    tags: ["Product catalogue", "Cart & checkout", "Orders", "Admin dashboard"],
+  },
+  {
+    icon: "icon:calendar-check",
+    art: "/brand/types/booking.webp",
+    category: "Booking / Appointment Website",
+    title: "Booking & Events",
+    sub: "Tickets, appointments and reservations",
+    desc: "Let customers discover events, pick slots and book online — like our live TicketX platform.",
+    tags: ["Event listings", "Slot booking", "Reminders", "Like TicketX"],
+  },
+  {
+    icon: "icon:user",
+    art: "/brand/types/portfolio.webp",
+    category: "Personal Portfolio",
+    title: "Portfolio & Personal Brand",
+    sub: "Show your work, skills and story",
+    desc: "A striking portfolio for creators, professionals and artists — projects, achievements, resume and direct contact.",
+    tags: ["Projects", "Resume", "Testimonials", "Contact links"],
+  },
+  {
+    icon: "icon:utensils",
+    art: "/brand/types/restaurant.webp",
+    category: "Restaurant Website",
+    title: "Restaurants & Local Shops",
+    sub: "Menus, offers and orders for local businesses",
+    desc: "Digital menus, offers, galleries, WhatsApp ordering and maps that turn local searches into visits.",
+    tags: ["Digital menu", "WhatsApp orders", "Offers", "Location"],
+  },
+  {
+    icon: "icon:code-xml",
+    art: "/brand/types/custom.webp",
+    category: "Other / Custom Website",
+    title: "Custom Web Apps",
+    sub: "Tools and platforms built around your idea",
+    desc: "Dashboards, utilities and custom platforms — from media tools like AudioX to digital cards like StarX Connect.",
+    tags: ["Dashboards", "Logins", "Databases", "Like AudioX"],
   },
 ];

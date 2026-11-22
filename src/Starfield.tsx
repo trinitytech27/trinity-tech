@@ -1,37 +1,107 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
+import { STAR_ICONS } from "./starIcons";
 
 /**
  * Living star background (single WebGL canvas behind every page).
  *
- * - A field of twinkling stars whose colours slowly drift.
- * - Part of the stars form a shape that changes per page (galaxy, helix,
- *   orbit sphere, trinity rings, wave, torus). On navigation they travel
- *   to the new shape, so the background is different on every page.
- * - Scroll turns and lifts the formation; the pointer tilts it slightly.
- * - "tt:warp" events (page transitions) rush the stars toward the camera.
+ * - A field of twinkling, colour-drifting stars.
+ * - Part of the stars form a shape. On Home it starts as "TRINITY TECH"
+ *   written in stars, then each section re-forms the stars into its own
+ *   symbol as you scroll (sections declare it with data-stars="…", and
+ *   App broadcasts the visible one as a "tt:stars" event). Other pages
+ *   have their own default shape.
+ * - Readable shapes (text, symbols) face the visitor; 3D shapes turn slowly.
+ * - "tt:warp" (page transitions) rushes the stars toward the camera.
  *
- * Cost control: one draw call, all motion in the vertex shader, DPR capped,
- * fewer stars on phones, paused while the tab is hidden, a single still
- * frame for reduced-motion visitors.
+ * Cost: one draw call, motion in the vertex shader, capped DPR, fewer stars
+ * on phones / low-core devices, paused while hidden, still for reduced motion.
  */
 
-type Shape = "galaxy" | "helix" | "orbit" | "trinity" | "wave" | "torus";
+export type Shape =
+  | "text"
+  | "code"
+  | "infinity"
+  | "logo"
+  | "galaxy"
+  | "helix"
+  | "helixV"
+  | "orbit"
+  | "trinity"
+  | "wave"
+  | "torus"
+  | "atom"
+  | `icon:${string}`;
+
+type BaseShape = Exclude<Shape, `icon:${string}`>;
 
 export const ROUTE_SHAPES: Record<string, Shape> = {
-  "/": "galaxy",
+  "/": "text",
   "/work": "helix",
   "/services": "orbit",
   "/about": "trinity",
   "/project": "wave",
-  "/contact": "torus",
+  "/contact": "icon:handshake",
 };
 
 export const shapeFor = (path: string): Shape => {
   if (path.startsWith("/work/")) return "helix";
   return ROUTE_SHAPES[path] ?? "galaxy";
 };
+
+/** How the formation is presented: spin (0 = faces visitor) and base tilt. */
+const BASE_STYLE: Record<BaseShape, { spin: number; tilt: number }> = {
+  text: { spin: 0, tilt: 0 },
+  code: { spin: 0, tilt: 0 },
+  infinity: { spin: 0, tilt: 0 },
+  logo: { spin: 0, tilt: 0 },
+  wave: { spin: 0, tilt: 0 },
+  galaxy: { spin: 1, tilt: 0.35 },
+  helix: { spin: 1, tilt: 0.3 },
+  helixV: { spin: 1, tilt: 0.08 },
+  orbit: { spin: 1, tilt: 0.35 },
+  trinity: { spin: 0.4, tilt: 0.15 },
+  torus: { spin: 1, tilt: 0.45 },
+  atom: { spin: 0.55, tilt: 0.2 },
+};
+const ICON_STYLE = { spin: 0, tilt: 0 };
+const styleOf = (s: Shape) => (s.startsWith("icon:") ? ICON_STYLE : BASE_STYLE[s as BaseShape]);
+const isShape = (s: string): s is Shape =>
+  (s.startsWith("icon:") && s.slice(5) in STAR_ICONS) || s in BASE_STYLE;
+
+/** Draw a 24×24 outline icon (lucide format) centred on the canvas. */
+function drawIcon(name: string, ctx: CanvasRenderingContext2D, W: number, H: number) {
+  const nodes = STAR_ICONS[name];
+  if (!nodes) return;
+  const k = (H * 0.9) / 24;
+  ctx.setTransform(k, 0, 0, k, W / 2 - 12 * k, H / 2 - 12 * k);
+  ctx.lineWidth = 1.9;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const n = (v?: string) => Number(v || 0);
+  for (const [tag, a] of nodes) {
+    ctx.beginPath();
+    if (tag === "path") {
+      ctx.stroke(new Path2D(a.d));
+      continue;
+    }
+    if (tag === "circle") ctx.arc(n(a.cx), n(a.cy), n(a.r), 0, Math.PI * 2);
+    else if (tag === "ellipse") ctx.ellipse(n(a.cx), n(a.cy), n(a.rx), n(a.ry), 0, 0, Math.PI * 2);
+    else if (tag === "rect") ctx.roundRect(n(a.x), n(a.y), n(a.width), n(a.height), n(a.rx));
+    else if (tag === "line") {
+      ctx.moveTo(n(a.x1), n(a.y1));
+      ctx.lineTo(n(a.x2), n(a.y2));
+    } else if (tag === "polyline" || tag === "polygon") {
+      const p = String(a.points || "").trim().split(/[s,]+/).map(Number);
+      for (let i = 0; i < p.length; i += 2) (i ? ctx.lineTo : ctx.moveTo).call(ctx, p[i], p[i + 1]);
+      if (tag === "polygon") ctx.closePath();
+    }
+    ctx.stroke();
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const gauss = () => {
@@ -42,57 +112,164 @@ const gauss = () => {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 };
 
-/** Fill `out` (xyz per star) with the formation for the shaped stars. */
-function buildShape(shape: Shape, out: Float32Array, from: number, count: number) {
+type View = { w: number; h: number; narrow: boolean };
+
+/* ---------- sample star positions from text / drawings on a canvas ---------- */
+const sampleCache = new Map<string, Float32Array>();
+
+function sampleCanvas(key: string, draw: (ctx: CanvasRenderingContext2D, W: number, H: number) => void, W = 1200, H = 520) {
+  const hit = sampleCache.get(key);
+  if (hit) return hit;
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return new Float32Array(0);
+  ctx.fillStyle = "#fff";
+  ctx.strokeStyle = "#fff";
+  draw(ctx, W, H);
+  const data = ctx.getImageData(0, 0, W, H).data;
+  const pts: number[] = [];
+  const step = 3;
+  for (let y = 0; y < H; y += step) {
+    for (let x = 0; x < W; x += step) {
+      if (data[(y * W + x) * 4 + 3] > 140) pts.push(x / W - 0.5, 0.5 - y / H);
+    }
+  }
+  const out = new Float32Array(pts);
+  if (out.length) sampleCache.set(key, out);
+  return out;
+}
+
+const HEAD_FONT = '"Cinzel", "Playfair Display", Georgia, serif';
+
+const drawers: Partial<Record<Shape, (ctx: CanvasRenderingContext2D, W: number, H: number) => void>> = {
+  text: (ctx, W, H) => {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
+    ctx.fillText("TRINITY", W / 2, H * 0.3);
+    ctx.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
+    ctx.fillText("TECH", W / 2, H * 0.74);
+  },
+  code: (ctx, W, H) => {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `700 ${H * 0.78}px "Outfit", "Inter", sans-serif`;
+    ctx.fillText("</>", W / 2, H * 0.54);
+  },
+  logo: (ctx, W, H) => {
+    // the Trinity Tech mark: two bars + stem, inside a rounded tile outline
+    const s = H / 64;
+    const ox = W / 2 - 32 * s;
+    const rr = (x: number, y: number, w: number, h: number, r: number) => {
+      ctx.beginPath();
+      ctx.roundRect(ox + x * s, y * s, w * s, h * s, r * s);
+      ctx.fill();
+    };
+    rr(13, 15, 17, 9, 4.5);
+    rr(34, 15, 17, 9, 4.5);
+    rr(27.5, 28, 9, 22, 4.5);
+    ctx.lineWidth = 2.2 * s;
+    ctx.beginPath();
+    ctx.roundRect(ox + 2 * s, 2 * s, 60 * s, 60 * s, 15 * s);
+    ctx.stroke();
+  },
+};
+
+/** Fill `out` (xyz per star) for the shaped stars. */
+function buildShape(shape: Shape, out: Float32Array, from: number, count: number, view: View) {
   const set = (i: number, x: number, y: number, z: number) => {
     out[i * 3] = x;
     out[i * 3 + 1] = y;
     out[i * 3 + 2] = z;
   };
+
+  const isIcon = shape.startsWith("icon:");
+  const draw = isIcon
+    ? (ctx: CanvasRenderingContext2D, W: number, H: number) => drawIcon(shape.slice(5), ctx, W, H)
+    : drawers[shape as BaseShape];
+  if (draw) {
+    const pts = sampleCanvas(shape, draw);
+    if (pts.length) {
+      // fit to the visible area
+      const fitW = shape === "text" ? (view.narrow ? 0.9 : 0.66) : shape === "code" ? 0.4 : 0.42;
+      const width = Math.min(view.w * fitW, shape === "text" ? 86 : 64);
+      // icons: square box, sized to the shorter screen side
+      const iconSize = Math.min(view.w * (view.narrow ? 0.8 : 0.42), view.h * 0.62, 46);
+      const aspect = 520 / 1200;
+      const scaleX = isIcon
+        ? iconSize / ((520 * 0.9) / 1200)
+        : shape === "logo"
+        ? width * (1200 / 520) * 0.55
+        : width;
+      const scaleY = isIcon || shape === "logo" ? scaleX * aspect : width * aspect;
+      const lift = shape === "text" ? view.h * (view.narrow ? 0.17 : 0.12) : shape === "logo" ? view.h * 0.2 : 0;
+      const n = pts.length / 2;
+      for (let k = 0; k < count; k++) {
+        const j = Math.floor(Math.random() * n) * 2;
+        set(
+          from + k,
+          pts[j] * scaleX + gauss() * 0.12,
+          pts[j + 1] * scaleY + lift + gauss() * 0.12,
+          gauss() * 0.9,
+        );
+      }
+      return;
+    }
+  }
+
   for (let k = 0; k < count; k++) {
     const i = from + k;
     const t = k / count;
     switch (shape) {
+      case "infinity": {
+        const a = Math.random() * Math.PI * 2;
+        const sc = Math.min(view.w * 0.3, 34);
+        const d = 1 + Math.sin(a) ** 2;
+        const x = (sc * Math.cos(a)) / d;
+        const y = (sc * Math.sin(a) * Math.cos(a)) / d;
+        set(i, x + gauss() * 0.5, y + gauss() * 0.5, Math.sin(a * 2) * 4 + gauss() * 0.8);
+        break;
+      }
       case "galaxy": {
         const arm = k % 3;
         const r = Math.pow(Math.random(), 0.55) * 34 + 1.5;
         const a = r * 0.28 + (arm * Math.PI * 2) / 3 + gauss() * 0.22;
-        const h = gauss() * 1.6 * (1 - r / 40);
-        set(i, Math.cos(a) * r, h, Math.sin(a) * r);
+        set(i, Math.cos(a) * r, gauss() * 1.6 * (1 - r / 40), Math.sin(a) * r);
         break;
       }
-      case "helix": {
-        const along = (t - 0.5) * 96;
-        const strand = k % 5 === 0 ? 2 : k % 2; // 2 = rung
+      case "helix":
+      case "helixV": {
+        const along = (t - 0.5) * (shape === "helixV" ? view.h * 1.15 : 96);
+        const strand = k % 5 === 0 ? 2 : k % 2;
         const a = along * 0.16;
+        const R = shape === "helixV" ? 7 : 9;
+        let u: number;
+        let v: number;
         if (strand === 2) {
           const s = rand(-1, 1);
-          set(i, along, Math.cos(a) * 9 * s, Math.sin(a) * 9 * s);
+          u = Math.cos(a) * R * s;
+          v = Math.sin(a) * R * s;
         } else {
           const off = strand * Math.PI;
-          set(
-            i,
-            along + gauss() * 0.4,
-            Math.cos(a + off) * 9 + gauss() * 0.7,
-            Math.sin(a + off) * 9 + gauss() * 0.7,
-          );
+          u = Math.cos(a + off) * R + gauss() * 0.7;
+          v = Math.sin(a + off) * R + gauss() * 0.7;
         }
+        if (shape === "helixV") set(i, u, along + gauss() * 0.4, v);
+        else set(i, along + gauss() * 0.4, u, v);
         break;
       }
       case "orbit": {
         if (k % 3 === 0) {
-          // two tilted orbit rings
           const ring = k % 2;
           const a = Math.random() * Math.PI * 2;
           const R = ring ? 30 : 36;
-          const x = Math.cos(a) * R;
-          const z = Math.sin(a) * R;
           const tilt = ring ? 0.5 : -0.35;
-          set(i, x, z * Math.sin(tilt) + gauss() * 0.4, z * Math.cos(tilt));
+          const z = Math.sin(a) * R;
+          set(i, Math.cos(a) * R, z * Math.sin(tilt) + gauss() * 0.4, z * Math.cos(tilt));
         } else {
-          // fibonacci sphere
-          const n = count;
-          const y = 1 - (k / (n - 1)) * 2;
+          const y = 1 - (k / (count - 1)) * 2;
           const rad = Math.sqrt(1 - y * y);
           const phi = k * 2.399963;
           const R = 18 + gauss() * 0.5;
@@ -101,21 +278,24 @@ function buildShape(shape: Shape, out: Float32Array, from: number, count: number
         break;
       }
       case "trinity": {
-        // three interlocking rings — the Trinity mark in stars
         const ring = k % 3;
         const ca = (ring * Math.PI * 2) / 3 - Math.PI / 2;
-        const cx = Math.cos(ca) * 10;
-        const cy = Math.sin(ca) * 10;
         const a = Math.random() * Math.PI * 2;
         const R = 15 + gauss() * 0.45;
-        set(i, cx + Math.cos(a) * R, cy + Math.sin(a) * R, gauss() * 1.4 + Math.sin(a * 2 + ring) * 2);
+        set(
+          i,
+          Math.cos(ca) * 10 + Math.cos(a) * R,
+          Math.sin(ca) * 10 + Math.sin(a) * R,
+          gauss() * 1.4 + Math.sin(a * 2 + ring) * 2,
+        );
         break;
       }
       case "wave": {
-        const gx = (Math.random() - 0.5) * 110;
-        const gz = (Math.random() - 0.5) * 70;
-        const y = Math.sin(gx * 0.12) * 4 + Math.cos(gz * 0.16) * 3 - 6;
-        set(i, gx, y, gz);
+        // a wide surface hanging near the top of the screen, receding into depth
+        const gx = (Math.random() - 0.5) * view.w * 1.5;
+        const gz = rand(-70, 12);
+        const top = view.h * 0.3;
+        set(i, gx, top + Math.sin(gx * 0.12) * 2.4 + Math.cos(gz * 0.16) * 1.6 + gz * -0.18, gz);
         break;
       }
       case "torus": {
@@ -126,6 +306,28 @@ function buildShape(shape: Shape, out: Float32Array, from: number, count: number
         set(i, (R + r * Math.cos(v)) * Math.cos(u), r * Math.sin(v), (R + r * Math.cos(v)) * Math.sin(u));
         break;
       }
+      case "atom": {
+        // nucleus + three tilted elliptical orbits (one per team member)
+        if (k % 5 === 0) {
+          set(i, gauss() * 3.2, gauss() * 3.2, gauss() * 3.2);
+        } else {
+          const orbit = k % 3;
+          const a = Math.random() * Math.PI * 2;
+          const RX = Math.min(view.w * 0.3, 30);
+          const RY = RX * 0.36;
+          let x = Math.cos(a) * RX + gauss() * 0.35;
+          let y = Math.sin(a) * RY + gauss() * 0.35;
+          const rot = (orbit * Math.PI) / 3;
+          const xr = x * Math.cos(rot) - y * Math.sin(rot);
+          const yr = x * Math.sin(rot) + y * Math.cos(rot);
+          x = xr;
+          y = yr;
+          set(i, x, y, Math.sin(a + orbit) * 4);
+        }
+        break;
+      }
+      default:
+        set(i, gauss() * 30, gauss() * 20, gauss() * 20);
     }
   }
 }
@@ -135,32 +337,33 @@ const vertex = /* glsl */ `
   attribute vec3 aTo;
   attribute float aSeed;
   attribute float aSize;
+  attribute float aShaped;
   attribute vec3 aColor;
   uniform float uTime;
   uniform float uMorph;
   uniform float uWarp;
+  uniform float uWave;
   uniform float uPixelRatio;
   varying vec3 vColor;
   varying float vAlpha;
 
   void main() {
-    // each star leaves at its own moment so the morph feels organic
     float m = smoothstep(0.0, 1.0, clamp(uMorph * 1.7 - aSeed * 0.7, 0.0, 1.0));
     vec3 p = mix(aFrom, aTo, m);
-    // a soft arc while travelling
-    p.y += sin(m * 3.14159) * (aSeed - 0.5) * 14.0;
-    // gentle drift
-    p.x += sin(uTime * 0.2 + aSeed * 40.0) * 0.35;
-    p.y += cos(uTime * 0.17 + aSeed * 30.0) * 0.35;
-    // warp: rush toward the camera during page transitions
+    p.y += sin(m * 3.14159) * (aSeed - 0.5) * 14.0 * aShaped;
+    // gentle drift (smaller for shaped stars so text stays crisp)
+    float drift = mix(0.35, 0.12, aShaped);
+    p.x += sin(uTime * 0.2 + aSeed * 40.0) * drift;
+    p.y += cos(uTime * 0.17 + aSeed * 30.0) * drift;
+    // rolling wave surface
+    p.y += uWave * aShaped * (sin(p.x * 0.13 + uTime * 0.9) * 2.4 + cos(p.z * 0.17 + uTime * 0.7) * 1.8);
     p.z += uWarp * (20.0 + aSeed * 60.0);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
     float twinkle = 0.55 + 0.45 * sin(uTime * (0.8 + aSeed * 2.4) + aSeed * 90.0);
     gl_PointSize = aSize * uPixelRatio * (1.0 + uWarp * 1.5) * (260.0 / -mv.z);
-    vAlpha = twinkle;
-    // colours slowly shift over time
+    vAlpha = mix(twinkle, 0.7 + 0.3 * twinkle, aShaped);
     float shift = 0.5 + 0.5 * sin(uTime * 0.12 + aSeed * 6.2831);
     vColor = mix(aColor, aColor.zxy, shift * 0.35);
   }
@@ -179,10 +382,10 @@ const fragment = /* glsl */ `
 
 const PALETTE = [
   new THREE.Color("#ffffff"),
-  new THREE.Color("#c7d2fe"),
-  new THREE.Color("#818cf8"),
-  new THREE.Color("#67e8f9"),
-  new THREE.Color("#a5b4fc"),
+  new THREE.Color("#f3dcb0"),
+  new THREE.Color("#e8a33d"),
+  new THREE.Color("#f6c66b"),
+  new THREE.Color("#f0c477"),
 ];
 
 export default function Starfield({ route }: { route: string }) {
@@ -201,7 +404,7 @@ export default function Starfield({ route }: { route: string }) {
     try {
       renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "low-power" });
     } catch {
-      return; // no WebGL: CSS star fallback stays
+      return; // no WebGL: the CSS star fallback stays
     }
     const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 1.75);
     renderer.setPixelRatio(dpr);
@@ -211,41 +414,55 @@ export default function Starfield({ route }: { route: string }) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 400);
     camera.position.set(0, 0, 64);
+    const view: View = { w: 100, h: 66, narrow: false };
+    const measure = () => {
+      const narrow = window.innerWidth < 760;
+      camera.position.z = narrow ? 80 : 64;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      const h = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360);
+      view.h = h;
+      view.w = h * camera.aspect;
+      view.narrow = narrow;
+    };
+    measure();
 
-    const AMBIENT = small || lowCore ? 1400 : 2600;
-    const SHAPED = small || lowCore ? 2600 : 6000;
+    const AMBIENT = small || lowCore ? 1300 : 2400;
+    const SHAPED = small || lowCore ? 3200 : 7000;
     const N = AMBIENT + SHAPED;
 
     const from = new Float32Array(N * 3);
     const to = new Float32Array(N * 3);
     const seed = new Float32Array(N);
     const size = new Float32Array(N);
+    const shaped = new Float32Array(N);
     const color = new Float32Array(N * 3);
 
     for (let i = 0; i < N; i++) {
       seed[i] = Math.random();
-      const shaped = i >= AMBIENT;
-      size[i] = shaped ? rand(0.9, 2.1) : rand(0.6, 2.6);
+      const isShaped = i >= AMBIENT;
+      shaped[i] = isShaped ? 1 : 0;
+      size[i] = isShaped ? rand(0.8, 1.9) : rand(0.6, 2.6);
       const c = PALETTE[Math.floor(Math.random() * PALETTE.length)];
       color.set([c.r, c.g, c.b], i * 3);
-      if (!shaped) {
-        // distant field, wrapped around the camera
+      if (!isShaped) {
         const r = rand(70, 190);
         const th = Math.random() * Math.PI * 2;
         const ph = Math.acos(rand(-1, 1));
-        const x = r * Math.sin(ph) * Math.cos(th);
-        const y = r * Math.sin(ph) * Math.sin(th);
-        const z = r * Math.cos(ph) - 40;
-        from.set([x, y, z], i * 3);
-        to.set([x, y, z], i * 3);
+        const p = [r * Math.sin(ph) * Math.cos(th), r * Math.sin(ph) * Math.sin(th), r * Math.cos(ph) - 40];
+        from.set(p, i * 3);
+        to.set(p, i * 3);
+      } else {
+        // a loose cloud that gathers into the first shape
+        from.set([gauss() * 60, gauss() * 40, gauss() * 40], i * 3);
       }
     }
-    let shape = shapeFor(routeRef.current);
-    buildShape(shape, to, AMBIENT, SHAPED);
-    // start as a loose cloud and gather into the first shape
-    for (let i = AMBIENT; i < N; i++) {
-      from.set([gauss() * 60, gauss() * 40, gauss() * 40], i * 3);
-    }
+
+    let shape: Shape = shapeFor(routeRef.current);
+    // fonts must be ready before stars can spell text; start with a galaxy
+    const needsFont = (s: Shape) => s === "text" || s === "code";
+    let fontReady = !needsFont(shape);
+    buildShape(fontReady ? shape : "galaxy", to, AMBIENT, SHAPED, view);
 
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(to.slice(), 3));
@@ -255,6 +472,7 @@ export default function Starfield({ route }: { route: string }) {
     geo.setAttribute("aTo", aTo);
     geo.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
     geo.setAttribute("aSize", new THREE.BufferAttribute(size, 1));
+    geo.setAttribute("aShaped", new THREE.BufferAttribute(shaped, 1));
     geo.setAttribute("aColor", new THREE.BufferAttribute(color, 3));
     geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 400);
 
@@ -262,6 +480,7 @@ export default function Starfield({ route }: { route: string }) {
       uTime: { value: 0 },
       uMorph: { value: 0 },
       uWarp: { value: 0 },
+      uWave: { value: 0 },
       uPixelRatio: { value: dpr },
     };
     const mat = new THREE.ShaderMaterial({
@@ -272,19 +491,23 @@ export default function Starfield({ route }: { route: string }) {
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
-    const points = new THREE.Points(geo, mat);
     const group = new THREE.Group();
-    group.add(points);
+    group.add(new THREE.Points(geo, mat));
     scene.add(group);
 
-    const morphTween = { kill: () => {} };
-    const morphTo = (next: Shape) => {
-      if (next === shape && uniforms.uMorph.value >= 1) return;
-      // freeze the current (possibly mid-morph) positions as the new start
+    const renderOnce = () => renderer.render(scene, camera);
+    let morphTween: gsap.core.Tween | null = null;
+    const style = { spin: styleOf(shape).spin, tilt: styleOf(shape).tilt };
+
+    const morphTo = (next: Shape, quick = false) => {
+      if (next === shape && uniforms.uMorph.value >= 1 && !quick) return;
+      if (needsFont(next) && !fontReady) {
+        shape = next; // applied once fonts load
+        return;
+      }
       const mVal = uniforms.uMorph.value;
       for (let i = AMBIENT; i < N; i++) {
-        const s = seed[i];
-        const m = Math.min(1, Math.max(0, mVal * 1.7 - s * 0.7));
+        const m = Math.min(1, Math.max(0, mVal * 1.7 - seed[i] * 0.7));
         const e = m * m * (3 - 2 * m);
         for (let c = 0; c < 3; c++) {
           const j = i * 3 + c;
@@ -292,17 +515,32 @@ export default function Starfield({ route }: { route: string }) {
         }
       }
       shape = next;
-      buildShape(next, to, AMBIENT, SHAPED);
+      buildShape(next, to, AMBIENT, SHAPED, view);
       aFrom.needsUpdate = true;
       aTo.needsUpdate = true;
-      morphTween.kill();
+      morphTween?.kill();
       uniforms.uMorph.value = 0;
-      const tw = gsap.to(uniforms.uMorph, { value: 1, duration: reduced ? 0 : 2.4, ease: "power2.inOut" });
-      morphTween.kill = () => tw.kill();
+      const dur = reduced ? 0 : quick ? 0.6 : 1.15; // quick, so stars keep up with scrolling
+      morphTween = gsap.to(uniforms.uMorph, { value: 1, duration: dur, ease: "power2.inOut" });
+      gsap.to(style, { spin: styleOf(next).spin, tilt: styleOf(next).tilt, duration: dur || 0.01, ease: "power2.inOut" });
+      gsap.to(uniforms.uWave, { value: next === "wave" ? 1 : 0, duration: dur || 0.01 });
       if (reduced) renderOnce();
     };
-    api.current = { morphTo };
-    gsap.to(uniforms.uMorph, { value: 1, duration: reduced ? 0 : 3, ease: "power2.out", delay: 0.2 });
+    api.current = { morphTo: (s) => morphTo(s) };
+    morphTween = gsap.to(uniforms.uMorph, { value: 1, duration: reduced ? 0 : 3, ease: "power2.out", delay: 0.2 });
+    if (shape === "wave") uniforms.uWave.value = 1;
+
+    if (!fontReady) {
+      const ready = Promise.race([
+        document.fonts?.load(`700 200px Cinzel`).catch(() => null),
+        new Promise((r) => setTimeout(r, 1800)),
+      ]);
+      ready.then(() => {
+        fontReady = true;
+        sampleCache.clear();
+        morphTo(shape, false);
+      });
+    }
 
     const onWarp = () => {
       if (reduced) return;
@@ -312,14 +550,36 @@ export default function Starfield({ route }: { route: string }) {
         .to(uniforms.uWarp, { value: 1, duration: 0.55, ease: "power3.in" })
         .to(uniforms.uWarp, { value: 0, duration: 1.1, ease: "power3.out" });
     };
+    // "shape@side": the formation moves beside the content (left / right / top)
+    const offset = { x: 0, y: 0 };
+    const offsetTarget = { side: "center" };
+    const placeSide = (side: string) => {
+      offsetTarget.side = side;
+      const narrow = view.narrow;
+      offset.x = 0;
+      offset.y = 0;
+      // phones: move up out of the way instead of sideways
+      if (side === "left" || side === "right") {
+        if (narrow) offset.y = view.h * 0.2;
+        else offset.x = (side === "left" ? -1 : 1) * view.w * 0.23;
+      } else if (side === "top") offset.y = view.h * 0.22;
+      else if (side === "bottom") offset.y = -view.h * 0.2;
+    };
+    const onScene = (e: Event) => {
+      const raw = String((e as CustomEvent<string>).detail || "");
+      const [s, side = "center"] = raw.split("@");
+      placeSide(side);
+      if (s && isShape(s)) morphTo(s as Shape);
+    };
     window.addEventListener("tt:warp", onWarp);
+    window.addEventListener("tt:stars", onScene);
 
-    // pointer + scroll influence (smoothed)
     const target = { rx: 0, ry: 0, scroll: 0 };
-    const cur = { rx: 0, ry: 0, scroll: 0 };
+    const cur = { rx: 0, ry: 0, scroll: 0, x: 0, y: 0, vel: 0 };
+    let lastY = window.scrollY;
     const onPointer = (e: PointerEvent) => {
-      target.ry = (e.clientX / window.innerWidth - 0.5) * 0.25;
-      target.rx = (e.clientY / window.innerHeight - 0.5) * 0.15;
+      target.ry = (e.clientX / window.innerWidth - 0.5) * 0.3;
+      target.rx = (e.clientY / window.innerHeight - 0.5) * 0.18;
     };
     if (!small) window.addEventListener("pointermove", onPointer, { passive: true });
     const onScroll = () => {
@@ -328,37 +588,50 @@ export default function Starfield({ route }: { route: string }) {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
 
+    let resizeT = 0;
     const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      const narrow = window.innerWidth < 760;
-      // keep the formation framed on narrow screens
-      camera.position.z = narrow ? 92 : 64;
+      measure();
       renderOnce();
+      window.clearTimeout(resizeT);
+      // re-fit text/symbol shapes to the new screen
+      resizeT = window.setTimeout(() => {
+        placeSide(offsetTarget.side);
+        morphTo(shape, true);
+      }, 250);
     };
     window.addEventListener("resize", onResize);
 
-    const renderOnce = () => renderer.render(scene, camera);
     const clock = new THREE.Clock();
     let spin = 0;
     const loop = () => {
       const dt = Math.min(clock.getDelta(), 0.05);
       uniforms.uTime.value += dt;
-      spin += dt * 0.035;
-      cur.rx += (target.rx - cur.rx) * 0.04;
-      cur.ry += (target.ry - cur.ry) * 0.04;
+      spin += dt * 0.06 * style.spin;
+      // readable shapes: ease the accumulated turn back to facing front
+      if (style.spin < 0.05) spin += (Math.round(spin / (Math.PI * 2)) * Math.PI * 2 - spin) * 0.04;
+      cur.rx += (target.rx - cur.rx) * 0.05;
+      cur.ry += (target.ry - cur.ry) * 0.05;
       cur.scroll += (target.scroll - cur.scroll) * 0.06;
-      group.rotation.y = spin + cur.ry + cur.scroll * Math.PI * 0.9;
-      group.rotation.x = 0.35 + cur.rx - cur.scroll * 0.5;
-      group.position.y = cur.scroll * 10;
+      // scroll speed makes the stars lean and drift with you
+      const y = window.scrollY;
+      cur.vel += (Math.max(-60, Math.min(60, y - lastY)) - cur.vel) * 0.08;
+      lastY = y;
+      cur.x += (offset.x - cur.x) * 0.05;
+      cur.y += (offset.y - cur.y) * 0.05;
+      const t = uniforms.uTime.value;
+      // readable shapes face the visitor; 3D shapes turn
+      group.rotation.y = spin + cur.ry * (0.6 + style.spin) + cur.vel * 0.004;
+      group.rotation.x = style.tilt + cur.rx * 0.8;
+      group.rotation.z = -cur.vel * 0.0025;
+      group.position.x = cur.x + Math.sin(t * 0.22) * view.w * 0.015;
+      group.position.y = cur.y + cur.vel * 0.06 + Math.cos(t * 0.18) * view.h * 0.012 + cur.scroll * 4 * style.spin;
       renderer.render(scene, camera);
     };
 
-    onResize();
     if (reduced) {
       uniforms.uMorph.value = 1;
-      group.rotation.x = 0.35;
+      group.rotation.x = style.tilt;
       renderOnce();
     } else {
       renderer.setAnimationLoop(loop);
@@ -374,11 +647,13 @@ export default function Starfield({ route }: { route: string }) {
     return () => {
       renderer.setAnimationLoop(null);
       window.removeEventListener("tt:warp", onWarp);
+      window.removeEventListener("tt:stars", onScene);
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVis);
-      morphTween.kill();
+      window.clearTimeout(resizeT);
+      morphTween?.kill();
       geo.dispose();
       mat.dispose();
       renderer.dispose();

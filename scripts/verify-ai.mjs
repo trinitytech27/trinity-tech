@@ -67,7 +67,7 @@ const promptsToTest = process.argv.includes("--all")
       "Can customers pay online?",
       "How much will it cost?",
       "Naku business website kavali.",
-      "How do I track SXD-001?",
+      "How do I track TT-001?",
       "Can you show your previous projects?",
       "What did I just ask you?",
     ]
@@ -84,7 +84,7 @@ try {
       "Owner/Developer: Sanjay. Professional affiliation: Co-Founder at CodeXa Agency. " +
       "Explain services naturally. Understand Telugu-English phrasing. Recommend from 5 categories: " +
       "Personal Portfolio, Blog / Content Website, Business Website, Agency Website, E-Commerce Website. " +
-      "Portfolio case studies: StarX Live, TicketX, StarX Connect, AudioX. " +
+      "Portfolio case studies: StarX Live, TicketX, ABPS Books, StarX Connect, AudioX. " +
       "Track codes: clients track at /track with tracking code and email. Never invent prices or delivery guarantees.";
 
     const messages = [

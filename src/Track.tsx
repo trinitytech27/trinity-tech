@@ -184,7 +184,7 @@ export default function Track() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. SXD-001"
+                    placeholder="e.g. TT-001"
                     value={trackingCode}
                     onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
                     style={{

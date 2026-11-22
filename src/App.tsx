@@ -26,7 +26,8 @@ import {
   Smartphone,
   Expand,
 } from "lucide-react";
-import { defaults, projects as seed, contactEmails } from "./content";
+import { defaults, projects as seed, mainContact } from "./content";
+import { ContactStrip } from "./pages/Shared";
 import Contact from "./Contact";
 import Assistant from "./Assistant";
 import HomePage from "./Home";
@@ -72,14 +73,16 @@ function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Trinity Tech home">
       <img
-        src="/assets/trinity-logo.svg"
+        src="/brand/mark.webp"
         alt=""
         className="brand-logo-img"
-        width={40}
+        width={53}
         height={40}
       />
       <span className="brand-copy">
-        <span className="brand-title">Trinity Tech</span>
+        <span className="brand-title">
+          <span className="bt-a">Trinity</span> <span className="bt-b">Tech</span>
+        </span>
         <span className="brand-sub">Build · Innovate · Transform</span>
       </span>
     </Link>
@@ -112,13 +115,19 @@ function Footer() {
           <Link to="/privacy">Privacy</Link>
         </nav>
         <div className="tt-footer-col">
-          <b>Email us</b>
-          {contactEmails.map((c) => (
-            <a key={c.email} href={"mailto:" + c.email}>
-              <span>{c.name} · {c.role}</span>
-              {c.email}
-            </a>
-          ))}
+          <b>Contact</b>
+          <a href={"mailto:" + mainContact.email}>
+            <span>Email</span>
+            {mainContact.email}
+          </a>
+          <a href={mainContact.phoneHref}>
+            <span>Call</span>
+            {mainContact.phone}
+          </a>
+          <a href={mainContact.whatsappHref} target="_blank" rel="noreferrer">
+            <span>WhatsApp</span>
+            {mainContact.whatsapp}
+          </a>
         </div>
       </div>
       <div className="wrap tt-footer-base">
@@ -445,7 +454,7 @@ function Privacy() {
       <h2>Contact and deletion</h2>
       <p>
         Ask about your enquiry or request deletion at{" "}
-        <a href="mailto:balajoseboddukuri@gmail.com">balajoseboddukuri@gmail.com</a>.
+        <a href="mailto:trinitytech27@gmail.com">trinitytech27@gmail.com</a>.
         Information is retained only as needed for the enquiry and any
         subsequent business relationship.
       </p>
@@ -488,8 +497,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("theme-owner", isOwner);
+    // the admin workspace now shares the dark gold Trinity Tech theme
+    document.documentElement.classList.toggle("tt-admin", isOwner);
   }, [isOwner]);
+
+  // lets pages tune the star background (e.g. calmer behind the booking form)
+  useEffect(() => {
+    document.documentElement.dataset.route = loc.pathname;
+  }, [loc.pathname]);
 
   const finish = () => {
     setIntro(false);
@@ -577,7 +592,7 @@ export default function App() {
           >
             <div className="intro-mark">
               <img
-                src="/assets/trinity-logo.svg"
+                src="/brand/mark.webp"
                 alt="Trinity Tech official logo"
               />
               <h2>Trinity Tech</h2>
@@ -656,6 +671,8 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             </div>
+            {/* common to every page: contact + start a project */}
+            {!isOwner && loc.pathname !== "/contact" && <ContactStrip />}
           </main>
           <Footer />
           {site.assistantEnabled &&

@@ -126,7 +126,7 @@ test("sendEnquiryNotification dispatches via Gmail SMTP transporter, sending own
       company: "StarX Corp",
       phone: "+91 9876543210",
       description: "Redesigning our portfolio platform with modern typography and fast load speeds.",
-      tracking_code: "SXD-108",
+      tracking_code: "TT-108",
     },
     {
       transporter: mockTransporter,
@@ -146,15 +146,15 @@ test("sendEnquiryNotification dispatches via Gmail SMTP transporter, sending own
 
   // Email 1: Owner inbox notification
   assert.equal(sentMessages[0].to, "sanjuxdev27@gmail.com");
-  assert.ok(sentMessages[0].subject.includes("New Trinity Tech Enquiry — SXD-108"));
+  assert.ok(sentMessages[0].subject.includes("New Trinity Tech Enquiry — TT-108"));
   assert.ok(sentMessages[0].html.includes("StarX Corp"));
   assert.ok(sentMessages[0].html.includes("https://sanju-x-dev.vercel.app/spideyy"));
 
-  // Email 2: Customer SXD tracking code confirmation
+  // Email 2: Customer tracking code confirmation
   assert.equal(sentMessages[1].to, "client@example.com");
-  assert.ok(sentMessages[1].subject.includes("SXD-108"));
-  assert.ok(sentMessages[1].html.includes("SXD-108"));
-  assert.ok(sentMessages[1].html.includes("https://sanju-x-dev.vercel.app/track?code=SXD-108"));
+  assert.ok(sentMessages[1].subject.includes("TT-108"));
+  assert.ok(sentMessages[1].html.includes("TT-108"));
+  assert.ok(sentMessages[1].html.includes("https://sanju-x-dev.vercel.app/track?code=TT-108"));
 });
 
 test("verifySmtpConnection reports status and handles mock transporter verification", async () => {

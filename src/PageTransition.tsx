@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import { gsap, prefersReducedMotion } from "./scroll";
+import { gsap, prefersReducedMotion, scrollToPageTop } from "./scroll";
 
 /**
  * Page-to-page transition.
@@ -54,8 +54,15 @@ export default function PageTransition() {
       if (url.origin !== window.location.origin) return;
       const current = locRef.current;
       const to = url.pathname + url.search + url.hash;
-      // same page (e.g. only the hash differs): let the normal handler run
-      if (url.pathname === current.pathname && url.search === current.search) return;
+      // same page: Home / logo on the home page (or any page link to itself)
+      // glides back to the top instead of doing nothing
+      if (url.pathname === current.pathname && url.search === current.search) {
+        if (url.hash) return;
+        e.preventDefault();
+        e.stopPropagation();
+        scrollToPageTop();
+        return;
+      }
       if (url.pathname.startsWith("/api")) return;
 
       e.preventDefault();
@@ -115,7 +122,7 @@ export default function PageTransition() {
   return (
     <div ref={overlay} className="tt-pt" aria-hidden="true">
       <div className="tt-pt-inner">
-        <img className="tt-pt-mark" src="/assets/trinity-logo.svg" alt="" width={56} height={56} />
+        <img className="tt-pt-mark" src="/brand/mark.webp" alt="" width={96} height={72} />
         <span className="tt-pt-kicker">{label.kicker}</span>
         <h2 className="tt-pt-title">
           {label.title.split("").map((ch, i) => (

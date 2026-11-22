@@ -1,8 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { deliverables, projects as seed } from "../content";
-import { DemoStage, WorkGallery } from "../ShowcaseFX";
+import { DemoStage } from "../ShowcaseFX";
 import { PageHero, TiltCard, useRefreshOnLoad } from "../FX3D";
-import { CtaBand } from "./Shared";
 
 type Project = (typeof seed)[number];
 
@@ -37,7 +36,6 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
 
       <DemoStage items={all} />
 
-      <WorkGallery items={all} />
 
       <section className="tt-section wrap" data-section="Included" aria-label="What every project includes">
         <header className="tt-section-head center" data-reveal>
@@ -57,7 +55,6 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
         </div>
       </section>
 
-      <CtaBand title="Want a website like these?" text="Share your idea and we'll build a live, professional experience for your business." />
     </div>
   );
 }

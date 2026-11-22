@@ -36,8 +36,8 @@ const port = Number(env("SMTP_PORT", "465"));
 const secure = env("SMTP_SECURE", "true") !== "false";
 const user = env("SMTP_USER", "").trim();
 const pass = env("SMTP_PASS", "").replace(/\s+/g, "");
-const fromEmail = env("SMTP_FROM_EMAIL", user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <sanjuxdev27@gmail.com>');
-const ownerNotificationEmail = env("OWNER_NOTIFICATION_EMAIL", user || "sanjuxdev27@gmail.com");
+const fromEmail = env("SMTP_FROM_EMAIL", user ? `"Trinity Tech" <${user}>` : '"Trinity Tech" <trinitytech27@gmail.com>');
+const ownerNotificationEmail = env("OWNER_NOTIFICATION_EMAIL", user || "trinitytech27@gmail.com");
 
 console.log("\n=======================================================");
 console.log("  Trinity Tech — GMAIL SMTP DELIVERY DIAGNOSTIC TOOL");

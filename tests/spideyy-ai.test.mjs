@@ -214,9 +214,9 @@ test("spideyy AI understands Telugu-English mixed enquiry 'Naku business website
   assert.ok(body.links.some((l) => l.url.includes("Business%20Website")));
 });
 
-test("spideyy AI directs 'How do I track SXD-001?' to secure /track without exposing private data", async () => {
+test("spideyy AI directs 'How do I track TT-001?' to secure /track without exposing private data", async () => {
   const mockFetch = createMockFetch({
-    content: "To track your project with code SXD-001, visit our secure Track Project page at /track. For your privacy and security, enter SXD-001 along with your registered email to view real-time milestone progress and updates.",
+    content: "To track your project with code TT-001, visit our secure Track Project page at /track. For your privacy and security, enter TT-001 along with your registered email to view real-time milestone progress and updates.",
   });
 
   configureEnvironment({
@@ -232,7 +232,7 @@ test("spideyy AI directs 'How do I track SXD-001?' to secure /track without expo
       method: "POST",
       url: "/api/chat",
       headers: { origin: "http://127.0.0.1:3100" },
-      body: { question: "How do I track SXD-001?" },
+      body: { question: "How do I track TT-001?" },
     },
     {
       setHeader() {},
@@ -506,14 +506,14 @@ test("Phase 10 - Test 6: User 'I want to submit my project.' provides working ac
   assert.ok(body.links.some((l) => l.label === "Start Your Project" && l.url === "/project"));
 });
 
-test("Phase 10 - Test 7: User 'Track SXD-001.' directs to secure /track without exposing private data", async () => {
+test("Phase 10 - Test 7: User 'Track TT-001.' directs to secure /track without exposing private data", async () => {
   let body = {};
   await handler(
     {
       method: "POST",
       url: "/api/chat",
       headers: { origin: "http://127.0.0.1:3100" },
-      body: { question: "Track SXD-001." },
+      body: { question: "Track TT-001." },
     },
     {
       setHeader() {},

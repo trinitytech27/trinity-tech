@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { PageHero } from "./FX3D";
+import { scrollToElement, scrollToPageTop, showStars } from "./scroll";
 import {
   Copy,
   Check,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import {
   DEFAULT_WEBSITE_CATEGORIES,
+  categoryArt,
   PRIMARY_PURPOSE_OPTIONS,
   LOGIN_OPTIONS,
   LOGIN_METHODS,
@@ -85,7 +87,9 @@ export interface FormState {
   whatsappPhone: string;
   sameAsPhone: boolean;
   city: string;
+  country: string;
   isBusiness: boolean;
+  bizChosen: boolean;
   businessName: string;
   preferredContact: string;
   additionalMessage: string;
@@ -97,6 +101,7 @@ export interface FormState {
 export default function ProjectPage() {
   const [params] = useSearchParams();
   const [step, setStep] = useState<number>(0);
+  const [contactOther, setContactOther] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [trackingCode, setTrackingCode] = useState("");
@@ -141,19 +146,21 @@ export default function ProjectPage() {
     designMind: "",
     referenceUrl: "",
     hasDomain: "",
-    timeline: "Flexible",
-    budget: "Not Sure Yet",
+    timeline: "",
+    budget: "",
 
     name: "",
     email: "",
     countryCode: "+91",
     phone: "",
     whatsappPhone: "",
-    sameAsPhone: true,
+    sameAsPhone: false,
     city: "",
+    country: "",
     isBusiness: false,
+    bizChosen: false,
     businessName: "",
-    preferredContact: "WhatsApp",
+    preferredContact: "",
     additionalMessage: "",
     consent: false,
     website: "",
@@ -163,7 +170,7 @@ export default function ProjectPage() {
   // Restore saved draft from sessionStorage on mount
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("sxd_enquiry_draft_v5");
+      const saved = sessionStorage.getItem("tt_enquiry_draft_v6");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === "object") {
@@ -181,12 +188,32 @@ export default function ProjectPage() {
     }
   }, [initialCategory]);
 
+  // the star background draws the type of website the client picked
+  useEffect(() => {
+    const ICONS: Record<string, string> = {
+      portfolio: "user",
+      blog: "book-open",
+      business: "briefcase",
+      agency: "layers",
+      ecommerce: "shopping-cart",
+      restaurant: "utensils",
+      shop: "store",
+      booking: "calendar-check",
+      educational: "graduation-cap",
+      custom: "code-xml",
+      not_sure: "circle-help",
+    };
+    const cat = DEFAULT_WEBSITE_CATEGORIES.find((c) => c.label === form.selectedCategory);
+    const icon = cat ? ICONS[cat.id] : "";
+    showStars(icon ? "icon:" + icon + "@top" : "wave");
+  }, [form.selectedCategory]);
+
   // Persist draft
   useEffect(() => {
     try {
       const safeState: Record<string, unknown> = { ...form };
       delete safeState.website;
-      sessionStorage.setItem("sxd_enquiry_draft_v5", JSON.stringify(safeState));
+      sessionStorage.setItem("tt_enquiry_draft_v6", JSON.stringify(safeState));
     } catch {
       /* ignore storage errors */
     }
@@ -230,10 +257,13 @@ export default function ProjectPage() {
     });
   };
 
-  const scrollToTop = () => {
-    const el = document.getElementById("enquiry-top") || document.body;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  // every Continue / Back brings the stepper + new step header into view
+  const scrollToTop = () =>
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(".builder-progress-stepper");
+      if (el) scrollToElement(el);
+      else scrollToPageTop();
+    });
 
   // Step 1 Validation
   function handleGoToStep2(e?: React.FormEvent) {
@@ -307,10 +337,44 @@ export default function ProjectPage() {
     scrollToTop();
   }
 
-  // Final Step 4 Submission (Submit & Continue on WhatsApp)
+  // Step 4 Validation — your details
+  function validateDetails() {
+    if (!form.name.trim()) return "Please enter your full name.";
+    if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email.trim())) return "Please enter a valid email address.";
+    if (!form.phone.trim()) return "Please enter your mobile phone number.";
+    const wa = form.sameAsPhone ? form.phone.trim() : form.whatsappPhone.trim();
+    if (!wa) return "Please enter your WhatsApp number (or check 'Same as Mobile Number').";
+    if (!form.city.trim()) return "Please enter your city.";
+    if (!form.country.trim()) return "Please enter your country.";
+    if (!form.bizChosen) return "Please tell us if this is for yourself or a business.";
+    if (form.isBusiness && !form.businessName.trim()) return "Please enter your business or brand name.";
+    return "";
+  }
+
+  function handleGoToStep5(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    const problem = validateDetails();
+    if (problem) {
+      setStatus(problem);
+      return;
+    }
+    setStatus("");
+    setStep(4);
+    scrollToTop();
+  }
+
+  // Final Step 5 Submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (!form.preferredContact) {
+      setStatus("Please choose how we should contact you.");
+      return;
+    }
+    if (form.preferredContact === "Other" && !contactOther.trim()) {
+      setStatus("Please tell us how you would like us to contact you.");
+      return;
+    }
 
     if (!form.name.trim()) {
       setStatus("Please enter your full name.");
@@ -329,8 +393,8 @@ export default function ProjectPage() {
       setStatus("Please enter your WhatsApp number (or check 'Same as Mobile Number').");
       return;
     }
-    if (!form.city.trim()) {
-      setStatus("Please enter your city or location.");
+    if (!form.city.trim() || !form.country.trim()) {
+      setStatus("Please enter your city and country.");
       return;
     }
     if (form.isBusiness && !form.businessName.trim()) {
@@ -371,7 +435,10 @@ export default function ProjectPage() {
         email: form.email.trim().toLowerCase(),
         phone: fullMobile,
         whatsapp: fullWhatsApp,
-        preferred_contact: form.preferredContact,
+        preferred_contact: (form.preferredContact === "Other"
+          ? "Other: " + contactOther.trim()
+          : form.preferredContact
+        ).slice(0, 40),
         company: form.isBusiness ? form.businessName.trim() : "",
         business_name: form.isBusiness ? form.businessName.trim() : "",
         is_business: form.isBusiness,
@@ -390,11 +457,16 @@ export default function ProjectPage() {
         reference_url: form.referenceUrl.trim(),
         design_preference: form.designStyle,
         has_domain: form.hasDomain,
-        timeline: form.timeline,
-        budget: form.budget,
+        timeline: form.timeline || "Flexible",
+        budget: form.budget || "Not Sure Yet",
         description: `Project enquiry for ${categoryDescription}. Objectives: ${form.selectedPurposes.join(", ") || "General"}. Pages: ${form.pageCount}. Style: ${form.designStyle}.`,
-        city: form.city.trim(),
-        additional_message: form.additionalMessage.trim(),
+        city: (form.city.trim() + ", " + form.country.trim()).slice(0, 100),
+        additional_message: [
+          form.preferredContact === "Other" ? "Preferred contact: " + contactOther.trim() : "",
+          form.additionalMessage.trim(),
+        ]
+          .filter(Boolean)
+          .join("\n"),
         consent: true,
         website: form.website, // honeypot
         idempotency_key: form.idempotencyKey,
@@ -409,7 +481,7 @@ export default function ProjectPage() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "Unable to send your enquiry. Please check your information and try again.");
 
-      const generatedCode = d.trackingCode || "SXD-001";
+      const generatedCode = d.trackingCode || "TT-001";
       setTrackingCode(generatedCode);
 
       // Build rich WhatsApp URL with all requirements
@@ -420,7 +492,7 @@ export default function ProjectPage() {
         email: form.email.trim(),
         phone: fullMobile,
         whatsapp: fullWhatsApp,
-        city: form.city.trim(),
+        city: form.city.trim() + ", " + form.country.trim(),
         websiteType: categoryDescription,
         primaryPurpose: form.selectedPurposes,
         features: compiledFeatures,
@@ -449,8 +521,8 @@ export default function ProjectPage() {
         referenceUrl: form.referenceUrl.trim() || undefined,
         hasDomain:
           DOMAIN_OPTIONS.find((dm) => dm.id === form.hasDomain)?.label || form.hasDomain || undefined,
-        timeline: form.timeline,
-        budget: form.budget,
+        timeline: form.timeline || "Flexible",
+        budget: form.budget || "Not Sure Yet",
         additionalMessage: form.additionalMessage.trim() || undefined,
       };
 
@@ -459,11 +531,11 @@ export default function ProjectPage() {
       setSent(true);
 
       // Clear draft storage
-      sessionStorage.removeItem("sxd_enquiry_draft_v5");
+      sessionStorage.removeItem("tt_enquiry_draft_v6");
       scrollToTop();
 
-      // Seamless redirect to WhatsApp
-      setTimeout(() => {
+      // Continue on WhatsApp only when that is the chosen contact method
+      if (form.preferredContact === "WhatsApp") setTimeout(() => {
         try {
           window.location.assign(waUrl);
         } catch {
@@ -520,7 +592,7 @@ export default function ProjectPage() {
         kicker="Start a Project"
         title="Let's start"
         accent="your project."
-        sub="Complete our 4-step project guide, receive your permanent tracking ID and continue with our team on WhatsApp."
+        sub="Five easy steps: choose what you need, tell us about you and how to reach you — you get a permanent tracking ID."
       />
       <div className="wrap tt-booking-body" data-section="Booking">
 
@@ -533,7 +605,7 @@ export default function ProjectPage() {
             onClick={() => step > 0 && setStep(0)}
           >
             <span className="stepper-num">01</span>
-            <span className="stepper-label">Choose Your Website</span>
+            <span className="stepper-label">Website Type</span>
           </button>
           <span className="stepper-arrow" aria-hidden="true">→</span>
           <button
@@ -542,7 +614,7 @@ export default function ProjectPage() {
             onClick={() => step > 1 && setStep(1)}
           >
             <span className="stepper-num">02</span>
-            <span className="stepper-label">Select Features</span>
+            <span className="stepper-label">Features</span>
           </button>
           <span className="stepper-arrow" aria-hidden="true">→</span>
           <button
@@ -551,15 +623,24 @@ export default function ProjectPage() {
             onClick={() => step > 2 && setStep(2)}
           >
             <span className="stepper-num">03</span>
-            <span className="stepper-label">Design Preferences</span>
+            <span className="stepper-label">Design</span>
           </button>
           <span className="stepper-arrow" aria-hidden="true">→</span>
           <button
             type="button"
-            className={`stepper-item ${step === 3 ? "active" : ""}`}
+            className={`stepper-item ${step === 3 ? "active" : step > 3 ? "completed" : ""}`}
             onClick={() => step > 3 && setStep(3)}
           >
             <span className="stepper-num">04</span>
+            <span className="stepper-label">Your Details</span>
+          </button>
+          <span className="stepper-arrow">→</span>
+          <button
+            type="button"
+            className={`stepper-item ${step === 4 ? "active" : ""}`}
+            onClick={() => step > 4 && setStep(4)}
+          >
+            <span className="stepper-num">05</span>
             <span className="stepper-label">Contact & Submit</span>
           </button>
         </div>
@@ -630,7 +711,7 @@ export default function ProjectPage() {
           {step === 0 && (
             <div className="builder-step-form">
               <div className="builder-step-header">
-                <span className="eyebrow">STEP 1 OF 4</span>
+                <span className="eyebrow">STEP 1 OF 5</span>
                 <h2 className="builder-step-title">What Kind of Website Do You Need?</h2>
                 <p className="builder-step-sub">
                   Choose the type of website you&apos;re planning. We&apos;ll help you with the rest.
@@ -656,6 +737,7 @@ export default function ProjectPage() {
                         }
                       }}
                     >
+                      {categoryArt(cat.id) && <img className="builder-cat-art" src={categoryArt(cat.id)} alt="" loading="lazy" />}
                       <div className="builder-cat-header">
                         <div className="builder-cat-icon">{renderCategoryIcon(cat.id)}</div>
                         <div className="builder-radio-dot" aria-hidden="true" />
@@ -753,7 +835,7 @@ export default function ProjectPage() {
           {step === 1 && (
             <div className="builder-step-form">
               <div className="builder-step-header">
-                <span className="eyebrow">STEP 2 OF 4</span>
+                <span className="eyebrow">STEP 2 OF 5</span>
                 <h2 className="builder-step-title">Select Website Features</h2>
                 <p className="builder-step-sub">
                   Choose the features you need for your <strong>{form.selectedCategory}</strong>.
@@ -1012,7 +1094,7 @@ export default function ProjectPage() {
           {step === 2 && (
             <div className="builder-step-form">
               <div className="builder-step-header">
-                <span className="eyebrow">STEP 3 OF 4</span>
+                <span className="eyebrow">STEP 3 OF 5</span>
                 <h2 className="builder-step-title">Design & Scope Preferences</h2>
                 <p className="builder-step-sub">
                   Tell us about your page expectations, visual style, and timeline.
@@ -1284,25 +1366,14 @@ export default function ProjectPage() {
           {step === 3 && (
             <div className="builder-step-form">
               <div className="builder-step-header">
-                <span className="eyebrow">STEP 4 OF 4</span>
-                <h2 className="builder-step-title">Let&apos;s Get Your Project Started</h2>
+                <span className="eyebrow">STEP 4 OF 5</span>
+                <h2 className="builder-step-title">Tell Us About You</h2>
                 <p className="builder-step-sub">
-                  Share your contact details so we can review your scope and connect on WhatsApp.
+                  Just the basics, so we know who we are building for.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit}>
-                {/* Honeypot field */}
-                <input
-                  type="text"
-                  name="website"
-                  value={form.website}
-                  onChange={(e) => update("website", e.target.value)}
-                  style={{ display: "none" }}
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-
+              <form onSubmit={handleGoToStep5}>
                 <div className="builder-form-grid">
                   {/* Full Name */}
                   <div className="builder-form-group">
@@ -1382,21 +1453,24 @@ export default function ProjectPage() {
                       <label htmlFor="client-whatsapp" style={{ margin: 0 }}>
                         WhatsApp Number <span className="req">*</span>
                       </label>
-                      <label className="builder-checkbox-inline" style={{ margin: 0, fontSize: 12.5, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        <input
-                          type="checkbox"
-                          checked={form.sameAsPhone}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setForm((f) => ({
-                              ...f,
-                              sameAsPhone: checked,
-                              whatsappPhone: checked ? f.phone : f.whatsappPhone,
-                            }));
-                          }}
-                        />
-                        Same as Mobile
-                      </label>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={form.sameAsPhone}
+                        className={"tt-switch" + (form.sameAsPhone ? " on" : "")}
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            sameAsPhone: !f.sameAsPhone,
+                            whatsappPhone: !f.sameAsPhone ? f.phone : f.whatsappPhone,
+                          }))
+                        }
+                      >
+                        <span className="tt-switch-track">
+                          <span className="tt-switch-thumb" />
+                        </span>
+                        Same as mobile
+                      </button>
                     </div>
                     <input
                       id="client-whatsapp"
@@ -1411,21 +1485,44 @@ export default function ProjectPage() {
                     />
                   </div>
 
-                  {/* City / Location */}
+                  {/* City */}
                   <div className="builder-form-group">
                     <label htmlFor="client-city">
-                      City / Location <span className="req">*</span>
+                      City <span className="req">*</span>
                     </label>
                     <input
                       id="client-city"
                       type="text"
                       className="builder-input"
                       required
-                      maxLength={60}
-                      placeholder="e.g. Hyderabad, Bengaluru, Mumbai"
+                      maxLength={50}
+                      placeholder="e.g. Hyderabad"
                       value={form.city}
                       onChange={(e) => update("city", e.target.value)}
                     />
+                  </div>
+
+                  {/* Country */}
+                  <div className="builder-form-group">
+                    <label htmlFor="client-country">
+                      Country <span className="req">*</span>
+                    </label>
+                    <input
+                      id="client-country"
+                      type="text"
+                      className="builder-input"
+                      required
+                      maxLength={45}
+                      list="tt-countries"
+                      placeholder="e.g. India"
+                      value={form.country}
+                      onChange={(e) => update("country", e.target.value)}
+                    />
+                    <datalist id="tt-countries">
+                      {["India", "United States", "United Kingdom", "United Arab Emirates", "Canada", "Australia", "Singapore", "Germany", "Saudi Arabia", "Qatar"].map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
 
                   {/* Individual vs Business */}
@@ -1436,15 +1533,15 @@ export default function ProjectPage() {
                     <div className="builder-pills-row" role="radiogroup">
                       <button
                         type="button"
-                        className={`builder-pill ${!form.isBusiness ? "active" : ""}`}
-                        onClick={() => update("isBusiness", false)}
+                        className={`builder-pill ${form.bizChosen && !form.isBusiness ? "active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, isBusiness: false, bizChosen: true }))}
                       >
                         Personal / Individual Project
                       </button>
                       <button
                         type="button"
-                        className={`builder-pill ${form.isBusiness ? "active" : ""}`}
-                        onClick={() => update("isBusiness", true)}
+                        className={`builder-pill ${form.bizChosen && form.isBusiness ? "active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, isBusiness: true, bizChosen: true }))}
                       >
                         Business / Organization
                       </button>
@@ -1470,21 +1567,93 @@ export default function ProjectPage() {
                     </div>
                   )}
 
-                  {/* Preferred Contact Method */}
+                </div>
+
+                {status && <div className="builder-status-alert">{status}</div>}
+
+                <div className="builder-step-actions split">
+                  <button
+                    type="button"
+                    className="button secondary"
+                    onClick={() => {
+                      setStep(2);
+                      scrollToTop();
+                    }}
+                  >
+                    <ArrowLeft size={16} /> Back
+                  </button>
+                  <button type="submit" className="button builder-continue-btn">
+                    Continue <ArrowRight size={16} />
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="builder-step-form">
+              <div className="builder-step-header">
+                <span className="eyebrow">STEP 5 OF 5</span>
+                <h2 className="builder-step-title">How Should We Contact You?</h2>
+                <p className="builder-step-sub">
+                  Pick what suits you best, check your summary and send your enquiry.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                {/* Honeypot field */}
+                <input
+                  type="text"
+                  name="website"
+                  value={form.website}
+                  onChange={(e) => update("website", e.target.value)}
+                  style={{ display: "none" }}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+
+                <div className="builder-form-grid">
+                  {/* How can we contact you? */}
                   <div className="builder-form-group full-width">
-                    <label>Preferred Contact Method</label>
-                    <div className="builder-pills-row" role="radiogroup">
-                      {["WhatsApp", "Phone Call", "Email"].map((method) => (
+                    <label>
+                      How Can We Contact You? <span className="req">*</span>
+                    </label>
+                    <div className="builder-radio-cards-grid tt-contact-methods" role="radiogroup">
+                      {[
+                        { id: "Email", desc: "We reply with your proposal by email." },
+                        { id: "Google Meet", desc: "A quick video call to discuss your project." },
+                        { id: "WhatsApp", desc: "Chat with our team on WhatsApp." },
+                        { id: "Phone Call", desc: "We call you at a convenient time." },
+                        { id: "Other", desc: "Tell us your preferred way." },
+                      ].map((m) => (
                         <button
-                          key={method}
+                          key={m.id}
                           type="button"
-                          className={`builder-pill ${form.preferredContact === method ? "active" : ""}`}
-                          onClick={() => update("preferredContact", method)}
+                          role="radio"
+                          aria-checked={form.preferredContact === m.id}
+                          className={`builder-option-card ${form.preferredContact === m.id ? "selected" : ""}`}
+                          onClick={() => update("preferredContact", m.id)}
                         >
-                          {method}
+                          <span className="builder-radio-dot" />
+                          <span className="builder-option-content">
+                            <span className="builder-option-title">{m.id}</span>
+                            <span className="builder-option-desc">{m.desc}</span>
+                          </span>
                         </button>
                       ))}
                     </div>
+                    {form.preferredContact === "Other" && (
+                      <input
+                        type="text"
+                        className="builder-input"
+                        style={{ marginTop: 12 }}
+                        maxLength={80}
+                        placeholder="Please specify (e.g. Telegram, Zoom, Instagram DM)"
+                        value={contactOther}
+                        onChange={(e) => setContactOther(e.target.value)}
+                        aria-label="Other contact method"
+                      />
+                    )}
                   </div>
 
                   {/* Additional Notes (Optional) */}
@@ -1557,9 +1726,18 @@ export default function ProjectPage() {
                     <div className="review-row">
                       <span className="review-lbl">Timeline & Budget:</span>
                       <span className="review-val">
-                        {form.timeline} · {form.budget}
+                        {form.timeline || "Flexible"} · {form.budget || "Not sure yet"}
                       </span>
                       <button type="button" className="review-edit-btn" onClick={() => setStep(2)}>
+                        Edit
+                      </button>
+                    </div>
+                    <div className="review-row">
+                      <span className="review-lbl">Your Details:</span>
+                      <span className="review-val">
+                        {form.name || "—"} · {form.email || "—"}
+                      </span>
+                      <button type="button" className="review-edit-btn" onClick={() => setStep(3)}>
                         Edit
                       </button>
                     </div>
@@ -1582,25 +1760,24 @@ export default function ProjectPage() {
 
                 {status && <div className="builder-status-alert">{status}</div>}
 
-                {/* ONLY ONE PRIMARY SUBMIT BUTTON AS STRICTLY SPECIFIED */}
                 <div className="builder-step-actions split">
                   <button
                     type="button"
                     className="button secondary"
                     onClick={() => {
-                      setStep(2);
+                      setStep(3);
                       scrollToTop();
                     }}
                   >
-                    <ArrowLeft size={16} /> Back to Design Preferences
+                    <ArrowLeft size={16} /> Back
                   </button>
-                  <button
-                    type="submit"
-                    className="button button-whatsapp builder-continue-btn"
-                    disabled={busy}
-                    style={{ fontSize: 15, padding: "12px 28px" }}
-                  >
-                    {busy ? "Saving & Connecting…" : "Submit & Continue on WhatsApp"} <ArrowRight size={16} />
+                  <button type="submit" className="button builder-continue-btn" disabled={busy}>
+                    {busy
+                      ? "Sending…"
+                      : form.preferredContact === "WhatsApp"
+                      ? "Submit & Continue on WhatsApp"
+                      : "Submit Enquiry"}{" "}
+                    <ArrowRight size={16} />
                   </button>
                 </div>
               </form>
@@ -1627,6 +1804,7 @@ export function EnquiryPreview() {
             style={{ cursor: "pointer" }}
             onClick={() => navigate(`/project?category=${encodeURIComponent(cat.label)}`)}
           >
+            {categoryArt(cat.id) && <img className="builder-cat-art" src={categoryArt(cat.id)} alt="" loading="lazy" />}
             <div className="builder-cat-header">
               <div className="builder-cat-icon">
                 {cat.id === "portfolio" && <User size={20} />}

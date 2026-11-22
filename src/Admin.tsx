@@ -27,6 +27,14 @@ const auth =
 export default function Admin() {
   const [stage, setStage] = useState<"code" | "login" | "setup" | "workspace">("code");
   const [secretCode, setSecretCode] = useState("");
+  // which admin unlocked the workspace (Sanju / Maddy / Jose)
+  const [adminName, setAdminName] = useState<{ name: string; fullName: string; role: string } | null>(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("tt-admin") || "null");
+    } catch {
+      return null;
+    }
+  });
   const [showSecret, setShowSecret] = useState(false);
   const [newCode, setNewCode] = useState("");
   const [confirmCode, setConfirmCode] = useState("");
@@ -195,6 +203,12 @@ export default function Admin() {
       setStage("code");
       setData(null);
       setSecretCode("");
+      setAdminName(null);
+      try {
+        sessionStorage.removeItem("tt-admin");
+      } catch {
+        /* ignore */
+      }
     });
   }
 
@@ -297,12 +311,12 @@ export default function Admin() {
             <h3 style={{ margin: "0 0 6px 0" }}>
               {stage === "setup"
                 ? "Configure Owner Password"
-                : "Spideyy — Owner Access"}
+                : "Trinity Tech — Admin Access"}
             </h3>
             <p style={{ margin: 0, fontSize: 14, color: "var(--muted)" }}>
               {stage === "setup"
                 ? "Choose a strong password (minimum 8 characters) for direct owner access."
-                : "Enter your owner password to unlock the workspace."}
+                : "Enter your private access code. Only Trinity Tech admins can open the dashboard."}
             </p>
           </div>
 
@@ -369,11 +383,19 @@ export default function Admin() {
                 void run(async () => {
                   const res = await api({ action: "login-code", code: secretCode });
                   setSecretCode("");
+                  if (res.admin) {
+                    setAdminName(res.admin);
+                    try {
+                      sessionStorage.setItem("tt-admin", JSON.stringify(res.admin));
+                    } catch {
+                      /* ignore */
+                    }
+                  }
                   if (res.sessionToken && auth) {
                     try {
                       await auth.auth.setSession({
                         access_token: res.sessionToken,
-                        refresh_token: "",
+                        refresh_token: res.sessionRefresh || "",
                       });
                     } catch {
                       /* ignore */
@@ -384,7 +406,7 @@ export default function Admin() {
               }}
             >
               <label>
-                Owner Password
+                Private Access Code
                 <div style={{ position: "relative" }}>
                   <input
                     type={showSecret ? "text" : "password"}
@@ -393,7 +415,7 @@ export default function Admin() {
                     disabled={codeLockout > 0 || busy}
                     value={secretCode}
                     onChange={(e) => setSecretCode(e.target.value)}
-                    placeholder="Enter owner password"
+                    placeholder="Enter your access code"
                     style={{ paddingRight: 40 }}
                   />
                   <button
@@ -432,6 +454,19 @@ export default function Admin() {
       ) : (
         /* AUTHENTICATED WORKSPACE */
         <>
+          <div className="tt-admin-welcome">
+            <div className="tt-admin-avatar">{(adminName?.name || "A").slice(0, 1)}</div>
+            <div>
+              <span className="tt-admin-kicker">
+                {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+              </span>
+              <h2>Welcome back, {adminName?.name || "Admin"}.</h2>
+              <p>
+                {adminName ? adminName.fullName + " · " + adminName.role + " · " : ""}
+                Manage enquiries, projects and site content for Trinity Tech.
+              </p>
+            </div>
+          </div>
           <div className="admin-tabs" style={{ position: "relative" }}>
             {tabs.map((t) => (
               <button
@@ -628,7 +663,7 @@ export default function Admin() {
                   className="button"
                   style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px" }}
                   onClick={() => {
-                    const defaultTracking = "SXD-" + String((data?.projects?.length || 0) + 1).padStart(3, "0");
+                    const defaultTracking = "TT-" + String((data?.projects?.length || 0) + 1).padStart(3, "0");
                     setEditingProject({
                       tracking_code: defaultTracking,
                       title: "",
@@ -1019,7 +1054,7 @@ export default function Admin() {
                           borderRadius: 4,
                         }}
                       >
-                        {r.tracking_code || r.data?.tracking_code || "SXD-001"}
+                        {r.tracking_code || r.data?.tracking_code || "TT-001"}
                       </span>
                       <span>
                         <strong>{r.data.name}</strong> · {r.data.service}
@@ -1067,9 +1102,9 @@ export default function Admin() {
                       }}
                     >
                       <div>
-                        <small style={{ color: "var(--muted)", display: "block" }}>SXD Tracking ID</small>
+                        <small style={{ color: "var(--muted)", display: "block" }}>Tracking ID</small>
                         <div style={{ fontFamily: "ui-monospace, Menlo, monospace", fontWeight: 700, color: "var(--accent)" }}>
-                          {r.tracking_code || r.data?.tracking_code || "SXD-001"}
+                          {r.tracking_code || r.data?.tracking_code || "TT-001"}
                         </div>
                       </div>
 
@@ -1412,7 +1447,7 @@ export default function Admin() {
                           </button>
                           {(() => {
                             const clientWa = (r.data.whatsapp || r.phone || r.data.phone || "").replace(/[^0-9]/g, "");
-                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Trinity Tech regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'SXD'}).`)}` : null;
+                            const waChatUrl = clientWa ? `https://wa.me/${clientWa}?text=${encodeURIComponent(`Hi ${r.data.name || ''}, this is Sanju from Trinity Tech regarding your project enquiry (${r.tracking_code || r.data?.tracking_code || 'TT'}).`)}` : null;
                             const clientEmailUrl = r.data.email ? `mailto:${r.data.email}?subject=${encodeURIComponent(`Trinity Tech — Regarding your enquiry ${r.tracking_code || r.data?.tracking_code || ''}`)}` : null;
                             return (
                               <>
@@ -1480,7 +1515,7 @@ export default function Admin() {
                             style={{ padding: "8px 16px", borderColor: "var(--accent)", color: "var(--accent)" }}
                             onClick={() => {
                               setEditingProject({
-                                tracking_code: r.tracking_code || "SXD-001",
+                                tracking_code: r.tracking_code || "TT-001",
                                 title: (r.data.company || r.data.name) + " — " + r.data.service,
                                 client_name: r.data.name,
                                 client_email: r.data.email,
