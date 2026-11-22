@@ -1,6 +1,7 @@
 import { Eye, Mail, Target, Sparkles, ArrowUpRight } from "lucide-react";
 import { audiences, brand, team, values } from "../content";
 import { PageHero, TiltCard, useRefreshOnLoad } from "../FX3D";
+import { Journey } from "./Journey";
 
 export default function AboutPage() {
   useRefreshOnLoad();
@@ -52,7 +53,9 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="tt-section wrap" data-section="Team" aria-label="Our team">
+      <Journey />
+
+      <section className="tt-section wrap" data-section="Team" aria-label="Our team" data-stars="trinity">
         <header className="tt-section-head center" data-reveal>
           <span className="tt-eyebrow">The Team</span>
           <h2 className="tt-title">

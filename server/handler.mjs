@@ -21,6 +21,7 @@ import {
   formatProgressUpdatedHtml,
   formatProjectCompletedHtml,
   formatProjectStatusChangeHtml,
+  formatCustomMessageHtml,
 } from "./email.mjs";
 import seed from "./seed.json" with { type: "json" };
 
@@ -31,9 +32,9 @@ import seed from "./seed.json" with { type: "json" };
  * (create it with: node scripts/admin-pins.mjs).
  */
 const ADMIN_PROFILES = {
-  sanju: { name: "Sanju", fullName: "Sanjay", role: "Developer" },
-  maddy: { name: "Maddy", fullName: "Madhan Kumar", role: "Developer" },
-  jose: { name: "Jose", fullName: "Balajose", role: "Founder" },
+  sanju: { name: "Sanju", fullName: "Sanjay", role: "Developer", access: "superadmin" },
+  maddy: { name: "Maddy", fullName: "Madhan Kumar", role: "Developer", access: "admin" },
+  jose: { name: "Jose", fullName: "Balajose", role: "Founder", access: "admin" },
 };
 
 function adminVerifiers() {
@@ -526,7 +527,17 @@ async function unlocked(client, req, user) {
 
   const row = await checked(query.maybeSingle());
   if (!row) throw fail(403, "Workspace locked. Verify your code again.");
+  return row;
 }
+
+/** Who is signed in. The legacy owner code (no named admin) counts as superadmin. */
+function whoIs(row) {
+  const p = row?.admin_id ? ADMIN_PROFILES[row.admin_id] : null;
+  return p
+    ? { id: row.admin_id, name: p.name, fullName: p.fullName, role: p.role, access: p.access }
+    : { id: "owner", name: "Owner", fullName: "Trinity Tech", role: "Owner", access: "superadmin" };
+}
+const SUPER_ONLY = new Set(["send-mail", "delete-enquiry", "delete-project", "delete-media", "test-email", "verify-smtp", "retry-email", "setup-code", "test-ai"]);
 
 async function audit(client, action) {
   try {
@@ -904,6 +915,9 @@ export default async function handler(req, res) {
           publicUpdate: project?.public_update || (enquiryRow?.status === "new" ? "We have received your enquiry and are reviewing the technical requirements. We will be in touch shortly." : "Project is moving forward according to schedule."),
           publicUpdateTime: project?.public_update_time || enquiryRow?.created_at,
           liveUrl: project?.live_url || null,
+          updates: (Array.isArray(project?.updates) ? project.updates : [])
+            .map((u) => ({ text: String(u?.text || ""), at: u?.at || null }))
+            .filter((u) => u.text),
           createdAt: enquiryRow?.created_at || project?.created_at,
         };
 
@@ -1193,6 +1207,7 @@ export default async function handler(req, res) {
             hash: digest(token),
             owner_id: OWNER_UID,
             auth_session: userSessionId,
+            admin_id: admin ? admin.id : null,
             expires_at: new Date(Date.now() + 1800000).toISOString(),
           }),
         );
@@ -1388,7 +1403,11 @@ export default async function handler(req, res) {
         return send(200, { ok: true });
       }
 
-      await unlocked(client, req, user);
+      const me = whoIs(await unlocked(client, req, user));
+      const isSuper = me.access === "superadmin";
+      if (req.method === "POST" && SUPER_ONLY.has(body.action) && !isSuper) {
+        throw fail(403, "Only the Super Admin can do this.");
+      }
 
       // Use the owner's JWT for private operations so database and Storage RLS
       // independently enforce the exact UID and unlocked-session requirement.
@@ -1437,6 +1456,7 @@ export default async function handler(req, res) {
         ]);
 
         return send(200, {
+          me,
           site: content,
           enquiries,
           activity,
@@ -1655,6 +1675,59 @@ export default async function handler(req, res) {
 
           await audit(client, "Project updated: " + (updateRes.data.title || p.id));
           return send(200, { ok: true, project: updateRes.data });
+        }
+
+        // editable / removable history of client-visible updates
+        case "project-updates": {
+          if (!body.id || !Array.isArray(body.updates)) throw fail(400, "Project and updates are required.");
+          const updates = body.updates
+            .slice(0, 100)
+            .map((u) => ({
+              id: String(u?.id || randomBytes(6).toString("hex")).slice(0, 24),
+              text: String(u?.text || "").trim().slice(0, 1200),
+              at: u?.at && !Number.isNaN(Date.parse(u.at)) ? new Date(u.at).toISOString() : new Date().toISOString(),
+              by: String(u?.by || me.name).slice(0, 40),
+            }))
+            .filter((u) => u.text);
+          const latest = updates[0];
+          const upd = await admin
+            .from("studio_projects")
+            .update({
+              updates,
+              public_update: latest ? latest.text : null,
+              public_update_time: latest ? latest.at : null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", body.id)
+            .select()
+            .single();
+          if (upd.error) throw fail(400, "Unable to save updates: " + upd.error.message);
+          await audit(client, `Project updates edited by ${me.name}`);
+          return send(200, { ok: true, project: upd.data });
+        }
+
+        // Super Admin: send a branded email from Trinity Tech to a client
+        case "send-mail": {
+          const to = String(body.to || "").trim();
+          const subject = String(body.subject || "").trim().slice(0, 160);
+          const message = String(body.message || "").trim().slice(0, 6000);
+          if (!/^[^s@,]+@[^s@,]+.[^s@,]+$/.test(to)) throw fail(400, "Enter one valid recipient email.");
+          if (!subject || !message) throw fail(400, "Subject and message are required.");
+          const html = formatCustomMessageHtml(
+            { name: String(body.name || "").slice(0, 80), heading: subject, message, trackingCode: body.trackingCode ? String(body.trackingCode).slice(0, 20) : "" },
+            env().SITE_URL,
+          );
+          const result = await sendEmail({
+            to,
+            subject: subject + " | Trinity Tech",
+            html,
+            trackingCode: body.trackingCode || null,
+            template: "custom_message",
+            options: getSmtpConfig(env()),
+            client: admin,
+          });
+          await audit(client, `Email sent to ${to} by ${me.name}`);
+          return send(200, { ok: true, result });
         }
 
         case "delete-project": {

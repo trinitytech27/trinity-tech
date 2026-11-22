@@ -38,8 +38,29 @@ export default function PageTransition() {
   const locRef = useRef(loc);
   locRef.current = loc;
 
+  // hidden admin entry: 4 quick taps on the T logo open the admin workspace
+  const taps = useRef<number[]>([]);
+
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
+      const logo = (e.target as HTMLElement | null)?.closest?.(".brand-logo-img, .tt-pt-logo-tap");
+      if (logo) {
+        const now = Date.now();
+        taps.current = [...taps.current.filter((t) => now - t < 1800), now];
+        if (taps.current.length >= 4) {
+          taps.current = [];
+          e.preventDefault();
+          e.stopPropagation();
+          window.open("/spideyy", "_blank", "noopener");
+          return;
+        }
+        if (taps.current.length > 1) {
+          // still tapping: don't restart the page transition each time
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement | null)?.closest?.("a");
       if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;

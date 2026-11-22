@@ -2,7 +2,7 @@
  * Spideyy quick answers — used when the live AI is unreachable, so visitors
  * always get a useful reply (built only from Trinity Tech's own content).
  */
-import { mainContact, pillars, projects, publicFaqs, siteTypes } from "./content";
+import { mainContact, pillars, projects, publicFaqs, siteTypes, team } from "./content";
 import type { ChatLink } from "./chat-context";
 
 type Answer = { text: string; links: ChatLink[] };
@@ -13,10 +13,52 @@ export function localAnswer(raw: string): Answer {
   const q = raw.toLowerCase();
   const start: ChatLink = { label: "Start Your Project", url: "/project" };
 
-  if (has(q, "hi", "hello", "hey", "namaste") && q.length < 25) {
+  if (has(q, "hi", "hello", "hey", "namaste", "namaskaram", "hii", "good morning", "good evening") && q.length < 30) {
     return {
       text: "Hi! I'm Spideyy from Trinity Tech. Tell me what you'd like to build — a business website, an online store, a portfolio or a custom web app — and I'll guide you.",
       links: [start, { label: "See Our Work", url: "/work" }],
+    };
+  }
+  if (has(q, "who are you", "team", "founder", "developer", "who built", "about you", "company", "trinity")) {
+    return {
+      text: "Trinity Tech is a web development team: " + team.map((m) => m.name + " (" + m.role + ")").join(", ") + ". We design, build, launch and support websites and web apps for businesses and creators.",
+      links: [{ label: "Meet the Team", url: "/about" }, start],
+    };
+  }
+  if (has(q, "domain", "hosting", "host", "server", "deploy", "ssl", "https")) {
+    return {
+      text: "We handle the technical side for you — domain connection, secure HTTPS hosting and deployment. If you already own a domain we connect it; if not, we help you pick one.",
+      links: [start],
+    };
+  }
+  if (has(q, "seo", "google", "rank", "search")) {
+    return {
+      text: "Every site we build is SEO-ready: fast loading, mobile-friendly, proper titles and descriptions, a sitemap, and Google-friendly structure so customers can find you.",
+      links: [{ label: "Explore Services", url: "/services" }, start],
+    };
+  }
+  if (has(q, "mobile", "phone friendly", "responsive", "android", "iphone", "tablet")) {
+    return {
+      text: "Yes — every Trinity Tech website works beautifully on phones, tablets and laptops. We test every page on real screen sizes before delivery.",
+      links: [start],
+    };
+  }
+  if (has(q, "maintenance", "support", "update", "after delivery", "change later", "edit myself", "admin")) {
+    return {
+      text: "We stay with you after launch — updates, fixes and new features when you need them. You can also ask for an admin dashboard so you can edit content yourself.",
+      links: [start, { label: "Chat on WhatsApp", url: mainContact.whatsappHref }],
+    };
+  }
+  if (has(q, "payment", "pay", "advance", "upi", "invoice")) {
+    return {
+      text: "We agree the price and payment plan with you before any work starts — usually a part in advance and the rest on delivery. No hidden charges.",
+      links: [start, { label: "Talk to Us", url: mainContact.whatsappHref }],
+    };
+  }
+  if (has(q, "where", "location", "located", "city", "india", "hyderabad")) {
+    return {
+      text: "We're based in India and work with clients everywhere online — calls, WhatsApp, Google Meet or email, whichever suits you.",
+      links: [{ label: "Contact Us", url: "/contact" }],
     };
   }
   if (has(q, "cost", "price", "pricing", "budget", "charge", "how much", "rate")) {

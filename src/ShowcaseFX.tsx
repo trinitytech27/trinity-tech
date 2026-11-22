@@ -154,7 +154,7 @@ export function DemoStage({ items }: { items: Project[] }) {
   const inView = useRef(false);
   const activeRef = useRef(0);
   activeRef.current = active;
-  const imgSide = (i: number) => (i % 2 === 0 ? "right" : "left");
+  const imgSide = (_i: number): "right" | "left" => "right"; // image always on the right
   const starsFor = (i: number) =>
     `${PROJECT_ICONS[items[i]?.slug] || "helix"}@${imgSide(i) === "right" ? "left" : "right"}`;
 
@@ -187,7 +187,6 @@ export function DemoStage({ items }: { items: Project[] }) {
             inView.current = self.isActive;
             if (self.isActive) showStars(starsFor(activeRef.current));
           },
-          snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
           onUpdate: (self) => {
             const t = self.progress * (self.animation ? self.animation.duration() : 0);
             let idx = 0;
