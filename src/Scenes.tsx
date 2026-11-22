@@ -53,7 +53,10 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       el.classList.add("is-flying");
       const cards = gsap.utils.toArray<HTMLElement>(".tt-pf-card", el);
       const narrow = window.innerWidth < 760;
-      const sx = (i: number) => (narrow ? 0 : sideOf(i) === "right" ? 20 : -20); // vw
+      // laptops: the screen sits on the right half (info card owns the left half)
+      const sx = (_i: number) => (narrow ? 0 : 23); // vw
+      const FROM_X = narrow ? 0 : -38; // next screen waits on the left…
+      const EXIT_X = narrow ? 0 : 62; // …and the current one leaves to the right
       const pose = (x: number, y: number, z: number, scale: number, opacity: number, blur = 0) => ({
         xPercent: -50,
         yPercent: -50,
@@ -66,7 +69,7 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       });
       const MAIN_Y = narrow ? -9 : -3;
       // waiting far away, small, on the project's own side
-      cards.forEach((c, i) => gsap.set(c, pose(sx(i) * 0.55, MAIN_Y - 6, -1800, 0.5, 0)));
+      cards.forEach((c) => gsap.set(c, pose(FROM_X, MAIN_Y - 6, -1800, 0.5, 0)));
 
       const marks: number[] = [];
       const tl = gsap.timeline({
@@ -94,14 +97,14 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
       cards.forEach((card, i) => {
         if (i > 0) {
           // the current screen rushes toward the visitor and blurs away
-          tl.to(cards[i - 1], { ...pose(sx(i - 1) * 1.5, MAIN_Y + 4, 900, 1.6, 0, 14), duration: 1, ease: "power2.in" }, ">");
+          tl.to(cards[i - 1], { ...pose(narrow ? 0 : EXIT_X, MAIN_Y + 4, narrow ? 900 : 300, narrow ? 1.6 : 1.15, 0, 14), duration: 1, ease: "power2.in" }, ">");
         }
         // the first project is already in place when the section arrives;
         // each next screen glides in from deep space
         if (i === 0) gsap.set(card, pose(sx(0), MAIN_Y, 0, 1, 1, 0));
         else tl.to(card, { ...pose(sx(i), MAIN_Y, 0, 1, 1, 0), duration: 1.1, ease: "power3.out" }, "<0.15");
         // and the one after it appears far behind, waiting
-        if (cards[i + 1]) tl.to(cards[i + 1], { ...pose(sx(i + 1) * 0.6, MAIN_Y - 5, -1300, 0.55, 0.35, 2), duration: 0.8 }, "<0.3");
+        if (cards[i + 1]) tl.to(cards[i + 1], { ...pose(FROM_X, MAIN_Y - 5, -1300, 0.55, 0.35, 2), duration: 0.8 }, "<0.3");
         marks.push(tl.duration());
         tl.addLabel("p" + i);
         tl.to({}, { duration: 0.5 });

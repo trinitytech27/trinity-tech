@@ -575,11 +575,38 @@ export default function App() {
                   "/project": "Start a Project",
                   "/track": "Track Your Project",
                   "/privacy": "Privacy",
-                  "/spideyy": "Spideyy — Private Access",
+                  "/spideyy": "Admin Workspace",
                   "/admin": "Spideyy — Private Access",
                 } as Record<string, string>
               )[loc.pathname] ?? "Page not found")) + " — ") + site.seoTitle;
   }, [loc.pathname, loc.hash, site]);
+
+  // The admin is a separate private workspace: none of the public site around it
+  if (isOwner) {
+    return (
+      <Context.Provider value={site}>
+        <div className="tt-ws">
+          <header className="tt-ws-bar">
+            <span className="tt-ws-brand">
+              <img src="/brand/mark.webp" alt="" width={42} height={32} />
+              <span>
+                <b>Trinity Tech</b>
+                <small>Admin Workspace</small>
+              </span>
+            </span>
+            <a href="/" target="_blank" rel="noreferrer" className="tt-ws-link">
+              View public site ↗
+            </a>
+          </header>
+          <main id="main" className="tt-ws-main">
+            <Suspense fallback={<p className="wrap page">Loading workspace…</p>}>
+              <Admin />
+            </Suspense>
+          </main>
+        </div>
+      </Context.Provider>
+    );
+  }
 
   return (
     <Context.Provider value={site}>

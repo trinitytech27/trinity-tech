@@ -1198,3 +1198,39 @@ html.tt-admin .tt-admin-welcome h2 { display: flex; align-items: center; flex-wr
 .intro.tt-intro2 h2 span:nth-child(n+9) { color: #e8a33d !important; -webkit-text-fill-color: #e8a33d; }
 .intro.tt-intro2 .tt-intro-logo img { width: clamp(90px, 16vmin, 150px) !important; height: auto !important; margin: 0 !important; }
 .intro.tt-intro2 .intro-mark p { animation: tt-intro-fade .9s ease 1.8s both !important; opacity: 0; }
+
+/* Home live projects (laptops): screen on the right half, info card only on the left half */
+@media (min-width: 760px) {
+  .tt-pfly.is-flying .tt-pf-card { width: min(46vw, 720px) !important; }
+  .tt-pfly.is-flying .tt-pf-caption,
+  .tt-pfly.is-flying .tt-pf-caption.on-left,
+  .tt-pfly.is-flying .tt-pf-caption.on-right {
+    left: max(24px, calc((100vw - 1440px) / 2 + 40px)) !important; right: auto !important;
+    top: max(130px, 27vh); bottom: auto;
+    width: min(38vw, 520px) !important;
+  }
+  .tt-pfly.is-flying .tt-pf-progress.on-left,
+  .tt-pfly.is-flying .tt-pf-progress.on-right { left: auto !important; right: max(24px, calc((100vw - 1440px) / 2 + 56px)) !important; }
+}
+
+/* ==========================================================================
+   Separate admin workspace (no public header/footer/stars/Spideyy)
+   ========================================================================== */
+.tt-ws { min-height: 100vh; background: radial-gradient(ellipse at top, #1a1208 0%, #070503 55%) fixed; color: #f3e7d2; }
+.tt-ws-bar {
+  position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px max(16px, calc((100vw - 1240px) / 2)); background: rgba(7,5,3,.86);
+  border-bottom: 1px solid rgba(232,163,61,.18); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.tt-ws-brand { display: flex; align-items: center; gap: 10px; }
+.tt-ws-brand img { filter: drop-shadow(0 0 10px rgba(232,163,61,.45)); }
+.tt-ws-brand b { display: block; font: 700 15px/1.1 var(--font-brand, serif); letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.tt-ws-brand small { display: block; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #e8a33d; margin-top: 3px; }
+.tt-ws-link { font-size: 13px; color: #f6d28a; text-decoration: none; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(232,163,61,.3); }
+.tt-ws-link:hover { background: rgba(232,163,61,.1); }
+.tt-ws-main { padding-top: 8px; }
+.tt-ws .admin-shell { padding-top: 28px; }
+/* sticky menus sit below the workspace bar, not the old site header */
+html.tt-admin .tt-ws .admin-tabs { top: 72px; }
+@media (min-width: 1024px) { html.tt-admin .tt-ws .admin-shell:has(.tt-admin-welcome) > .admin-tabs { top: 84px; } }
+@media (max-width: 640px) { .tt-ws-link { font-size: 12px; padding: 7px 10px; } .tt-ws-brand b { font-size: 13px; } }

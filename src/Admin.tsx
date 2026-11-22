@@ -316,8 +316,8 @@ export default function Admin() {
 
   return (
     <section className="page wrap admin-shell">
-      <span className="eyebrow">Private / Trinity Tech</span>
-      <h1>Spideyy — Private Access</h1>
+      <span className="eyebrow">Private · Admins only</span>
+      <h1>Admin Workspace</h1>
 
       {stage !== "workspace" ? (
         <div className="admin-card admin-login">
