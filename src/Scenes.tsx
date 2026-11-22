@@ -28,7 +28,8 @@ export function SectionTag({ n, label }: { n: string; label: string }) {
    image. When the next one arrives, the current screen rushes past the
    visitor and blurs away.
    ========================================================================== */
-const sideOf = (i: number) => (i % 2 === 0 ? "right" : "left");
+// every project shows its screenshot on the right, copy on the left
+const sideOf = (_i: number) => "right" as const;
 const opposite = (s: string) => (s === "right" ? "left" : "right");
 
 export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string }) {
@@ -78,7 +79,6 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          snap: { snapTo: "labels", duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
           onToggle: (self) => {
             inView.current = self.isActive;
             if (self.isActive) showStars(starsFor(activeRef.current));
@@ -96,8 +96,10 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
           // the current screen rushes toward the visitor and blurs away
           tl.to(cards[i - 1], { ...pose(sx(i - 1) * 1.5, MAIN_Y + 4, 900, 1.6, 0, 14), duration: 1, ease: "power2.in" }, ">");
         }
-        // the next screen glides in from deep space to its side
-        tl.to(card, { ...pose(sx(i), MAIN_Y, 0, 1, 1, 0), duration: 1.1, ease: "power3.out" }, i === 0 ? 0 : "<0.15");
+        // the first project is already in place when the section arrives;
+        // each next screen glides in from deep space
+        if (i === 0) gsap.set(card, pose(sx(0), MAIN_Y, 0, 1, 1, 0));
+        else tl.to(card, { ...pose(sx(i), MAIN_Y, 0, 1, 1, 0), duration: 1.1, ease: "power3.out" }, "<0.15");
         // and the one after it appears far behind, waiting
         if (cards[i + 1]) tl.to(cards[i + 1], { ...pose(sx(i + 1) * 0.6, MAIN_Y - 5, -1300, 0.55, 0.35, 2), duration: 0.8 }, "<0.3");
         marks.push(tl.duration());
@@ -226,7 +228,6 @@ export function LayerStack({ n = "03" }: { n?: string }) {
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        snap: { snapTo: snaps, duration: { min: 0.25, max: 0.7 }, ease: "power1.inOut", delay: 0.05, inertia: false },
         onToggle: (self) => {
           inView.current = self.isActive;
           if (self.isActive) showStars(siteTypes[activeRef.current]?.icon + "@center");

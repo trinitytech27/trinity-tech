@@ -72,7 +72,7 @@ export default function Assistant() {
         aria-label="Open Spideyy website consultant"
         onClick={() => setFloatingOpen(!floatingOpen)}
       >
-        <img className="spider-official" src="/assets/spideyy.jpg" alt="Spideyy" />
+        <img className="spider-official" src="/brand/spideyy.svg" alt="Spideyy" />
         <span className="chat-launch-text">Ask Spideyy</span>
       </button>
 
@@ -88,7 +88,7 @@ export default function Assistant() {
           {/* 1. HEADER */}
           <div className="chat-head">
             <div className="chat-head-identity">
-              <img className="spider-official" src="/assets/spideyy.jpg" alt="Spideyy" />
+              <img className="spider-official" src="/brand/spideyy.svg" alt="Spideyy" />
               <div className="chat-head-titles">
                 <span className="chat-head-title">Spideyy</span>
                 <span className={`chat-head-status ${badge.className}`}>
@@ -145,7 +145,7 @@ export default function Assistant() {
                   className={`chat-msg-row ${m.role === "user" ? "user-row" : "assistant-row"}`}
                 >
                   {m.role === "assistant" && (
-                    <img className="spider-official chat-msg-avatar" src="/assets/spideyy.jpg" alt="Spideyy" />
+                    <img className="spider-official chat-msg-avatar" src="/brand/spideyy.svg" alt="Spideyy" />
                   )}
                   <div className="chat-bubble-wrap">
                     <div className={m.role === "user" ? "user-bubble" : "assistant-bubble"}>
@@ -198,7 +198,7 @@ export default function Assistant() {
               {/* Thinking Indicator */}
               {busy && (
                 <div className="chat-msg-row assistant-row">
-                  <img className="spider-official chat-msg-avatar" src="/assets/spideyy.jpg" alt="Spideyy" />
+                  <img className="spider-official chat-msg-avatar" src="/brand/spideyy.svg" alt="Spideyy" />
                   <div className="assistant-bubble thinking">
                     <span className="typing-dots">
                       <span className="dot" />

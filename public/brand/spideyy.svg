@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Spideyy">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="60%">
+      <stop offset="0" stop-color="#2a1d0c"/>
+      <stop offset="1" stop-color="#070503"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6d28a"/>
+      <stop offset=".5" stop-color="#e8a33d"/>
+      <stop offset="1" stop-color="#b8741a"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="60" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+  <!-- web -->
+  <g fill="none" stroke="#e8a33d" stroke-opacity=".28" stroke-width="1">
+    <path d="M64 6V122M6 64H122M23 23L105 105M105 23L23 105"/>
+    <polygon points="64,22 94,34 106,64 94,94 64,106 34,94 22,64 34,34"/>
+    <polygon points="64,38 82,46 90,64 82,82 64,90 46,82 38,64 46,46"/>
+  </g>
+  <!-- legs -->
+  <g fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M57 58 L42 46 L36 30"/><path d="M71 58 L86 46 L92 30"/>
+    <path d="M56 64 L38 60 L26 50"/><path d="M72 64 L90 60 L102 50"/>
+    <path d="M56 70 L38 76 L28 90"/><path d="M72 70 L90 76 L100 90"/>
+    <path d="M58 76 L46 90 L44 104"/><path d="M70 76 L82 90 L84 104"/>
+  </g>
+  <!-- body -->
+  <g filter="url(#glow)">
+    <ellipse cx="64" cy="56" rx="9" ry="8" fill="url(#gold)"/>
+    <ellipse cx="64" cy="76" rx="12" ry="14" fill="url(#gold)"/>
+    <path d="M64 68 L58 76 L64 86 L70 76 Z" fill="#1a1206" opacity=".85"/>
+    <circle cx="60.5" cy="54.5" r="1.9" fill="#1a1206"/>
+    <circle cx="67.5" cy="54.5" r="1.9" fill="#1a1206"/>
+  </g>
+  <!-- star sparkles on the web -->
+  <g fill="#fff3d6">
+    <circle cx="94" cy="34" r="1.6"/><circle cx="34" cy="94" r="1.3"/><circle cx="106" cy="64" r="1.2"/>
+    <circle cx="22" cy="64" r="1.4"/><circle cx="64" cy="22" r="1.5"/><circle cx="82" cy="82" r="1.1"/>
+  </g>
+</svg>

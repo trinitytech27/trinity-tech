@@ -249,7 +249,7 @@ function HomepageAiConsole() {
     <div className="home-ai-scrapbook-card" aria-label="Spideyy Assistant">
       <div className="home-ai-card-header">
         <div className="home-ai-badge">
-          <img className="spider-official" src="/assets/spideyy.jpg" alt="Spideyy" />
+          <img className="spider-official" src="/brand/spideyy.svg" alt="Spideyy" />
           <div>
             <b>Spideyy</b>
             <span>Instant website guidance & project estimates</span>
@@ -506,10 +506,19 @@ export default function App() {
     document.documentElement.dataset.route = loc.pathname;
   }, [loc.pathname]);
 
+  const [introLeaving, setIntroLeaving] = useState(false);
+  // Spideyy waits until the intro has fully finished, then fades in
+  const [assistantReady, setAssistantReady] = useState(false);
   const finish = () => {
     setIntro(false);
+    setIntroLeaving(false);
     sessionStorage.setItem("sxd-intro", "1");
   };
+  useEffect(() => {
+    if (intro) return;
+    const id = setTimeout(() => setAssistantReady(true), 1400);
+    return () => clearTimeout(id);
+  }, [intro]);
 
   useEffect(() => {
     fetch("/api/site")
@@ -530,8 +539,12 @@ export default function App() {
 
   useEffect(() => {
     if (!intro) return;
-    const id = setTimeout(finish, 2200);
-    return () => clearTimeout(id);
+    const leave = setTimeout(() => setIntroLeaving(true), 3300);
+    const id = setTimeout(finish, 4100);
+    return () => {
+      clearTimeout(leave);
+      clearTimeout(id);
+    };
   }, [intro]);
 
   useEffect(() => {
@@ -585,18 +598,27 @@ export default function App() {
         </a>
         {intro && (
           <div
-            className="intro"
+            className={"intro tt-intro2" + (introLeaving ? " is-leaving" : "")}
             role="dialog"
             aria-label="Trinity Tech introduction"
             aria-modal="true"
           >
+            <span className="tt-intro-glow" aria-hidden="true" />
+            <span className="tt-intro-ring" aria-hidden="true" />
+            <span className="tt-intro-ring two" aria-hidden="true" />
             <div className="intro-mark">
-              <img
-                src="/brand/mark.webp"
-                alt="Trinity Tech official logo"
-              />
-              <h2>Trinity Tech</h2>
-              <p>Build. Innovate. Transform.</p>
+              <span className="tt-intro-logo">
+                <img src="/brand/mark.webp" alt="Trinity Tech official logo" />
+                <span className="tt-intro-shine" aria-hidden="true" />
+              </span>
+              <h2 aria-label="Trinity Tech">
+                {"TRINITY TECH".split("").map((c, i) => (
+                  <span key={i} style={{ "--i": i } as React.CSSProperties} aria-hidden="true">
+                    {c === " " ? " " : c}
+                  </span>
+                ))}
+              </h2>
+              <p>Your Vision. Our Code. Infinite Possibilities.</p>
             </div>
             <button autoFocus onClick={finish}>
               Skip introduction <Arrow />
@@ -623,6 +645,7 @@ export default function App() {
                 <NavLink to="/services">Services</NavLink>
                 <NavLink to="/about">About</NavLink>
                 <NavLink to="/contact">Contact</NavLink>
+                <NavLink to="/track">Track Project</NavLink>
                 <NavLink to="/project" className="nav-cta-btn">
                   Start a Project <ArrowRight size={15} />
                 </NavLink>
@@ -676,6 +699,8 @@ export default function App() {
           </main>
           <Footer />
           {site.assistantEnabled &&
+            !intro &&
+            assistantReady &&
             !loc.pathname.startsWith("/spideyy") &&
             !loc.pathname.startsWith("/admin") && <Assistant />}
         </div>

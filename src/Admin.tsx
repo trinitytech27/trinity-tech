@@ -14,6 +14,7 @@ import {
   Send,
 } from "lucide-react";
 import { defaults } from "./content";
+import { AdminOverview, ComposeMail, UpdatesEditor, accessLabel, isSuper, type Me } from "./AdminExtras";
 
 const auth =
   import.meta.env.VITE_SUPABASE_URL &&
@@ -41,6 +42,9 @@ export default function Admin() {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState("Overview");
+  // compose-email panel (Super Admin) and which project's updates are open
+  const [compose, setCompose] = useState<null | { to?: string; name?: string; trackingCode?: string }>(null);
+  const [openUpdates, setOpenUpdates] = useState<string | null>(null);
   const [site, setSite] = useState(defaults);
   const [data, setData] = useState<any>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -289,6 +293,16 @@ export default function Admin() {
       });
   }, [data?.enquiries, statusFilter, serviceFilter, search, sortOrder]);
 
+  const me: Me | null = data?.me || null;
+  const superUser = isSuper(me);
+  const TAB_LABELS: Record<string, string> = {
+    "Active Projects": "Client Projects",
+    "Email Outbox": "Emails",
+    Projects: "Portfolio",
+    "Page content": "Site Content",
+    "Services & Enquiry Form": "Enquiry Form",
+    spideyy: "Spideyy AI",
+  };
   const unreadCount = useMemo(() => {
     return data?.enquiries?.filter((e: any) => !e.read).length || 0;
   }, [data?.enquiries]);
@@ -460,7 +474,10 @@ export default function Admin() {
               <span className="tt-admin-kicker">
                 {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
               </span>
-              <h2>Welcome back, {adminName?.name || "Admin"}.</h2>
+              <h2>
+                Welcome back, {me?.name || adminName?.name || "Admin"}.{" "}
+                <span className={"tt-role" + (superUser ? " super" : "")}>{accessLabel(me)}</span>
+              </h2>
               <p>
                 {adminName ? adminName.fullName + " · " + adminName.role + " · " : ""}
                 Manage enquiries, projects and site content for Trinity Tech.
@@ -468,13 +485,16 @@ export default function Admin() {
             </div>
           </div>
           <div className="admin-tabs" style={{ position: "relative" }}>
-            {tabs.map((t) => (
+            {tabs.filter((t) => superUser || t !== "Security").map((t) => (
               <button
                 key={t}
                 className={tab === t ? "active" : ""}
-                onClick={() => setTab(t)}
+                onClick={() => {
+                  setTab(t);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
-                {t}
+                {TAB_LABELS[t] || t}
                 {t === "Enquiries" && unreadCount > 0 && (
                   <span
                     style={{
@@ -610,7 +630,16 @@ export default function Admin() {
           </div>
 
           {/* OVERVIEW TAB */}
+          {compose && superUser && (
+            <div className="tt-ax-modal" role="dialog" aria-label="Send email" onClick={(e) => e.target === e.currentTarget && setCompose(null)}>
+              <ComposeMail api={api} initial={compose} onClose={() => setCompose(null)} onSent={() => void loadSilently()} />
+            </div>
+          )}
+
           {tab === "Overview" && (
+            <AdminOverview data={data} me={me} goTo={setTab} onCompose={() => setCompose({})} />
+          )}
+          {tab === "Overview-legacy" && (
             <>
               <div className="admin-summary">
                 <div>
@@ -791,8 +820,29 @@ export default function Admin() {
                           >
                             View on /track <ExternalLink size={13} />
                           </Link>
+                          <button
+                            type="button"
+                            className="button secondary"
+                            style={{ padding: "6px 12px", fontSize: 12 }}
+                            onClick={() => setOpenUpdates(openUpdates === p.id ? null : p.id)}
+                          >
+                            {openUpdates === p.id ? "Close updates" : "Client updates"}
+                          </button>
+                          {superUser && (
+                            <button
+                              type="button"
+                              className="button secondary"
+                              style={{ padding: "6px 12px", fontSize: 12 }}
+                              onClick={() => setCompose({ to: p.client_email, name: p.client_name, trackingCode: p.tracking_code })}
+                            >
+                              <Send size={13} /> Email client
+                            </button>
+                          )}
                         </div>
                       </div>
+                      {openUpdates === p.id && (
+                        <UpdatesEditor project={p} api={api} me={me} onSaved={() => void loadSilently()} />
+                      )}
 
                       {/* Progress Bar */}
                       <div style={{ margin: "14px 0 10px" }}>
@@ -1509,6 +1559,16 @@ export default function Admin() {
                           >
                             {r.read ? "Mark as unread" : "Mark as read"}
                           </button>
+                          {superUser && (
+                            <button
+                              type="button"
+                              className="button secondary"
+                              style={{ padding: "8px 16px" }}
+                              onClick={() => setCompose({ to: r.data?.email, name: r.data?.name, trackingCode: r.tracking_code })}
+                            >
+                              <Send size={14} /> Email client
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="button secondary"
@@ -1594,6 +1654,9 @@ export default function Admin() {
           )}
 
           {/* EMAIL OUTBOX TAB */}
+          {tab === "Email Outbox" && superUser && (
+            <ComposeMail api={api} onSent={() => void loadSilently()} />
+          )}
           {tab === "Email Outbox" && (
             <div className="admin-card">
               <div
@@ -1990,13 +2053,61 @@ export default function Admin() {
           {/* PROJECTS TAB */}
           {tab === "Projects" && (
             <div className="admin-card">
-              <h3>Projects & case studies</h3>
+              <div className="tt-ax-head">
+                <h3>Portfolio projects</h3>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => {
+                    const base = site.projects[0];
+                    const n = site.projects.length + 1;
+                    setSite({
+                      ...site,
+                      projects: [
+                        ...site.projects,
+                        {
+                          ...base,
+                          slug: "new-project-" + n,
+                          name: "New Project",
+                          short: "New Project",
+                          quote: "",
+                          headline: "",
+                          summary: "",
+                          story: "",
+                          note: "",
+                          features: [],
+                          order: n,
+                          published: false,
+                        } as any,
+                      ],
+                    });
+                  }}
+                >
+                  <Plus size={15} /> Add project
+                </button>
+              </div>
+              <p className="tt-ax-note" style={{ marginTop: 0 }}>
+                Open a project to edit every field. Changes go live after you click Publish changes.
+              </p>
               {site.projects.map((p, i) => (
                 <details key={i}>
                   <summary>
                     {p.order}. {p.name} — {p.published ? "Published" : "Draft"}
                   </summary>
                   <div>
+                    {superUser && (
+                      <button
+                        type="button"
+                        className="button secondary"
+                        style={{ marginBottom: 12 }}
+                        onClick={() => {
+                          if (confirm("Remove " + p.name + " from the portfolio? (Publish to make it final.)"))
+                            setSite({ ...site, projects: site.projects.filter((_, j) => j !== i) });
+                        }}
+                      >
+                        <Trash2 size={14} /> Remove this project
+                      </button>
+                    )}
                     {(
                       [
                         "name",
@@ -2011,13 +2122,15 @@ export default function Admin() {
                         "summary",
                         "story",
                         "note",
+                        "quote",
+                        "color",
                       ] as const
                     ).map((k) => (
                       <label key={k}>
                         {k}
-                        {["story", "summary", "note"].includes(k) ? (
+                        {["story", "summary", "note", "quote"].includes(k) ? (
                           <textarea
-                            value={p[k]}
+                            value={(p as any)[k] ?? ""}
                             onChange={(e) =>
                               setSite({
                                 ...site,
@@ -2029,7 +2142,7 @@ export default function Admin() {
                           />
                         ) : (
                           <input
-                            value={p[k]}
+                            value={(p as any)[k] ?? ""}
                             onChange={(e) =>
                               setSite({
                                 ...site,

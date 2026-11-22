@@ -34,6 +34,7 @@ interface ProjectData {
   daysRemaining: string | null;
   publicUpdate: string;
   publicUpdateTime: string | null;
+  updates?: { text: string; at: string | null }[];
   liveUrl: string | null;
   createdAt: string;
 }
@@ -399,8 +400,26 @@ export default function Track() {
                 </div>
               </div>
 
-              {/* Latest Update Box */}
-              {project.publicUpdate && (
+              {/* Full update history from the team */}
+              {project.updates && project.updates.length > 0 && (
+                <div className="tt-track-updates">
+                  <div className="tt-track-updates-title">Project Updates</div>
+                  <ol>
+                    {project.updates.map((u, i) => (
+                      <li key={i} className={i === 0 ? "latest" : ""}>
+                        <span className="dot" />
+                        <div>
+                          {u.at && <small>{formatISTDate(u.at)}</small>}
+                          <p>{u.text}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Latest Update Box (shown when there is no history yet) */}
+              {project.publicUpdate && !(project.updates && project.updates.length) && (
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--muted)", marginBottom: 8 }}>
                     Latest Project Broadcast

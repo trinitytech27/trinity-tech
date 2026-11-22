@@ -15,38 +15,60 @@ function sanitizeError(err, pass) {
   return msg;
 }
 
-function emailShell(title, preheader, content) {
+const SITE_FALLBACK = "https://trinity-tech.vercel.app";
+const originOf = (siteUrl) => (siteUrl || process.env.SITE_URL || SITE_FALLBACK).replace(/\/$/, "");
+
+/* Dark-gold Trinity Tech email layout (inline-friendly; works in Gmail/Outlook). */
+function emailShell(title, preheader, content, siteUrl) {
+  const origin = originOf(siteUrl);
+  const host = origin.replace(/^https?:\/\//, "");
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>${escape(title)}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #222; margin: 0; padding: 24px; background: #eee5d5; }
-    .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #dcd3c4; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-    .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #852c32; margin-bottom: 12px; }
-    h1 { margin: 0 0 16px 0; font-size: 22px; font-weight: 600; color: #201c1b; line-height: 1.25; }
-    p { margin: 0 0 14px 0; font-size: 14px; color: #392e1d; }
-    .code-badge { display: inline-block; background: #eee5d5; color: #852c32; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 17px; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px dashed #852c32; margin: 12px 0 18px 0; }
-    .meta-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-    .meta-table td { padding: 9px 12px; border-bottom: 1px solid #eee; }
-    .meta-table td.label { font-weight: 600; color: #6c5c4e; width: 140px; }
-    .box { background: #fdfbf7; border-left: 4px solid #852c32; padding: 14px 16px; margin: 16px 0; border-radius: 0 4px 4px 0; font-size: 14px; white-space: pre-wrap; color: #2e261f; }
-    .btn { display: inline-block; background: #852c32; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; margin-top: 14px; }
-    .btn-secondary { display: inline-block; background: #25d366; color: #ffffff !important; text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; margin-left: 8px; margin-top: 14px; }
-    .footer { font-size: 12px; color: #706044; margin-top: 28px; border-top: 1px solid #eee; padding-top: 16px; }
-    .notice { font-size: 12px; color: #706044; background: #fdfbf7; padding: 10px 14px; border-radius: 4px; border: 1px solid #e8decb; margin-top: 16px; }
+    body { margin:0; padding:0; background:#050403; }
+    .wrap { width:100%; box-sizing:border-box; background:#050403; padding:28px 12px; }
+    .card { box-sizing:border-box; }
+    .card { max-width:620px; margin:0 auto; background:#0d0a06; border:1px solid #8a6424; border-radius:18px; padding:30px 26px; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#efe3cc; }
+    h1 { margin:6px 0 14px; font-size:24px; line-height:1.3; color:#ffffff; text-align:center; font-weight:700; }
+    h1 .gold, .gold { color:#f0b752; }
+    p { margin:0 0 14px; font-size:14.5px; line-height:1.65; color:#d9cdb6; }
+    strong { color:#ffffff; }
+    .pill { display:inline-block; border:1px solid #c8913a; border-radius:999px; padding:7px 18px; font-size:13px; color:#f6d28a; background:#1a130a; }
+    .code-badge { display:inline-block; border:1px solid #c8913a; border-radius:14px; padding:12px 26px; font-size:28px; font-weight:800; letter-spacing:.04em; color:#f6c66b; background:#120d06; margin:10px 0 6px; font-family:'Segoe UI',Roboto,Arial,sans-serif; }
+    .panel { border:1px solid #6e4f1d; border-radius:14px; background:#110c07; padding:14px 16px; margin:14px 0; }
+    .panel-title { font-size:15px; font-weight:700; color:#ffffff; margin:0 0 8px; }
+    .meta-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+    .meta-table td { padding:8px 4px; border-bottom:1px solid #2a2014; color:#efe3cc; vertical-align:top; }
+    .meta-table td.label { color:#b9a684; width:42%; }
+    .box { background:#140f08; border-left:3px solid #e8a33d; padding:14px 16px; margin:16px 0; border-radius:0 10px 10px 0; font-size:14px; white-space:pre-wrap; color:#efe3cc; }
+    .btn { display:inline-block; background:#e8a33d; background-image:linear-gradient(120deg,#c9862a,#f0b752,#f6d28a); color:#1a1206 !important; text-decoration:none; padding:13px 28px; border-radius:999px; font-weight:700; font-size:14.5px; margin-top:10px; }
+    .btn-secondary { display:inline-block; background:#25d366; color:#ffffff !important; text-decoration:none; padding:12px 20px; border-radius:999px; font-weight:600; font-size:14px; margin-left:8px; margin-top:10px; }
+    .notice { font-size:12.5px; color:#b9a684; background:#120d07; padding:12px 14px; border-radius:10px; border:1px solid #3a2c17; margin-top:16px; }
+    .footer { text-align:center; margin-top:26px; padding-top:18px; border-top:1px solid #3a2c17; font-size:12.5px; color:#b9a684; }
+    .footer a { color:#f0b752; text-decoration:none; }
+    a { color:#f0b752; }
   </style>
 </head>
 <body>
-  <div style="display:none;font-size:1px;color:#eee5d5;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${escape(preheader)}</div>
-  <div class="card">
-    <div class="brand">Trinity Tech · Digital Solutions</div>
-    ${content}
-    <div class="footer">
-      Trinity Tech — Design with distinction & powerful digital experiences.<br>
-      Direct enquiries: <a href="mailto:trinitytech27@gmail.com" style="color: #4f46e5;">trinitytech27@gmail.com</a>
+  <div style="display:none;font-size:1px;color:#050403;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escape(preheader)}</div>
+  <div class="wrap">
+    <div style="text-align:center;margin:0 0 18px;">
+      <img src="${origin}/brand/mark.png" width="64" height="48" alt="Trinity Tech" style="display:inline-block;border:0;">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:.32em;color:#ffffff;margin-top:8px;">TRINITY TECH</div>
+      <div style="font-size:10.5px;letter-spacing:.42em;color:#e8a33d;margin-top:6px;">DIGITAL SOLUTIONS</div>
+    </div>
+    <div class="card">
+      ${content}
+      <div class="footer">
+        <div style="font-family:Georgia,serif;letter-spacing:.3em;color:#e8a33d;font-size:14px;">TRINITY TECH</div>
+        <div style="font-style:italic;margin:4px 0 12px;">Your Vision. Our Code. Infinite Possibilities.</div>
+        <a href="${origin}">${escape(host)}</a> &nbsp;·&nbsp; <a href="mailto:trinitytech27@gmail.com">trinitytech27@gmail.com</a> &nbsp;·&nbsp; <a href="https://wa.me/917075452718">WhatsApp +91 70754 52718</a>
+      </div>
     </div>
   </div>
 </body>
@@ -105,43 +127,83 @@ export function formatNewEnquiryOwnerHtml(enquiry, trackingCode, siteUrl) {
     </div>
   `;
 
-  return emailShell("New Enquiry — " + trackingCode, "New project enquiry from " + enquiry.name, content);
+  return emailShell("New Enquiry — " + trackingCode, "New project enquiry from " + enquiry.name, content, siteUrl);
 }
 
 // EMAIL B: Confirmation to Customer with Tracking Code
 export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
-  const origin = (siteUrl || "https://trinity-tech.in").replace(/\/$/, "");
+  const origin = originOf(siteUrl);
   const trackUrl = `${origin}/track?code=${encodeURIComponent(trackingCode)}`;
+  const row = (label, value) =>
+    value ? `<tr><td class="label">${escape(label)}</td><td>${escape(value)}</td></tr>` : "";
+  const business = enquiry.business_name || enquiry.company;
 
   const content = `
-    <h1>We’ve received your enquiry</h1>
-    <p>Hello ${escape(enquiry.name)},</p>
-    <p>Thank you for considering <strong>Trinity Tech</strong>. We’ve received your project requirements and will review them thoroughly.</p>
+    <div style="text-align:center;"><span class="pill">&#10003;&nbsp; Project Enquiry Received</span></div>
+    <h1>Your Project Request Has Been <span class="gold">Received</span></h1>
+    <p><strong>Hello ${escape(enquiry.name)},</strong><br>
+    Thank you for choosing <strong>TRINITY TECH</strong>! We've received your project enquiry. Your details are saved securely and our team will review your requirements and get in touch with you soon.</p>
 
-    <div style="text-align: center; margin: 20px 0;">
-      <div style="font-size: 12px; color: #706044; text-transform: uppercase; letter-spacing: 0.1em;">Your Permanent Tracking ID</div>
+    <div style="text-align:center;margin:18px 0 6px;">
+      <div style="font-size:12px;letter-spacing:.16em;color:#b9a684;text-transform:uppercase;">Your Tracking ID</div>
       <div class="code-badge">${escape(trackingCode)}</div>
-      <div style="font-size: 12px; color: #706044;">Keep this code to check your project status at any time.</div>
+      <div><span class="pill" style="font-size:12px;">Request Status: <strong style="color:#f6d28a;">Request Received</strong></span></div>
     </div>
 
-    <table class="meta-table">
-      <tr><td class="label">Project / Business</td><td>${escape(enquiry.company || enquiry.name)}</td></tr>
-      <tr><td class="label">Website Type</td><td>${escape(enquiry.service)}</td></tr>
-      ${enquiry.design_preference ? `<tr><td class="label">Design Style</td><td>${escape(enquiry.design_preference)}</td></tr>` : ""}
-      <tr><td class="label">Timeline</td><td>${escape(enquiry.timeline || "Flexible")}</td></tr>
-      <tr><td class="label">Budget Choice</td><td>${escape(enquiry.budget || "Not specified")}</td></tr>
-    </table>
+    <div class="panel">
+      <div class="panel-title">&#128100;&nbsp; Client Information</div>
+      <table class="meta-table">
+        ${row("Client Name", enquiry.name)}
+        ${row("Business / Brand", business || "Individual / Personal Project")}
+        ${row("Registered Email", enquiry.email)}
+        ${row("Mobile Number", enquiry.phone)}
+        ${row("WhatsApp Number", enquiry.whatsapp)}
+        ${row("Preferred Contact", enquiry.preferred_contact || "Email")}
+        ${row("Location", enquiry.city)}
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">&#9881;&nbsp; Project Requirements</div>
+      <table class="meta-table">
+        ${row("Website Type", enquiry.service)}
+        ${row("Design Style", enquiry.design_preference)}
+        ${row("Pages", enquiry.page_count)}
+        ${row("Timeline", enquiry.timeline || "Flexible")}
+        ${row("Budget", enquiry.budget || "Not sure yet")}
+        ${row("Domain", enquiry.has_domain)}
+      </table>
+    </div>
+
+    <div class="panel" style="text-align:center;">
+      <div class="panel-title">&#10148;&nbsp; Track Your Project</div>
+      <p style="margin:0 0 6px;">Check your project status and follow every update with your tracking ID and registered email.</p>
+      <a href="${trackUrl}" class="btn">Track Your Project &rarr;</a>
+      <div style="font-size:12px;margin-top:10px;"><a href="${trackUrl}">${escape(trackUrl.replace(/^https?:\/\//, ""))}</a></div>
+    </div>
 
     <div class="notice">
-      <strong>Important:</strong> Submitting an enquiry allows us to review your requirements. We will contact you via your preferred method (${escape(enquiry.preferred_contact || "Email")}) to confirm scope, timelines, and tailored pricing before work begins.
+      <strong>What happens next?</strong> We'll contact you on ${escape(enquiry.preferred_contact || "Email")} to confirm the scope, timeline and pricing before any work begins. Questions? Just reply to this email or message us on WhatsApp.
     </div>
 
-    <div style="margin-top: 22px; text-align: center;">
-      <a href="${trackUrl}" class="btn">Track Your Project Status →</a>
-    </div>
+    <p style="text-align:center;margin-top:20px;">Thank you for giving us the opportunity to work on your idea.<br>We look forward to building something great together!</p>
   `;
 
-  return emailShell("Your Enquiry Has Been Received — " + trackingCode, "Tracking ID: " + trackingCode, content);
+  return emailShell("Your Project Request Has Been Received — " + trackingCode, "Your tracking ID is " + trackingCode, content, siteUrl);
+}
+
+// Custom message from Trinity Tech (superadmin compose)
+export function formatCustomMessageHtml({ name, heading, message, trackingCode }, siteUrl) {
+  const origin = originOf(siteUrl);
+  const content = `
+    ${trackingCode ? `<div style="text-align:center;"><span class="pill">Project ${escape(trackingCode)}</span></div>` : ""}
+    <h1>${escape(heading || "A message from Trinity Tech")}</h1>
+    <p><strong>Hello ${escape(name || "there")},</strong></p>
+    <div class="box">${escape(message)}</div>
+    ${trackingCode ? `<div style="text-align:center;"><a class="btn" href="${origin}/track?code=${encodeURIComponent(trackingCode)}">View Your Project &rarr;</a></div>` : ""}
+    <p style="margin-top:18px;">Warm regards,<br><strong>Team Trinity Tech</strong></p>
+  `;
+  return emailShell(heading || "A message from Trinity Tech", String(message || "").slice(0, 90), content, siteUrl);
 }
 
 // EMAIL C: Project Accepted
@@ -175,7 +237,7 @@ export function formatProjectAcceptedHtml(project, siteUrl) {
     </div>
   `;
 
-  return emailShell("Project Accepted: " + project.title + " — " + project.tracking_code, "Your project has been accepted", content);
+  return emailShell("Project Accepted: " + project.title + " — " + project.tracking_code, "Your project has been accepted", content, siteUrl);
 }
 
 // EMAIL D: Progress Update
@@ -206,7 +268,7 @@ export function formatProgressUpdatedHtml(project, updateMessage, siteUrl) {
     </div>
   `;
 
-  return emailShell("Project Update: " + project.tracking_code, "New update on your project", content);
+  return emailShell("Project Update: " + project.tracking_code, "New update on your project", content, siteUrl);
 }
 
 // EMAIL E: Project Completed
@@ -242,7 +304,7 @@ export function formatProjectCompletedHtml(project, siteUrl) {
     </div>
   `;
 
-  return emailShell("Project Completed: " + project.tracking_code, "Your project is ready", content);
+  return emailShell("Project Completed: " + project.tracking_code, "Your project is ready", content, siteUrl);
 }
 
 // EMAIL F: Project On Hold / Declined
@@ -273,7 +335,7 @@ export function formatProjectStatusChangeHtml(project, reason, siteUrl) {
     </div>
   `;
 
-  return emailShell("Project Status: " + project.tracking_code, "Update regarding your project status", content);
+  return emailShell("Project Status: " + project.tracking_code, "Update regarding your project status", content, siteUrl);
 }
 
 // Factory helper to construct or extract a Nodemailer transporter
@@ -537,7 +599,7 @@ export function formatEnquiryHtml(enquiry, siteUrl) {
 
 // Automatic Notification Pipeline: Owner Alert + Customer Tracking Confirmation
 export async function sendEnquiryNotification(enquiry, options = {}, client = null) {
-  const siteUrl = options.siteUrl || process.env.SITE_URL || "https://trinity-tech.in";
+  const siteUrl = options.siteUrl || process.env.SITE_URL || SITE_FALLBACK;
   const trackingCode = enquiry.tracking_code || "TT-001";
   const toEmail =
     options.toEmail ||

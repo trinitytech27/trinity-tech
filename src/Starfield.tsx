@@ -40,7 +40,7 @@ export const ROUTE_SHAPES: Record<string, Shape> = {
   "/": "text",
   "/work": "helix",
   "/services": "orbit",
-  "/about": "trinity",
+  "/about": "icon:square-terminal",
   "/project": "wave",
   "/contact": "icon:handshake",
 };
@@ -344,6 +344,8 @@ const vertex = /* glsl */ `
   uniform float uWarp;
   uniform float uWave;
   uniform float uPixelRatio;
+  uniform float uScroll;
+  uniform float uSpan;
   varying vec3 vColor;
   varying float vAlpha;
 
@@ -358,6 +360,11 @@ const vertex = /* glsl */ `
     // rolling wave surface
     p.y += uWave * aShaped * (sin(p.x * 0.13 + uTime * 0.9) * 2.4 + cos(p.z * 0.17 + uTime * 0.7) * 1.8);
     p.z += uWarp * (20.0 + aSeed * 60.0);
+    // natural parallax: free stars glide up with the page at different
+    // depths (near ones faster) and wrap around, like looking into space
+    float depth = 0.35 + aSeed * 0.65;
+    float freeY = mod(p.y + uScroll * depth + uSpan * 0.5, uSpan) - uSpan * 0.5;
+    p.y = mix(freeY, p.y, aShaped);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -482,6 +489,8 @@ export default function Starfield({ route }: { route: string }) {
       uWarp: { value: 0 },
       uWave: { value: 0 },
       uPixelRatio: { value: dpr },
+      uScroll: { value: 0 },
+      uSpan: { value: 200 },
     };
     const mat = new THREE.ShaderMaterial({
       vertexShader: vertex,
@@ -575,7 +584,7 @@ export default function Starfield({ route }: { route: string }) {
     window.addEventListener("tt:stars", onScene);
 
     const target = { rx: 0, ry: 0, scroll: 0 };
-    const cur = { rx: 0, ry: 0, scroll: 0, x: 0, y: 0, vel: 0 };
+    const cur = { rx: 0, ry: 0, scroll: 0, x: 0, y: 0, vel: 0, py: 0 };
     let lastY = window.scrollY;
     const onPointer = (e: PointerEvent) => {
       target.ry = (e.clientX / window.innerWidth - 0.5) * 0.3;
@@ -615,17 +624,21 @@ export default function Starfield({ route }: { route: string }) {
       cur.scroll += (target.scroll - cur.scroll) * 0.06;
       // scroll speed makes the stars lean and drift with you
       const y = window.scrollY;
-      cur.vel += (Math.max(-60, Math.min(60, y - lastY)) - cur.vel) * 0.08;
+      cur.vel += (Math.max(-40, Math.min(40, y - lastY)) - cur.vel) * 0.03;
       lastY = y;
-      cur.x += (offset.x - cur.x) * 0.05;
-      cur.y += (offset.y - cur.y) * 0.05;
+      // world-space parallax for the free stars (smoothed, never jumpy)
+      cur.py += (y * (view.h / window.innerHeight) * 0.35 - cur.py) * 0.08;
+      uniforms.uScroll.value = cur.py;
+      uniforms.uSpan.value = view.h * 1.6;
+      cur.x += (offset.x - cur.x) * 0.035;
+      cur.y += (offset.y - cur.y) * 0.035;
       const t = uniforms.uTime.value;
       // readable shapes face the visitor; 3D shapes turn
-      group.rotation.y = spin + cur.ry * (0.6 + style.spin) + cur.vel * 0.004;
+      group.rotation.y = spin + cur.ry * (0.6 + style.spin) + cur.vel * 0.0015;
       group.rotation.x = style.tilt + cur.rx * 0.8;
-      group.rotation.z = -cur.vel * 0.0025;
-      group.position.x = cur.x + Math.sin(t * 0.22) * view.w * 0.015;
-      group.position.y = cur.y + cur.vel * 0.06 + Math.cos(t * 0.18) * view.h * 0.012 + cur.scroll * 4 * style.spin;
+      group.rotation.z = 0;
+      group.position.x = cur.x + Math.sin(t * 0.16) * view.w * 0.01;
+      group.position.y = cur.y + cur.vel * 0.02 + Math.cos(t * 0.13) * view.h * 0.008;
       renderer.render(scene, camera);
     };
 
