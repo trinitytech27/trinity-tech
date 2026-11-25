@@ -146,13 +146,13 @@ const EMPTY: Form = {
   city: "",
   country: "India",
   business: "",
-  contact: "WhatsApp",
+  contact: "",
   message: "",
   consent: false,
   website: "",
 };
 
-const DRAFT = "tt_booking_draft_v7";
+const DRAFT = "tt_booking_draft_v8";
 const STEPS = ["Website", "Features", "Design & plan", "Your details"];
 const labelOf = (list: { id: string; label: string }[], id: string) => list.find((x) => x.id === id)?.label || "";
 
@@ -175,7 +175,7 @@ export default function ProjectPage() {
     }
     const fromLink = typeFromParam(params.get("type") || params.get("category") || params.get("service"));
     const t = fromLink || typeById(draft.type);
-    return { ...EMPTY, ...draft, type: t?.id || "", pages: draft.pages || t?.pages || "", website: "", consent: false };
+    return { ...EMPTY, ...draft, type: t?.id || "", website: "", consent: false };
   });
   const type = typeById(form.type);
 
@@ -200,8 +200,7 @@ export default function ProjectPage() {
     setForm((f) => ({ ...f, [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v] }));
 
   const chooseType = (id: string) => {
-    const t = typeById(id);
-    setForm((f) => ({ ...f, type: id, extras: f.type === id ? f.extras : [], pages: t?.pages || f.pages }));
+    setForm((f) => ({ ...f, type: id, extras: f.type === id ? f.extras : [] }));
     setStatus("");
   };
 
@@ -234,6 +233,7 @@ export default function ProjectPage() {
     if (form.phone.replace(/\D/g, "").length < 7) return "Please enter your mobile number.";
     if (form.waDifferent && form.whatsapp.replace(/\D/g, "").length < 7) return "Please enter your WhatsApp number.";
     if (!form.city.trim()) return "Please enter your city.";
+    if (!form.contact) return "Please choose the best way to reach you.";
     if (!form.consent) return "Please tick the box so we can contact you about this project.";
     return "";
   }
@@ -636,7 +636,7 @@ export default function ProjectPage() {
                       <input className="tt-bk-input" type="tel" autoComplete="tel-national" maxLength={20} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="98765 43210" />
                     </div>
                     <label className="tt-bk-inline">
-                      <input type="checkbox" checked={!form.waDifferent} onChange={(e) => set("waDifferent", !e.target.checked)} /> This number is on WhatsApp
+                      <input type="checkbox" checked={form.waDifferent} onChange={(e) => set("waDifferent", e.target.checked)} /> My WhatsApp is a different number
                     </label>
                   </Field>
                   {form.waDifferent ? (
