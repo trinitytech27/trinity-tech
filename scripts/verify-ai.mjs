@@ -84,7 +84,7 @@ try {
       "Owner/Developer: Sanjay. Professional affiliation: Co-Founder at CodeXa Agency. " +
       "Explain services naturally. Understand Telugu-English phrasing. Recommend from 5 categories: " +
       "Personal Portfolio, Blog / Content Website, Business Website, Agency Website, E-Commerce Website. " +
-      "Portfolio case studies: StarX Live, TicketX, ABPS Books, StarX Connect, AudioX. " +
+      "Portfolio case studies: StarX Live, TicketX, ABPS Books, StarX Connect. " +
       "Track codes: clients track at /track with tracking code and email. Never invent prices or delivery guarantees.";
 
     const messages = [

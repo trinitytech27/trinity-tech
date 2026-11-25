@@ -154,7 +154,7 @@ function extractChatLinks(question, answer) {
   }
 
   // 3. Portfolio / previous projects queries
-  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
+  if (/previous project|past work|portfolio|case stud|starx|ticketx|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
     addLink("View Projects", "/work");
   }
 
@@ -374,7 +374,7 @@ function runIntelligentFallback(rawQ, history, _s) {
   // 11. Portfolio / Previous work
   if (/work|portfolio|previous project|past work|case stud|projects/i.test(q)) {
     return {
-      answer: "We have five live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore), StarX Connect (digital card) and AudioX (audio utility app). Every one is a live demo in Our Work.",
+      answer: "We have four live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore) and StarX Connect (digital card). Every one is a live demo in Our Work.",
       mode: "FAQ guide",
       links: [
         { label: "View Projects", url: "/work" }
@@ -1011,7 +1011,7 @@ export default async function handler(req, res) {
               "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
               "\n8. TRACKING INTEGRATION: When asked about a tracking code (e.g. TT-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
-              "\n9. VERIFIED PORTFOLIO: Reference the real 5 projects (StarX Live, TicketX, ABPS Books, StarX Connect, AudioX) and direct to /work when requested." +
+              "\n9. VERIFIED PORTFOLIO: Reference the real 4 projects (StarX Live, TicketX, ABPS Books, StarX Connect) and direct to /work when requested." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");
 

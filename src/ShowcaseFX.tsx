@@ -413,7 +413,7 @@ export function WorkGallery({ items }: { items: Project[] }) {
       <div className="tt-work-viewport">
         <div ref={track} className="tt-work-track">
           {items.map((p, i) => {
-            const tall = p.slug === "starx-connect" || p.slug === "audiox";
+            const tall = p.slug === "starx-connect";
             return (
               <article
                 className={"tt-work-card" + (tall ? " has-phone" : "")}

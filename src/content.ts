@@ -97,31 +97,6 @@ export const projects = [
     published: true,
     order: 4,
   },
-  {
-    slug: "audiox",
-    quote: "Your media. Your terms. Anywhere.",
-    name: "AudioX",
-    short: "AudioX",
-    category: "Web Application / Media Utility",
-    kind: "Applications",
-    url: "https://audiox-by-spideyy.vercel.app/",
-    image: "/media/audiox.webp",
-    mobile: "/media/audiox-mobile.webp",
-    color: "#505184",
-    headline: "Utility, with a clear point of focus.",
-    summary:
-      "An audio utility interface with focused input and dedicated queue and download areas.",
-    story:
-      "AudioX presents a media URL analysis workflow for content the visitor owns or is permitted to download. Its primary action is separated from queue, download and settings navigation.",
-    features: [
-      "Media URL input and Analyze action",
-      "Queue and Downloads navigation",
-      "Settings and readiness status",
-    ],
-    note: "Interface inspected. Conversion and completed downloads were not tested.",
-    published: true,
-    order: 5,
-  },
 ];
 
 export const services = [
@@ -187,6 +162,48 @@ export const services = [
     example: "Schools, coaching centers, online academies, individual tutors, skill workshops.",
     items: "Course info, about school/teacher, enrolment form, gallery, notice board",
     category: "Educational Website"
+  },
+  {
+    name: "Quiz App",
+    description: "Engage visitors with fun, shareable quizzes that keep them coming back.",
+    example: "Trivia games, movie quizzes, student practice tests, brand engagement quizzes.",
+    items: "Timed questions, instant feedback, scores, leaderboard, WhatsApp sharing",
+    category: "Quiz App"
+  },
+  {
+    name: "Landing Page",
+    description: "Launch a product, app or offer with one focused page that turns visitors into sign-ups.",
+    example: "Product launches, app pre-registrations, event promotions, special offers.",
+    items: "Hero section, features, pricing, testimonials, FAQ, sign-up form",
+    category: "Landing Page"
+  },
+  {
+    name: "Event / Wedding Invitation",
+    description: "Share a beautiful digital invitation guests open on their phone, with RSVP and directions.",
+    example: "Weddings, engagements, birthdays, housewarmings, college events.",
+    items: "Event details, schedule, photo gallery, RSVP, map directions, countdown",
+    category: "Event / Wedding Invitation"
+  },
+  {
+    name: "Calculator Tools",
+    description: "Offer handy online calculators that bring visitors back to your website again and again.",
+    example: "EMI and loan calculators, BMI checkers, GST tools, discount calculators.",
+    items: "Instant results, input checks, result sharing, simple charts",
+    category: "Calculator Tools"
+  },
+  {
+    name: "Feedback / Survey Form",
+    description: "Collect customer feedback or survey answers with a branded form and see the results in one place.",
+    example: "Customer feedback, event surveys, student feedback, product research.",
+    items: "Ratings, multiple-choice questions, results dashboard, CSV export, QR code",
+    category: "Feedback / Survey Form"
+  },
+  {
+    name: "Photography Gallery",
+    description: "Show your photos full-screen in albums and turn viewers into shoot bookings.",
+    example: "Wedding photographers, portrait studios, event photographers, artists.",
+    items: "Photo albums, full-screen lightbox, packages, shoot enquiry, WhatsApp",
+    category: "Photography Gallery"
   },
   {
     name: "Other / Custom Website",
@@ -322,6 +339,55 @@ export const CATEGORY_OBJECTIVES_MAP: Record<string, string[]> = {
     "Manage Customers",
     "Manage My Team",
     "Add Customer Login",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  quiz: [
+    "Share Articles or Updates",
+    "Receive Customer Enquiries",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  landing: [
+    "Introduce My Business",
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Receive Online Payments",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  invitation: [
+    "Show Business Location",
+    "Receive Customer Enquiries",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  calculator: [
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Add an AI Chatbot",
+    "Something Else",
+    "Not Sure",
+  ],
+  survey: [
+    "Receive Customer Enquiries",
+    "Manage Customers",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  gallery: [
+    "Show My Work",
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Accept Bookings",
     "Add an AI Chatbot",
     "Manage My Website Content",
     "Something Else",
@@ -542,6 +608,122 @@ export const DEFAULT_WEBSITE_CATEGORIES: WebsiteCategory[] = [
       "Learning Materials",
       "Student Login",
       "Announcements"
+    ],
+    enabled: true
+  },
+  {
+    id: "quiz",
+    label: "Quiz App",
+    desc: "Create fun, shareable quizzes and practice tests.",
+    examples: [
+      "Trivia Quiz",
+      "Practice Test",
+      "Brand Quiz"
+    ],
+    features: [
+      "Multiple-Choice Questions",
+      "Question Timer",
+      "Instant Feedback",
+      "Score & Progress",
+      "Leaderboard",
+      "Share Score on WhatsApp"
+    ],
+    enabled: true
+  },
+  {
+    id: "landing",
+    label: "Landing Page",
+    desc: "One focused page to launch a product or offer.",
+    examples: [
+      "Product Launch",
+      "App Waitlist",
+      "Offer Page"
+    ],
+    features: [
+      "Hero Section",
+      "Features",
+      "Pricing Plans",
+      "Testimonials",
+      "FAQ",
+      "Email Sign-up",
+      "Launch Countdown"
+    ],
+    enabled: true
+  },
+  {
+    id: "invitation",
+    label: "Event / Wedding Invitation",
+    desc: "A digital invite link with RSVP and directions.",
+    examples: [
+      "Wedding Invite",
+      "Birthday Invite",
+      "Event Invite"
+    ],
+    features: [
+      "Event Details",
+      "Event Schedule",
+      "Photo Gallery",
+      "RSVP Form",
+      "Map Directions",
+      "Countdown",
+      "Background Music"
+    ],
+    enabled: true
+  },
+  {
+    id: "calculator",
+    label: "Calculator Tools",
+    desc: "Handy online calculators for your visitors.",
+    examples: [
+      "EMI Calculator",
+      "BMI Calculator",
+      "GST Calculator"
+    ],
+    features: [
+      "EMI / Loan Calculator",
+      "BMI Calculator",
+      "GST Calculator",
+      "Percentage / Discount Calculator",
+      "Instant Results",
+      "Share Result"
+    ],
+    enabled: true
+  },
+  {
+    id: "survey",
+    label: "Feedback / Survey Form",
+    desc: "Collect feedback and see the results in one place.",
+    examples: [
+      "Customer Feedback",
+      "Event Survey",
+      "Student Feedback"
+    ],
+    features: [
+      "Star Ratings",
+      "Multiple-Choice Questions",
+      "Text Answers",
+      "Results Dashboard",
+      "Export to CSV",
+      "QR Code Link"
+    ],
+    enabled: true
+  },
+  {
+    id: "gallery",
+    label: "Photography Gallery",
+    desc: "Show your photos in albums and get shoot bookings.",
+    examples: [
+      "Wedding Photographer",
+      "Portrait Studio",
+      "Artist Gallery"
+    ],
+    features: [
+      "Photo Albums",
+      "Full-Screen Lightbox",
+      "Album Filters",
+      "Packages",
+      "Shoot Enquiry",
+      "WhatsApp Contact"
     ],
     enabled: true
   },
@@ -821,7 +1003,7 @@ export const defaults = {
     },
     {
       q: "Can I see your work?",
-      a: "Explore StarX Live, TicketX, ABPS Books, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
+      a: "Explore StarX Live, TicketX, ABPS Books and StarX Connect in Our Work. Each has a case study and live link.",
     },
     {
       q: "How much does a website cost?",
@@ -988,7 +1170,6 @@ export const PROJECT_ICONS: Record<string, string> = {
   ticketx: "icon:ticket",
   "abps-books": "icon:book-open",
   "starx-connect": "icon:contact",
-  audiox: "icon:headphones",
 };
 
 /* ---------- Trust-building content ---------- */
@@ -1104,7 +1285,7 @@ export const siteTypes = [
     category: "Other / Custom Website",
     title: "Custom Web Apps",
     sub: "Tools and platforms built around your idea",
-    desc: "Dashboards, utilities and custom platforms — from media tools like AudioX to digital cards like StarX Connect.",
-    tags: ["Dashboards", "Logins", "Databases", "Like AudioX"],
+    desc: "Dashboards, utilities and custom platforms — from booking platforms like TicketX to digital cards like StarX Connect.",
+    tags: ["Dashboards", "Logins", "Databases", "Like StarX Connect"],
   },
 ];
