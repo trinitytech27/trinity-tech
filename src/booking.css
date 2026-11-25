@@ -145,6 +145,7 @@ textarea.tt-bk-input { resize: vertical; min-height: 84px; }
 /* summary */
 .tt-bk-summary {
   position: sticky; top: 100px; padding: 20px; border-radius: 20px; color: var(--bk-text);
+  max-height: calc(100vh - 196px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(232,163,61,.4) transparent;
   background: linear-gradient(160deg, rgba(232,163,61,.1), rgba(10,8,5,.9) 45%); border: 1px solid rgba(232,163,61,.28);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
@@ -183,7 +184,7 @@ textarea.tt-bk-input { resize: vertical; min-height: 84px; }
 /* tablets & phones */
 @media (max-width: 1023px) {
   .tt-bk-layout { grid-template-columns: 1fr; }
-  .tt-bk-summary { position: static; order: -1; padding: 16px; }
+  .tt-bk-summary { position: static; order: -1; padding: 16px; max-height: none; overflow: visible; }
   .tt-bk-summary.empty { display: none; }
   .tt-bk-summary dl, .tt-bk-trust, .tt-bk-sum-edit { display: none; }
   .tt-bk-summary .tt-bk-sum-k { margin-bottom: 10px; }

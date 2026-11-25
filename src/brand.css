@@ -1494,3 +1494,11 @@ html.tt-admin .tt-adm .tt-ax-head h3 { font-size: clamp(18px, 2.2vw, 24px); }
 @media (max-width: 900px) { html.tt-admin .tt-adm .tt-ov-cols { grid-template-columns: 1fr; } }
 html.tt-admin .tt-set-out .button { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 999px; font-weight: 700; }
 html.tt-admin .tt-set-out .tt-set-all { background: linear-gradient(135deg, #f6d28a, #e8a33d); color: #1a1206; border: 0; }
+
+/* Section pill lives inside the header row (between logo and menu) so it
+   can never sit on top of the navigation links */
+.scrapbook-header .tt-pill {
+  position: static; translate: none; top: auto; left: auto;
+  flex: 0 1 auto; min-width: 0; margin: 0 auto; white-space: nowrap; overflow: hidden;
+}
+@media (max-width: 1499px) { .scrapbook-header .tt-pill { display: none; } }

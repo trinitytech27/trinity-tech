@@ -619,7 +619,6 @@ export default function App() {
           </Suspense>
         )}
         <PageTransition />
-        {!isOwner && <SectionLabel />}
         <a className="skip" href="#main">
           Skip to content
         </a>
@@ -656,6 +655,7 @@ export default function App() {
           <header className="scrapbook-header">
             <div className="nav-wrap">
               <Brand />
+              {!isOwner && <SectionLabel />}
               <button
                 className="menu-toggle"
                 aria-expanded={menu}
