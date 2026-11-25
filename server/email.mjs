@@ -172,6 +172,7 @@ export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
         ${row("Timeline", enquiry.timeline || "Flexible")}
         ${row("Budget", enquiry.budget || "Not sure yet")}
         ${row("Domain", enquiry.has_domain)}
+        ${row("Content", enquiry.content_ready)}
       </table>
     </div>
 
