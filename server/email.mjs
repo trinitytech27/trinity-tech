@@ -194,13 +194,15 @@ export function formatCustomerConfirmationHtml(enquiry, trackingCode, siteUrl) {
 }
 
 // Custom message from Trinity Tech (superadmin compose)
-export function formatCustomMessageHtml({ name, heading, message, trackingCode }, siteUrl) {
+export function formatCustomMessageHtml({ name, heading, message, trackingCode, linkUrl, linkLabel }, siteUrl) {
   const origin = originOf(siteUrl);
+  const safeLink = /^https:\/\/[^\s"'<>]+$/.test(String(linkUrl || "")) ? String(linkUrl) : "";
   const content = `
     ${trackingCode ? `<div style="text-align:center;"><span class="pill">Project ${escape(trackingCode)}</span></div>` : ""}
     <h1>${escape(heading || "A message from Trinity Tech")}</h1>
     <p><strong>Hello ${escape(name || "there")},</strong></p>
     <div class="box">${escape(message)}</div>
+    ${safeLink ? `<div style="text-align:center;margin:18px 0;"><a class="btn" href="${escape(safeLink)}">${escape(linkLabel || "Open link")} &rarr;</a></div>` : ""}
     ${trackingCode ? `<div style="text-align:center;"><a class="btn" href="${origin}/track?code=${encodeURIComponent(trackingCode)}">View Your Project &rarr;</a></div>` : ""}
     <p style="margin-top:18px;">Warm regards,<br><strong>Team Trinity Tech</strong></p>
   `;

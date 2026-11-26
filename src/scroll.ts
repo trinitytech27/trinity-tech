@@ -55,6 +55,11 @@ export function destroySmoothScroll() {
 export function resetScroll() {
   if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
   else window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  // ScrollTrigger remembers the old page's scroll position and puts it back on
+  // its next refresh (phones use native scrolling, so this showed there):
+  // forget it, so every new page really starts at the top.
+  ScrollTrigger.clearScrollMemory("manual");
+  ScrollTrigger.update();
 }
 
 /** Smoothly bring an element into view (hash links). */

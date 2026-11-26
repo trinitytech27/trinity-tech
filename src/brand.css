@@ -299,8 +299,16 @@ nav a.active:not(.nav-cta-btn)::after {
   }
   .tt-atom.is-fanning .tt-member {
     top: 62%;
-    width: 58vw;
-    padding: 16px 14px;
+    width: min(88vw, 420px);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: center;
+  }
+  .tt-atom.is-fanning .tt-member-top {
+    grid-row: span 2;
+    margin: 0 !important;
   }
   .tt-atom.is-fanning .tt-member p,
   .tt-atom.is-fanning .tt-member-tags,
@@ -321,8 +329,11 @@ nav a.active:not(.nav-cta-btn)::after {
     color: #f6c66b;
   }
   .tt-atom.is-fanning .tt-member-mail {
-    font-size: 10.5px;
+    font-size: 11.5px;
     word-break: break-all;
+    margin: 4px 0 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
   }
   .tt-atom.is-fanning .tt-orb {
     width: 48px;
@@ -1502,3 +1513,18 @@ html.tt-admin .tt-set-out .tt-set-all { background: linear-gradient(135deg, #f6d
   flex: 0 1 auto; min-width: 0; margin: 0 auto; white-space: nowrap; overflow: hidden;
 }
 @media (max-width: 1499px) { .scrapbook-header .tt-pill { display: none; } }
+
+/* admin: samples shelf + compose button preview */
+.tt-shelf { margin-top: 18px; }
+.tt-shelf-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.tt-shelf-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid rgba(232,163,61,.1); }
+.tt-shelf-main { display: flex; flex-direction: column; min-width: 0; }
+.tt-shelf-main small { color: var(--muted, #a69c8c); font-size: 12px; overflow-wrap: anywhere; }
+.tt-shelf-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.tt-shelf-actions .button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px !important; font-size: 12px !important; border-radius: 999px; text-decoration: none; }
+.tt-compose-link { align-self: end; margin: 0 0 12px !important; overflow-wrap: anywhere; }
+.tt-compose-link a { color: #f6c66b; }
+@media (max-width: 640px) {
+  .tt-shelf-actions { width: 100%; }
+  .tt-shelf-actions .button { flex: 1 1 auto; justify-content: center; }
+}

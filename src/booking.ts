@@ -312,6 +312,46 @@ export const SITE_TYPES: SiteType[] = [
     art: "custom",
   },
   {
+    id: "quiz",
+    group: "custom",
+    label: "Quiz App",
+    desc: "Timed quizzes with scores and leaderboards for students, brands or communities.",
+    includes: ["Timed questions & instant feedback", "Scores & results screen", "Share on WhatsApp"],
+    extras: ["Leaderboard", "Student logins", "Question bank admin", "Certificates", "Telugu / Hindi version"],
+    pages: "small",
+    days: "7–10 days",
+    from: 6999,
+    icon: "circle-help",
+    art: "educational",
+  },
+  {
+    id: "calculator",
+    group: "custom",
+    label: "Calculator Tools",
+    desc: "EMI, BMI, GST or price calculators that bring visitors back to your website.",
+    includes: ["Calculators with instant results", "Simple charts", "Share result button"],
+    extras: ["Lead form with result", "More calculators", "PDF report download", "Embed on your website"],
+    pages: "small",
+    days: "5–7 days",
+    from: 4999,
+    tag: "Quick launch",
+    icon: "calculator",
+    art: "custom",
+  },
+  {
+    id: "survey",
+    group: "custom",
+    label: "Feedback / Survey Form",
+    desc: "Branded feedback and survey forms with a results dashboard and QR code.",
+    includes: ["Branded form (ratings, choices, comments)", "Results dashboard", "QR code to share"],
+    extras: ["CSV / Excel export", "Email alerts on new replies", "Multiple surveys", "Admin login"],
+    pages: "small",
+    days: "5–7 days",
+    from: 4999,
+    icon: "clipboard-list",
+    art: "custom",
+  },
+  {
     id: "webapp",
     group: "custom",
     label: "Web App / Dashboard",
@@ -415,9 +455,22 @@ export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 export const priceLabel = (t?: SiteType) => (!t ? "" : t.from ? "From " + inr(t.from) : "Custom quote");
 export const typeById = (id?: string) => SITE_TYPES.find((t) => t.id === id);
 /** Match old links like /project?category=Business%20Website or ?type=ecommerce */
+/** Website-type names used on the homepage, Work page and chat → a booking type. */
+const TYPE_ALIASES: Record<string, string> = {
+  "booking / appointment website": "salon",
+  "shop / local store website": "catalogue",
+  "educational website": "school",
+  "other / custom website": "webapp",
+  "quiz app": "quiz",
+  "calculator tools": "calculator",
+  "feedback / survey form": "survey",
+  "photography gallery": "photography",
+};
 export const typeFromParam = (v?: string | null) => {
   if (!v) return undefined;
   const q = v.toLowerCase();
+  const alias = TYPE_ALIASES[q];
+  if (alias) return SITE_TYPES.find((t) => t.id === alias);
   return (
     SITE_TYPES.find((t) => t.id === q || t.label.toLowerCase() === q) ||
     SITE_TYPES.find((t) => q.includes(t.id) || t.label.toLowerCase().includes(q.split(/[ /]/)[0]))

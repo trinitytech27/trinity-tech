@@ -1,5 +1,14 @@
-import { CheckCircle2 } from "lucide-react";
-import { deliverables, projects as seed } from "../content";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight, ArrowUpRight, BookOpen, Briefcase, Calculator, Camera, CheckCircle2, ClipboardList, GraduationCap, ListChecks, PartyPopper, PenLine, Rocket, Store, UserRound, UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
+import { deliverables, projects as seed, prototypes } from "../content";
+
+const PROTO_ICONS: Record<string, LucideIcon> = {
+  portfolio: UserRound, blog: PenLine, agency: Briefcase, restaurant: UtensilsCrossed, shop: Store, educational: GraduationCap,
+  quiz: ListChecks, landing: Rocket, invitation: PartyPopper, calculator: Calculator, survey: ClipboardList, gallery: Camera,
+};
 import { DemoStage } from "../ShowcaseFX";
 import { PageHero, TiltCard, useRefreshOnLoad } from "../FX3D";
 
@@ -28,13 +37,50 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
             <span>Responsive builds</span>
           </div>
           <div data-reveal="rise">
-            <b>4</b>
-            <span>Project categories</span>
+            <b>{prototypes.length}</b>
+            <span>Prototypes to try</span>
           </div>
         </div>
       </PageHero>
 
       <DemoStage items={all} />
+
+      <section className="tt-section wrap" data-section="Prototypes" aria-label="Prototypes for every website type">
+        <header className="tt-section-head center" data-reveal>
+          <span className="tt-eyebrow">Prototypes</span>
+          <h2 className="tt-title">
+            Try a sample of <span className="tt-gradient-text">every website type.</span>
+          </h2>
+          <p className="tt-proto-sub">
+            Each prototype explains the website type and shows several ready-made models you can click through. Pick the one closest to
+            your business and we build yours with your name, content and photos.
+          </p>
+        </header>
+        <div className="tt-grid-3 tt-proto-grid" data-reveal-stagger="60">
+          {prototypes.map((p) => {
+            const Icon = PROTO_ICONS[p.key] ?? BookOpen;
+            return (
+              <article className="tt-glass tt-feature tt-proto" key={p.key} data-reveal="rise">
+                <div className="tt-proto-top">
+                  <span className="tt-proto-icon"><Icon size={20} /></span>
+                  <span className="tt-proto-models">{p.models}</span>
+                </div>
+                <span className="tt-proto-type">{p.category}</span>
+                <h3>{p.name}</h3>
+                <p>{p.desc}</p>
+                <div className="tt-proto-actions">
+                  <a href={p.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary tt-proto-btn">
+                    Check prototype <ArrowUpRight size={16} />
+                  </a>
+                  <Link to={"/project?category=" + encodeURIComponent(p.category)} className="tt-proto-link">
+                    Start one like this <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
 
       <section className="tt-section wrap" data-section="Included" aria-label="What every project includes">

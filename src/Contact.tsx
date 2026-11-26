@@ -7,6 +7,8 @@ import {
   ArrowRight,
   BedDouble,
   BookOpen,
+  Calculator,
+  ClipboardList,
   Briefcase,
   Building2,
   CalendarCheck,
@@ -80,6 +82,8 @@ const ICONS: Record<string, React.ReactNode> = {
   "refresh-cw": <RefreshCw size={20} />,
   "code-xml": <CodeXml size={20} />,
   "circle-help": <CircleHelp size={20} />,
+  calculator: <Calculator size={20} />,
+  "clipboard-list": <ClipboardList size={20} />,
 };
 // star shapes the starfield can draw for each icon
 const STAR_SHAPE: Record<string, string> = {
@@ -91,7 +95,7 @@ const STAR_SHAPE: Record<string, string> = {
   "hand-heart": "handshake",
   "refresh-cw": "sparkles",
   "building-2": "briefcase",
-  camera: "layers",
+  camera: "camera",
 };
 
 type Form = {
