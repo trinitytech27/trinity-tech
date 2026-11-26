@@ -39,6 +39,7 @@ import PageTransition from "./PageTransition";
 import { SectionLabel } from "./FX3D";
 import { ScrollProgress, useScrollReveal, useScrollState } from "./Motion";
 import { destroySmoothScroll, initSmoothScroll, resetScroll, scrollToElement, ScrollTrigger } from "./scroll";
+import FloatingSymbols from "./FloatingSymbols";
 import { ChatProvider, useChat, STARTER_QUESTIONS } from "./chat-context";
 
 const Admin = lazy(() => import("./Admin"));
@@ -618,6 +619,7 @@ export default function App() {
             <Starfield route={loc.pathname} />
           </Suspense>
         )}
+        <FloatingSymbols />
         <PageTransition />
         <a className="skip" href="#main">
           Skip to content

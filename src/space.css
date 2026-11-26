@@ -1641,3 +1641,51 @@ html.theme-owner .menu-toggle {
 .tt-proto-link:hover {
   color: #f6c66b;
 }
+
+/* ---------- Faint web symbols wandering along the screen edges ---------- */
+.tt-float {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tt-float-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #e8a33d;
+  opacity: 0;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1), ease;
+  will-change: transform, opacity;
+}
+.tt-float-bob {
+  display: block;
+  animation: tt-float-bob 6s ease-in-out infinite alternate;
+}
+.tt-float-item svg {
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(232, 163, 61, 0.35));
+}
+.tt-float-item b {
+  display: inline-block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-weight: 700;
+  font-size: calc(var(--s) * 0.55);
+  line-height: 1;
+  padding: 0.35em 0.6em;
+  border: 1.25px solid currentColor;
+  border-radius: 0.5em;
+  white-space: nowrap;
+}
+@keyframes tt-float-bob {
+  from { transform: translateY(-6px) scale(0.96); }
+  to { transform: translateY(6px) scale(1.04); }
+}
+html[data-route="/project"] .tt-float,
+html[data-route="/track"] .tt-float { opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .tt-float-bob { animation: none; }
+  .tt-float-item { transition: none; }
+}
