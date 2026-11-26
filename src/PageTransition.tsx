@@ -38,7 +38,7 @@ export default function PageTransition() {
   const locRef = useRef(loc);
   locRef.current = loc;
 
-  // hidden admin entry: 4 quick taps on the T logo open the admin workspace
+  // hidden admin entry: 5 quick taps on the T logo open the admin workspace
   const taps = useRef<number[]>([]);
 
   useEffect(() => {
@@ -46,8 +46,8 @@ export default function PageTransition() {
       const logo = (e.target as HTMLElement | null)?.closest?.(".brand-logo-img, .tt-pt-logo-tap");
       if (logo) {
         const now = Date.now();
-        taps.current = [...taps.current.filter((t) => now - t < 1800), now];
-        if (taps.current.length >= 4) {
+        taps.current = [...taps.current.filter((t) => now - t < 2200), now];
+        if (taps.current.length >= 5) {
           taps.current = [];
           e.preventDefault();
           e.stopPropagation();

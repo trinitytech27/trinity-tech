@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ArrowUpRight, Mail, Radar } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Calculator, Camera, CircleHelp, ClipboardList, Mail, PartyPopper, Radar, Rocket, type LucideIcon } from "lucide-react";
 import { gsap, ScrollTrigger, showStars } from "./scroll";
 import { team, siteTypes, PROJECT_ICONS, type projects } from "./content";
 import { BOOKING_STEPS } from "./Home";
@@ -176,6 +176,30 @@ export function ProjectQueue({ items, n = "02" }: { items: Project[]; n?: string
    scroll brings the next domain to the top. The stars draw that domain's
    symbol (briefcase, cart, calendar…).
    ========================================================================== */
+/* types without a line-art illustration get a large outline icon instead */
+const TYPE_ICONS: Record<string, LucideIcon> = {
+  quiz: CircleHelp, landing: Rocket, invitation: PartyPopper, calculator: Calculator, survey: ClipboardList, gallery: Camera,
+};
+function TypeArt({ t }: { t: (typeof siteTypes)[number] }) {
+  if (t.art) return <img className="tt-layer-art" src={t.art} alt="" loading="lazy" />;
+  const Icon = TYPE_ICONS[t.key];
+  return Icon ? <Icon className="tt-layer-art tt-layer-art-icon" strokeWidth={0.9} aria-hidden="true" /> : null;
+}
+
+/** "Check prototype" + "Start a … project" for one domain. */
+function DomainActions({ t }: { t: (typeof siteTypes)[number] }) {
+  return (
+    <div className="tt-layer-actions">
+      <a href={t.demo.url} target="_blank" rel="noreferrer" className="tt-btn tt-btn-primary tt-layer-btn">
+        {t.demo.label} <ArrowUpRight size={16} />
+      </a>
+      <Link to={"/project?category=" + encodeURIComponent(t.category)} className="tt-btn tt-btn-ghost tt-layer-btn">
+        <span className="tt-btn-long">Start {/^[aeiou]/.test(t.noun) ? "an" : "a"} {t.noun} project</span><span className="tt-btn-short">Start a project</span> <ArrowRight size={16} />
+      </Link>
+    </div>
+  );
+}
+
 export function LayerStack({ n = "03" }: { n?: string }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
@@ -203,10 +227,11 @@ export function LayerStack({ n = "03" }: { n?: string }) {
           if (d < 0) {
             gsap.set(layer, { z: 70 + -d * 360, y: d * 40, opacity: Math.max(0, 1 + d * 1.6) });
           } else {
+            // only the next few layers show behind the top one (16 domains would crowd the stack)
             gsap.set(layer, {
               z: 70 - d * gap,
               y: 0,
-              opacity: Math.max(0.22, 1 - d * (0.05 + 0.15 * open)),
+              opacity: d > 5 ? 0 : Math.max(0.22, 1 - d * (0.05 + 0.15 * open)),
             });
           }
           layer.classList.toggle("is-top", Math.abs(d) < 0.5);
@@ -217,7 +242,7 @@ export function LayerStack({ n = "03" }: { n?: string }) {
       ScrollTrigger.create({
         trigger: el,
         start: "top top",
-        end: () => "+=" + window.innerHeight * N * 0.6,
+        end: () => "+=" + window.innerHeight * N * 0.45,
         scrub: 0.6,
         pin: true,
         anticipatePin: 1,
@@ -262,21 +287,21 @@ export function LayerStack({ n = "03" }: { n?: string }) {
                 <em key={t}>{t}</em>
               ))}
             </div>
-            <Link to={"/project?category=" + encodeURIComponent(cur.category)} className="tt-link">
-              Start a {cur.title.toLowerCase()} project <ArrowRight size={16} />
-            </Link>
+            <DomainActions t={cur} />
           </div>
-          <div className="tt-layer-dashes" aria-hidden="true">
-            {siteTypes.map((t, i) => (
-              <i key={t.title} className={i === active ? "on" : ""} />
-            ))}
+          <div className="tt-layer-progress" aria-hidden="true">
+            <b>{String(active + 1).padStart(2, "0")}</b>
+            <i>
+              <span style={{ transform: `scaleX(${(active + 1) / N})` }} />
+            </i>
+            <b>{String(N).padStart(2, "0")}</b>
           </div>
         </div>
         <div className="tt-stack" aria-hidden="true">
           <div className="tt-stack-plane">
             {siteTypes.map((t, k) => (
               <div className="tt-layer" key={t.title} style={{ zIndex: N - k } as React.CSSProperties}>
-                <img className="tt-layer-art" src={t.art} alt="" loading="lazy" />
+                <TypeArt t={t} />
                 <span className="tt-layer-n">{String(k + 1).padStart(2, "0")}</span>
                 <b>{t.title}</b>
                 <small>{t.sub}</small>
@@ -291,13 +316,14 @@ export function LayerStack({ n = "03" }: { n?: string }) {
         </div>
         <div className="tt-layers-list" data-reveal-stagger="80">
           {siteTypes.map((t, k) => (
-            <Link key={t.title} to={"/project?category=" + encodeURIComponent(t.category)} className="tt-layer-card" data-reveal="rise">
+            <article key={t.title} className="tt-layer-card" data-reveal="rise">
               <span className="tt-layer-kicker">
                 {String(k + 1).padStart(2, "0")} · {t.sub}
               </span>
               <h3>{t.title}</h3>
               <p>{t.desc}</p>
-            </Link>
+              <DomainActions t={t} />
+            </article>
           ))}
         </div>
       </div>
@@ -323,16 +349,18 @@ export function TeamAtom({ n = "04" }: { n?: string }) {
       const cards = gsap.utils.toArray<HTMLElement>(".tt-member", el);
       const narrow = window.innerWidth < 760;
       // fan positions: [x (vw), y (vh), rotation, scale]
+      // final places: side by side with clear gaps on laptops (no card hides
+      // another), and one under the other on phones (founder on top)
       const fan = narrow
         ? [
-            [-20, 6, -9, 0.9],
-            [0, 0, 0, 1],
-            [20, 6, 9, 0.9],
+            [0, 1, 0, 1],
+            [0, -19, 0, 1],
+            [0, 21, 0, 1],
           ]
         : [
-            [-24, 5, -8, 0.94],
-            [0, 0, 0, 1.04],
-            [24, 5, 8, 0.94],
+            [-30, 3, -3, 0.97],
+            [0, 0, 0, 1.02],
+            [30, 3, 3, 0.97],
           ];
       gsap.set(cards, { xPercent: -50, yPercent: -50, x: 0, y: "12vh", scale: 0.2, rotate: 0, opacity: 0, rotateX: 50 });
       const tl = gsap.timeline({

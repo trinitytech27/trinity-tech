@@ -34,7 +34,7 @@ const origin =
 
 const pages = [
   ["", "Build. Innovate. Transform.", seed.seoDescription],
-  ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, ABPS Books, StarX Connect and AudioX."],
+  ["work", "Our Work — Selected Case Studies", "Explore live websites and web applications built by Trinity Tech including StarX Live, TicketX, ABPS Books and StarX Connect."],
   ["about", "About the Business — Trinity Tech", seed.about],
   ["services", "Services — Design & Digital Development", "Web development, UI/UX design, custom web applications, e-commerce storefronts, and interactive digital experiences."],
   ["project", "Start a Project — Trinity Tech", "Choose your website type, select your features, and start your tailored web project with Trinity Tech."],

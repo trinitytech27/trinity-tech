@@ -245,7 +245,7 @@ test("/api/chat explains project starting and tracking clearly", async () => {
   assert.match(trackBody.answer, /TT-001/);
 });
 
-test("enquiry builder defaults have 11 website categories with correct features", () => {
+test("enquiry builder defaults have 17 website categories with correct features", () => {
   const expectedLabels = [
     "Personal Portfolio",
     "Blog / Content Website",
@@ -256,10 +256,16 @@ test("enquiry builder defaults have 11 website categories with correct features"
     "Shop / Local Store Website",
     "Booking / Appointment Website",
     "Educational Website",
+    "Quiz App",
+    "Landing Page",
+    "Event / Wedding Invitation",
+    "Calculator Tools",
+    "Feedback / Survey Form",
+    "Photography Gallery",
     "Other / Custom Website",
     "Not Sure — Help Me Choose",
   ];
-  assert.equal(seed.websiteCategories.length, 11);
+  assert.equal(seed.websiteCategories.length, 17);
   assert.deepEqual(
     seed.websiteCategories.map((c) => c.label),
     expectedLabels,

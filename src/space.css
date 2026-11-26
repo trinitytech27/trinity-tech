@@ -1561,3 +1561,83 @@ html.theme-owner .menu-toggle {
 .tt-gradient-text {
   text-shadow: none !important;
 }
+
+/* ---------- Prototypes grid (Work page) ---------- */
+.tt-proto-sub {
+  max-width: 640px;
+  margin: 14px auto 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+.tt-proto-grid {
+  margin-top: 40px;
+}
+.tt-proto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.tt-proto-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tt-proto-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #1a1206;
+  background: var(--brand-grad);
+}
+.tt-proto-models {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f6c66b;
+  border: 1px solid rgba(232, 163, 61, 0.35);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.tt-proto-type {
+  margin-top: 18px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.tt-proto h3 {
+  margin-top: 6px;
+}
+.tt-proto h3 small {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f6c66b;
+}
+.tt-proto p {
+  flex: 1;
+}
+.tt-proto-actions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.tt-proto-btn {
+  padding: 11px 18px;
+  font-size: 14px;
+}
+.tt-proto-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.tt-proto-link:hover {
+  color: #f6c66b;
+}

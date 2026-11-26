@@ -97,31 +97,6 @@ export const projects = [
     published: true,
     order: 4,
   },
-  {
-    slug: "audiox",
-    quote: "Your media. Your terms. Anywhere.",
-    name: "AudioX",
-    short: "AudioX",
-    category: "Web Application / Media Utility",
-    kind: "Applications",
-    url: "https://audiox-by-spideyy.vercel.app/",
-    image: "/media/audiox.webp",
-    mobile: "/media/audiox-mobile.webp",
-    color: "#505184",
-    headline: "Utility, with a clear point of focus.",
-    summary:
-      "An audio utility interface with focused input and dedicated queue and download areas.",
-    story:
-      "AudioX presents a media URL analysis workflow for content the visitor owns or is permitted to download. Its primary action is separated from queue, download and settings navigation.",
-    features: [
-      "Media URL input and Analyze action",
-      "Queue and Downloads navigation",
-      "Settings and readiness status",
-    ],
-    note: "Interface inspected. Conversion and completed downloads were not tested.",
-    published: true,
-    order: 5,
-  },
 ];
 
 export const services = [
@@ -187,6 +162,48 @@ export const services = [
     example: "Schools, coaching centers, online academies, individual tutors, skill workshops.",
     items: "Course info, about school/teacher, enrolment form, gallery, notice board",
     category: "Educational Website"
+  },
+  {
+    name: "Quiz App",
+    description: "Engage visitors with fun, shareable quizzes that keep them coming back.",
+    example: "Trivia games, movie quizzes, student practice tests, brand engagement quizzes.",
+    items: "Timed questions, instant feedback, scores, leaderboard, WhatsApp sharing",
+    category: "Quiz App"
+  },
+  {
+    name: "Landing Page",
+    description: "Launch a product, app or offer with one focused page that turns visitors into sign-ups.",
+    example: "Product launches, app pre-registrations, event promotions, special offers.",
+    items: "Hero section, features, pricing, testimonials, FAQ, sign-up form",
+    category: "Landing Page"
+  },
+  {
+    name: "Event / Wedding Invitation",
+    description: "Share a beautiful digital invitation guests open on their phone, with RSVP and directions.",
+    example: "Weddings, engagements, birthdays, housewarmings, college events.",
+    items: "Event details, schedule, photo gallery, RSVP, map directions, countdown",
+    category: "Event / Wedding Invitation"
+  },
+  {
+    name: "Calculator Tools",
+    description: "Offer handy online calculators that bring visitors back to your website again and again.",
+    example: "EMI and loan calculators, BMI checkers, GST tools, discount calculators.",
+    items: "Instant results, input checks, result sharing, simple charts",
+    category: "Calculator Tools"
+  },
+  {
+    name: "Feedback / Survey Form",
+    description: "Collect customer feedback or survey answers with a branded form and see the results in one place.",
+    example: "Customer feedback, event surveys, student feedback, product research.",
+    items: "Ratings, multiple-choice questions, results dashboard, CSV export, QR code",
+    category: "Feedback / Survey Form"
+  },
+  {
+    name: "Photography Gallery",
+    description: "Show your photos full-screen in albums and turn viewers into shoot bookings.",
+    example: "Wedding photographers, portrait studios, event photographers, artists.",
+    items: "Photo albums, full-screen lightbox, packages, shoot enquiry, WhatsApp",
+    category: "Photography Gallery"
   },
   {
     name: "Other / Custom Website",
@@ -322,6 +339,55 @@ export const CATEGORY_OBJECTIVES_MAP: Record<string, string[]> = {
     "Manage Customers",
     "Manage My Team",
     "Add Customer Login",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  quiz: [
+    "Share Articles or Updates",
+    "Receive Customer Enquiries",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  landing: [
+    "Introduce My Business",
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Receive Online Payments",
+    "Add an AI Chatbot",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  invitation: [
+    "Show Business Location",
+    "Receive Customer Enquiries",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  calculator: [
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Add an AI Chatbot",
+    "Something Else",
+    "Not Sure",
+  ],
+  survey: [
+    "Receive Customer Enquiries",
+    "Manage Customers",
+    "Manage My Website Content",
+    "Something Else",
+    "Not Sure",
+  ],
+  gallery: [
+    "Show My Work",
+    "Show My Services",
+    "Receive Customer Enquiries",
+    "Accept Bookings",
     "Add an AI Chatbot",
     "Manage My Website Content",
     "Something Else",
@@ -542,6 +608,122 @@ export const DEFAULT_WEBSITE_CATEGORIES: WebsiteCategory[] = [
       "Learning Materials",
       "Student Login",
       "Announcements"
+    ],
+    enabled: true
+  },
+  {
+    id: "quiz",
+    label: "Quiz App",
+    desc: "Create fun, shareable quizzes and practice tests.",
+    examples: [
+      "Trivia Quiz",
+      "Practice Test",
+      "Brand Quiz"
+    ],
+    features: [
+      "Multiple-Choice Questions",
+      "Question Timer",
+      "Instant Feedback",
+      "Score & Progress",
+      "Leaderboard",
+      "Share Score on WhatsApp"
+    ],
+    enabled: true
+  },
+  {
+    id: "landing",
+    label: "Landing Page",
+    desc: "One focused page to launch a product or offer.",
+    examples: [
+      "Product Launch",
+      "App Waitlist",
+      "Offer Page"
+    ],
+    features: [
+      "Hero Section",
+      "Features",
+      "Pricing Plans",
+      "Testimonials",
+      "FAQ",
+      "Email Sign-up",
+      "Launch Countdown"
+    ],
+    enabled: true
+  },
+  {
+    id: "invitation",
+    label: "Event / Wedding Invitation",
+    desc: "A digital invite link with RSVP and directions.",
+    examples: [
+      "Wedding Invite",
+      "Birthday Invite",
+      "Event Invite"
+    ],
+    features: [
+      "Event Details",
+      "Event Schedule",
+      "Photo Gallery",
+      "RSVP Form",
+      "Map Directions",
+      "Countdown",
+      "Background Music"
+    ],
+    enabled: true
+  },
+  {
+    id: "calculator",
+    label: "Calculator Tools",
+    desc: "Handy online calculators for your visitors.",
+    examples: [
+      "EMI Calculator",
+      "BMI Calculator",
+      "GST Calculator"
+    ],
+    features: [
+      "EMI / Loan Calculator",
+      "BMI Calculator",
+      "GST Calculator",
+      "Percentage / Discount Calculator",
+      "Instant Results",
+      "Share Result"
+    ],
+    enabled: true
+  },
+  {
+    id: "survey",
+    label: "Feedback / Survey Form",
+    desc: "Collect feedback and see the results in one place.",
+    examples: [
+      "Customer Feedback",
+      "Event Survey",
+      "Student Feedback"
+    ],
+    features: [
+      "Star Ratings",
+      "Multiple-Choice Questions",
+      "Text Answers",
+      "Results Dashboard",
+      "Export to CSV",
+      "QR Code Link"
+    ],
+    enabled: true
+  },
+  {
+    id: "gallery",
+    label: "Photography Gallery",
+    desc: "Show your photos in albums and get shoot bookings.",
+    examples: [
+      "Wedding Photographer",
+      "Portrait Studio",
+      "Artist Gallery"
+    ],
+    features: [
+      "Photo Albums",
+      "Full-Screen Lightbox",
+      "Album Filters",
+      "Packages",
+      "Shoot Enquiry",
+      "WhatsApp Contact"
     ],
     enabled: true
   },
@@ -821,7 +1003,7 @@ export const defaults = {
     },
     {
       q: "Can I see your work?",
-      a: "Explore StarX Live, TicketX, ABPS Books, StarX Connect and AudioX in Our Work. Each has a case study and live link.",
+      a: "Explore StarX Live, TicketX, ABPS Books and StarX Connect in Our Work. Each has a case study and live link.",
     },
     {
       q: "How much does a website cost?",
@@ -988,7 +1170,6 @@ export const PROJECT_ICONS: Record<string, string> = {
   ticketx: "icon:ticket",
   "abps-books": "icon:book-open",
   "starx-connect": "icon:contact",
-  audiox: "icon:headphones",
 };
 
 /* ---------- Trust-building content ---------- */
@@ -1051,60 +1232,134 @@ export const publicFaqs = [
 ];
 
 
+/* ---------- Prototypes: one sample site per website type (Work page) ---------- */
+export const prototypes = [
+  { key: "portfolio", category: "Personal Portfolio", name: "Portfolio (Prototype)", url: "https://trinity-portfolio-demo.vercel.app", desc: "Developer, designer, student and consultant portfolios with project pages and a printable resume.", models: "4 portfolios" },
+  { key: "blog", category: "Blog / Content Website", name: "Blog (Prototype)", url: "https://trinity-blog-demo.vercel.app", desc: "Food, travel, tech and business blogs with search, comments, recipe cards and code blocks.", models: "4 blogs" },
+  { key: "agency", category: "Agency Website", name: "Agency (Prototype)", url: "https://trinity-agency-demo.vercel.app", desc: "Marketing, software, branding and video agencies with case studies, pricing and a cost estimator.", models: "4 agencies" },
+  { key: "restaurant", category: "Restaurant Website", name: "Restaurant (Prototype)", url: "https://trinity-restaurant-demo.vercel.app", desc: "Online ordering, table booking, a custom cake builder and a table QR menu.", models: "4 restaurants" },
+  { key: "shop", category: "Shop / Local Store Website", name: "Shop (Prototype)", url: "https://trinity-shop-demo.vercel.app", desc: "Boutique, grocery, mobile and furniture stores with cart, checkout and WhatsApp orders.", models: "4 shops" },
+  { key: "educational", category: "Educational Website", name: "Educational (Prototype)", url: "https://trinity-educational-demo.vercel.app", desc: "School admissions, coaching course finder, online lessons with certificates and class timetables.", models: "4 institutes" },
+  { key: "quiz", category: "Quiz App", name: "Quiz (Prototype)", url: "https://trinity-quiz-demo.vercel.app", desc: "Timed quizzes on six topics with instant feedback, scores and attempt history.", models: "6 topics" },
+  { key: "landing", category: "Landing Page", name: "Landing Page (Prototype)", url: "https://trinity-landing-demo.vercel.app", desc: "App launch, coaching, real estate, festive sale and event landing pages.", models: "5 landing pages" },
+  { key: "invitation", category: "Event / Wedding Invitation", name: "Invitation (Prototype)", url: "https://trinity-invitation-demo.vercel.app", desc: "Wedding, birthday, housewarming and engagement invites with countdown, music and RSVP.", models: "4 invitations" },
+  { key: "calculator", category: "Calculator Tools", name: "Calculator (Prototype)", url: "https://trinity-calculator-demo.vercel.app", desc: "EMI, BMI, GST, SIP, age and discount calculators with charts and sharing.", models: "6 calculators" },
+  { key: "survey", category: "Feedback / Survey Form", name: "Survey (Prototype)", url: "https://trinity-survey-demo.vercel.app", desc: "Feedback and survey forms with a results dashboard, CSV export and QR code.", models: "4 surveys" },
+  { key: "gallery", category: "Photography Gallery", name: "Gallery (Prototype)", url: "https://trinity-gallery-demo.vercel.app", desc: "Wedding, portrait, travel and food photographers with albums, a lightbox and packages.", models: "4 studios" },
+];
+
 /* ---------- Website types (homepage layered stack) ---------- */
 export const siteTypes = [
   {
-    icon: "icon:briefcase",
-    art: "/brand/types/business.webp",
-    category: "Business Website",
-    title: "Business & Company",
-    sub: "Your brand, services and contact in one place",
-    desc: "A professional home for your business — services, about, gallery, enquiries and location, built to earn trust and bring customers in.",
+    key: "business", noun: "business website", icon: "icon:briefcase", art: "/brand/types/business.webp", category: "Business Website",
+    title: "Business & Company", sub: "Your brand, services and contact in one place",
+    desc: "A professional home for your business: services, about, gallery, enquiries and location, built to earn trust and bring customers in.",
     tags: ["Company profile", "Services", "Enquiry forms", "Google Maps"],
+    demo: { label: "Check live project", url: "https://starx-live-official.vercel.app/" },
   },
   {
-    icon: "icon:shopping-cart",
-    art: "/brand/types/ecommerce.webp",
-    category: "E-Commerce Website",
-    title: "E-Commerce Store",
-    sub: "Sell products online, day and night",
-    desc: "Product catalogues, cart and checkout flows, order management and an admin dashboard to run your store.",
-    tags: ["Product catalogue", "Cart & checkout", "Orders", "Admin dashboard"],
+    key: "ecommerce", noun: "online store", icon: "icon:shopping-cart", art: "/brand/types/ecommerce.webp", category: "E-Commerce Website",
+    title: "E-Commerce Store", sub: "Sell products online, day and night",
+    desc: "Product catalogues, cart and checkout, payments, order tracking and an admin dashboard to run your store, like our live ABPS Books.",
+    tags: ["Product catalogue", "Cart & checkout", "Payments", "Orders"],
+    demo: { label: "Check live project", url: "https://abps-books.vercel.app/" },
   },
   {
-    icon: "icon:calendar-check",
-    art: "/brand/types/booking.webp",
-    category: "Booking / Appointment Website",
-    title: "Booking & Events",
-    sub: "Tickets, appointments and reservations",
-    desc: "Let customers discover events, pick slots and book online — like our live TicketX platform.",
+    key: "booking", noun: "booking website", icon: "icon:calendar-check", art: "/brand/types/booking.webp", category: "Booking / Appointment Website",
+    title: "Booking & Appointments", sub: "Tickets, appointments and reservations",
+    desc: "Let customers discover events, pick slots and book online, like our live TicketX platform.",
     tags: ["Event listings", "Slot booking", "Reminders", "Like TicketX"],
+    demo: { label: "Check live project", url: "https://ticket-x-theta.vercel.app/" },
   },
   {
-    icon: "icon:user",
-    art: "/brand/types/portfolio.webp",
-    category: "Personal Portfolio",
-    title: "Portfolio & Personal Brand",
-    sub: "Show your work, skills and story",
-    desc: "A striking portfolio for creators, professionals and artists — projects, achievements, resume and direct contact.",
-    tags: ["Projects", "Resume", "Testimonials", "Contact links"],
+    key: "portfolio", noun: "portfolio", icon: "icon:user", art: "/brand/types/portfolio.webp", category: "Personal Portfolio",
+    title: "Portfolio & Personal Brand", sub: "Show your work, skills and story",
+    desc: "A striking portfolio for developers, designers, students and professionals: projects, skills, experience, resume and direct contact.",
+    tags: ["Projects", "Resume", "Testimonials", "Contact"],
+    demo: { label: "Check prototype", url: "https://trinity-portfolio-demo.vercel.app" },
   },
   {
-    icon: "icon:utensils",
-    art: "/brand/types/restaurant.webp",
-    category: "Restaurant Website",
-    title: "Restaurants & Local Shops",
-    sub: "Menus, offers and orders for local businesses",
-    desc: "Digital menus, offers, galleries, WhatsApp ordering and maps that turn local searches into visits.",
-    tags: ["Digital menu", "WhatsApp orders", "Offers", "Location"],
+    key: "restaurant", noun: "restaurant website", icon: "icon:utensils", art: "/brand/types/restaurant.webp", category: "Restaurant Website",
+    title: "Restaurants & Cafés", sub: "Menus, orders and table bookings",
+    desc: "Digital menus, online ordering, table reservations, cake orders and QR table menus that turn hungry visitors into customers.",
+    tags: ["Digital menu", "Online orders", "Table booking", "QR menu"],
+    demo: { label: "Check prototype", url: "https://trinity-restaurant-demo.vercel.app" },
   },
   {
-    icon: "icon:code-xml",
-    art: "/brand/types/custom.webp",
-    category: "Other / Custom Website",
-    title: "Custom Web Apps",
-    sub: "Tools and platforms built around your idea",
-    desc: "Dashboards, utilities and custom platforms — from media tools like AudioX to digital cards like StarX Connect.",
-    tags: ["Dashboards", "Logins", "Databases", "Like AudioX"],
+    key: "shop", noun: "shop website", icon: "icon:store", art: "/brand/types/shop.webp", category: "Shop / Local Store Website",
+    title: "Shops & Local Stores", sub: "Your store catalogue, open 24/7",
+    desc: "Products with prices, sizes and offers, a cart and orders straight to your WhatsApp, plus store location and timings.",
+    tags: ["Catalogue", "WhatsApp orders", "Offers", "Store location"],
+    demo: { label: "Check prototype", url: "https://trinity-shop-demo.vercel.app" },
+  },
+  {
+    key: "blog", noun: "blog", icon: "icon:book-open", art: "/brand/types/blog.webp", category: "Blog / Content Website",
+    title: "Blogs & Content", sub: "Articles people find on Google",
+    desc: "Recipes, travel guides, tutorials or company news with categories, search, comments and a newsletter.",
+    tags: ["Articles", "Categories & search", "Comments", "Newsletter"],
+    demo: { label: "Check prototype", url: "https://trinity-blog-demo.vercel.app" },
+  },
+  {
+    key: "agency", noun: "agency website", icon: "icon:layers", art: "/brand/types/agency.webp", category: "Agency Website",
+    title: "Agencies & Studios", sub: "Services, case studies and enquiries",
+    desc: "Marketing agencies, software companies, design studios and production houses: show your work, process and team, and win clients.",
+    tags: ["Case studies", "Services", "Team", "Enquiry form"],
+    demo: { label: "Check prototype", url: "https://trinity-agency-demo.vercel.app" },
+  },
+  {
+    key: "educational", noun: "school or institute website", icon: "icon:graduation-cap", art: "/brand/types/educational.webp", category: "Educational Website",
+    title: "Schools & Education", sub: "Courses, admissions and notices",
+    desc: "Schools, coaching centres, online courses and academies with admission forms, notice boards, timetables and online lessons.",
+    tags: ["Admissions", "Notice board", "Timetable", "Online courses"],
+    demo: { label: "Check prototype", url: "https://trinity-educational-demo.vercel.app" },
+  },
+  {
+    key: "quiz", noun: "quiz app", icon: "icon:circle-help", art: "", category: "Quiz App",
+    title: "Quiz Apps", sub: "Fun, shareable quizzes",
+    desc: "Timed quizzes with instant feedback, scores and leaderboards for students, brands and communities.",
+    tags: ["Timed questions", "Scores", "Leaderboard", "Sharing"],
+    demo: { label: "Check prototype", url: "https://trinity-quiz-demo.vercel.app" },
+  },
+  {
+    key: "landing", noun: "landing page", icon: "icon:rocket", art: "", category: "Landing Page",
+    title: "Landing Pages", sub: "One page, one goal",
+    desc: "Launch a product, app, course or offer with one focused page that turns visitors into sign-ups and leads.",
+    tags: ["Hero & offer", "Pricing", "FAQ", "Sign-up form"],
+    demo: { label: "Check prototype", url: "https://trinity-landing-demo.vercel.app" },
+  },
+  {
+    key: "invitation", noun: "invitation", icon: "icon:party-popper", art: "", category: "Event / Wedding Invitation",
+    title: "Event & Wedding Invitations", sub: "Invites guests open on their phone",
+    desc: "Beautiful digital invitations with countdown, schedule, map directions, music and RSVP.",
+    tags: ["Countdown", "Schedule", "Directions", "RSVP"],
+    demo: { label: "Check prototype", url: "https://trinity-invitation-demo.vercel.app" },
+  },
+  {
+    key: "calculator", noun: "calculator tool", icon: "icon:calculator", art: "", category: "Calculator Tools",
+    title: "Calculator Tools", sub: "Handy tools that bring visitors back",
+    desc: "EMI, BMI, GST, SIP and other calculators with instant results, charts and sharing.",
+    tags: ["Instant results", "Charts", "Sharing", "Lead capture"],
+    demo: { label: "Check prototype", url: "https://trinity-calculator-demo.vercel.app" },
+  },
+  {
+    key: "survey", noun: "survey form", icon: "icon:clipboard-list", art: "", category: "Feedback / Survey Form",
+    title: "Feedback & Surveys", sub: "Branded forms with live results",
+    desc: "Customer feedback and survey forms with a results dashboard, CSV export and a QR code to share.",
+    tags: ["Ratings", "Results dashboard", "CSV export", "QR code"],
+    demo: { label: "Check prototype", url: "https://trinity-survey-demo.vercel.app" },
+  },
+  {
+    key: "gallery", noun: "photography website", icon: "icon:camera", art: "", category: "Photography Gallery",
+    title: "Photography Galleries", sub: "Albums that win shoot bookings",
+    desc: "Full-screen albums, a lightbox, packages and shoot enquiries for photographers and studios.",
+    tags: ["Albums", "Lightbox", "Packages", "Enquiries"],
+    demo: { label: "Check prototype", url: "https://trinity-gallery-demo.vercel.app" },
+  },
+  {
+    key: "custom", noun: "custom web app", icon: "icon:code-xml", art: "/brand/types/custom.webp", category: "Other / Custom Website",
+    title: "Custom Web Apps", sub: "Tools and platforms built around your idea",
+    desc: "Dashboards, logins, databases and custom platforms, from booking systems like TicketX to digital cards like StarX Connect.",
+    tags: ["Dashboards", "Logins", "Databases", "Like StarX Connect"],
+    demo: { label: "Check live project", url: "https://connect-starx.vercel.app/" },
   },
 ];

@@ -158,6 +158,7 @@ export function enquiry(x) {
     animation_preference: 150,
     page_count: 150,
     existing_design_option: 150,
+    content_ready: 150,
     figma_url: 300,
     idempotency_key: 100,
   };

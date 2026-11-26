@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { defaults } from "./content";
-import { AdminOverview, AdminSettings, ComposeMail, UpdatesEditor, accessLabel, allowedTab, isSuper, labelOf, navFor, readPrefs, type Me } from "./AdminExtras";
+import { AdminOverview, AdminSettings, ComposeMail, UpdatesEditor, accessLabel, allowedTab, isSuper, labelOf, navFor, readPrefs, type ComposeInit, type Me } from "./AdminExtras";
 
 const auth =
   import.meta.env.VITE_SUPABASE_URL &&
@@ -46,7 +46,7 @@ export default function Admin() {
   const [tab, setTab] = useState("Overview");
   const [navOpen, setNavOpen] = useState(false);
   // compose-email panel (Super Admin) and which project's updates are open
-  const [compose, setCompose] = useState<null | { to?: string; name?: string; trackingCode?: string }>(null);
+  const [compose, setCompose] = useState<null | ComposeInit>(null);
   const [openUpdates, setOpenUpdates] = useState<string | null>(null);
   const [site, setSite] = useState(defaults);
   const [data, setData] = useState<any>(null);
@@ -296,6 +296,15 @@ export default function Admin() {
         return sortOrder === "newest" ? timeB - timeA : timeA - timeB;
       });
   }, [data?.enquiries, statusFilter, serviceFilter, search, sortOrder]);
+
+  // everyone we can email: enquiry senders and client projects
+  const contacts = useMemo(
+    () => [
+      ...(data?.enquiries || []).map((r: any) => ({ email: r.data?.email, name: r.data?.name, code: r.tracking_code, category: r.data?.service })),
+      ...(data?.projects || []).map((p: any) => ({ email: p.client_email, name: p.client_name, code: p.tracking_code })),
+    ].filter((c: any) => c.email),
+    [data?.enquiries, data?.projects],
+  );
 
   const me: Me | null = data?.me || null;
   const superUser = isSuper(me);
@@ -629,14 +638,14 @@ export default function Admin() {
           )}
 
           {/* OVERVIEW TAB */}
-          {compose && superUser && (
+          {compose && (
             <div className="tt-ax-modal" role="dialog" aria-label="Send email" onClick={(e) => e.target === e.currentTarget && setCompose(null)}>
-              <ComposeMail api={api} initial={compose} onClose={() => setCompose(null)} onSent={() => void loadSilently()} />
+              <ComposeMail api={api} initial={compose} contacts={contacts} onClose={() => setCompose(null)} onSent={() => void loadSilently()} />
             </div>
           )}
 
           {tab === "Overview" && (
-            <AdminOverview data={data} me={me} goTo={setTab} onCompose={() => setCompose({})} />
+            <AdminOverview data={data} me={me} goTo={goTo} onCompose={(init) => setCompose(init || {})} />
           )}
           {tab === "Overview-legacy" && (
             <>
@@ -827,16 +836,14 @@ export default function Admin() {
                           >
                             {openUpdates === p.id ? "Close updates" : "Client updates"}
                           </button>
-                          {superUser && (
-                            <button
-                              type="button"
-                              className="button secondary"
-                              style={{ padding: "6px 12px", fontSize: 12 }}
-                              onClick={() => setCompose({ to: p.client_email, name: p.client_name, trackingCode: p.tracking_code })}
-                            >
-                              <Send size={13} /> Email client
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="button secondary"
+                            style={{ padding: "6px 12px", fontSize: 12 }}
+                            onClick={() => setCompose({ to: p.client_email, name: p.client_name, trackingCode: p.tracking_code })}
+                          >
+                            <Send size={13} /> Email client
+                          </button>
                         </div>
                       </div>
                       {openUpdates === p.id && (
@@ -1558,16 +1565,14 @@ export default function Admin() {
                           >
                             {r.read ? "Mark as unread" : "Mark as read"}
                           </button>
-                          {superUser && (
-                            <button
-                              type="button"
-                              className="button secondary"
-                              style={{ padding: "8px 16px" }}
-                              onClick={() => setCompose({ to: r.data?.email, name: r.data?.name, trackingCode: r.tracking_code })}
-                            >
-                              <Send size={14} /> Email client
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="button secondary"
+                            style={{ padding: "8px 16px" }}
+                            onClick={() => setCompose({ to: r.data?.email, name: r.data?.name, trackingCode: r.tracking_code, category: r.data?.service })}
+                          >
+                            <Send size={14} /> Email client
+                          </button>
                           <button
                             type="button"
                             className="button secondary"
@@ -1654,7 +1659,7 @@ export default function Admin() {
 
           {/* EMAIL OUTBOX TAB */}
           {tab === "Email Outbox" && superUser && (
-            <ComposeMail api={api} onSent={() => void loadSilently()} />
+            <ComposeMail api={api} contacts={contacts} onSent={() => void loadSilently()} />
           )}
           {tab === "Email Outbox" && (
             <div className="admin-card">

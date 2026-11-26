@@ -58,6 +58,27 @@ function matchAdmin(code) {
 // Projects removed from the public portfolio, even if still stored in the database.
 const RETIRED_PROJECTS = new Set(["yuva-shakti"]);
 
+/** Every website type we build, with a prototype or live project to show clients. */
+const DOMAINS = [
+  ["Business Website", "companies, clinics, consultants", "https://starx-live-official.vercel.app/", "live project"],
+  ["E-Commerce Website / Online Store", "online stores with cart, checkout and payments", "https://abps-books.vercel.app/", "live project"],
+  ["Booking / Appointment Website", "events, salons, clinics, slot booking", "https://ticket-x-theta.vercel.app/", "live project"],
+  ["Personal Portfolio", "developers, designers, students, professionals", "https://trinity-portfolio-demo.vercel.app", "prototype"],
+  ["Restaurant Website", "menus, online orders, table booking, QR menus", "https://trinity-restaurant-demo.vercel.app", "prototype"],
+  ["Shop / Local Store Website", "local stores with catalogue and WhatsApp orders", "https://trinity-shop-demo.vercel.app", "prototype"],
+  ["Blog / Content Website", "articles, recipes, guides, company news", "https://trinity-blog-demo.vercel.app", "prototype"],
+  ["Agency Website", "agencies and studios with case studies", "https://trinity-agency-demo.vercel.app", "prototype"],
+  ["Educational Website", "schools, coaching, online courses, academies", "https://trinity-educational-demo.vercel.app", "prototype"],
+  ["Quiz App", "timed quizzes with scores and leaderboards", "https://trinity-quiz-demo.vercel.app", "prototype"],
+  ["Landing Page", "product, app or offer launches", "https://trinity-landing-demo.vercel.app", "prototype"],
+  ["Event / Wedding Invitation", "digital invites with RSVP and directions", "https://trinity-invitation-demo.vercel.app", "prototype"],
+  ["Calculator Tools", "EMI, BMI, GST and other calculators", "https://trinity-calculator-demo.vercel.app", "prototype"],
+  ["Feedback / Survey Form", "feedback forms with a results dashboard", "https://trinity-survey-demo.vercel.app", "prototype"],
+  ["Photography Gallery", "albums, lightbox and shoot enquiries", "https://trinity-gallery-demo.vercel.app", "prototype"],
+  ["Other / Custom Website", "dashboards, logins and custom web apps", "https://connect-starx.vercel.app/", "live project"],
+];
+const DOMAIN_LIST_TEXT = DOMAINS.map(([label, use]) => "• " + label + " — " + use).join("\n");
+
 function calculateDaysRemainingIST(targetDateStr) {
   if (!targetDateStr) return null;
   const target = new Date(targetDateStr);
@@ -154,7 +175,7 @@ function extractChatLinks(question, answer) {
   }
 
   // 3. Portfolio / previous projects queries
-  if (/previous project|past work|portfolio|case stud|starx|ticketx|audiox|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
+  if (/previous project|past work|portfolio|case stud|starx|ticketx|abps/i.test(q) || (/case stud|portfolio/i.test(a) && /project|work/i.test(q))) {
     addLink("View Projects", "/work");
   }
 
@@ -371,10 +392,22 @@ function runIntelligentFallback(rawQ, history, _s) {
     };
   }
 
+  // 10b. Prototypes / samples of each website type
+  if (/prototype|sample (site|website)|demo (site|website)|example (site|website)|see an example/i.test(q)) {
+    return {
+      answer: "We have a working prototype for most website types — restaurant, shop, school, blog, agency, portfolio, quiz, landing page, invitation, calculator, survey and photography gallery. Each one shows several ready-made models you can click through. Open the Work page and pick the type closest to your business.",
+      mode: "FAQ guide",
+      links: [
+        { label: "See all prototypes", url: "/work" },
+        { label: "Start Your Project", url: "/project" }
+      ]
+    };
+  }
+
   // 11. Portfolio / Previous work
   if (/work|portfolio|previous project|past work|case stud|projects/i.test(q)) {
     return {
-      answer: "We have five live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore), StarX Connect (digital card) and AudioX (audio utility app). Every one is a live demo in Our Work.",
+      answer: "We have four live portfolio projects: StarX Live (entertainment website), TicketX (event booking platform), ABPS Books (online bookstore) and StarX Connect (digital card), plus 12 prototypes, one for each website type we build. You can open all of them from Our Work.",
       mode: "FAQ guide",
       links: [
         { label: "View Projects", url: "/work" }
@@ -395,9 +428,10 @@ function runIntelligentFallback(rawQ, history, _s) {
 
   if (/right for me|what website is right|what kind of website|which website|help me decide/i.test(q)) {
     return {
-      answer: "We specialize in five core website categories:\n• Personal Portfolio — For developers, designers, and creators.\n• Blog / Content Website — For articles, tutorials, and regular updates.\n• Business Website — For companies, professional services, and trust building.\n• Agency Website — For creative studios and multidisciplinary teams.\n• E-Commerce Website / Online Store — For clothing shops, stores, and product selling.\nTell me what you're planning, and I'll guide you to the right one!",
+      answer: "We build " + DOMAINS.length + " kinds of websites:\n" + DOMAIN_LIST_TEXT + "\nTell me what you're planning, and I'll guide you to the right one!",
       mode: "FAQ guide",
       links: [
+        { label: "See prototypes", url: "/work" },
         { label: "Start Your Project", url: "/project" }
       ]
     };
@@ -458,7 +492,30 @@ async function site(client) {
   const rows = await checked(
     client.from("studio_content").select("data").eq("id", "site").maybeSingle(),
   );
-  return rows?.data || seed;
+  return withNewDomains(rows?.data || seed);
+}
+
+/**
+ * Content saved in the database before new website types were added would
+ * hide them. Add any domain the saved copy is missing (by id / category),
+ * keeping every edit the admins made to the existing ones.
+ */
+export function withNewDomains(saved) {
+  if (!saved || saved === seed) return saved;
+  const out = { ...saved };
+  const addMissing = (list, extra, keyOf) => {
+    if (!Array.isArray(list) || !Array.isArray(extra)) return list;
+    const have = new Set(list.map(keyOf));
+    const missing = extra.filter((x) => !have.has(keyOf(x)));
+    if (!missing.length) return list;
+    // keep "Other / Custom" and "Not sure" at the end
+    const tail = (x) => /custom|not_sure|not sure|other/i.test(String(keyOf(x)));
+    return [...list.filter((x) => !tail(x)), ...missing.filter((x) => !tail(x)), ...list.filter(tail), ...missing.filter(tail)];
+  };
+  out.websiteCategories = addMissing(saved.websiteCategories, seed.websiteCategories, (c) => c.id);
+  out.enquiryCategories = addMissing(saved.enquiryCategories, seed.enquiryCategories, (c) => c.id);
+  out.services = addMissing(saved.services, seed.services, (c) => c.category);
+  return out;
 }
 
 async function rate(client, req, scope, max) {
@@ -537,7 +594,8 @@ function whoIs(row) {
     ? { id: row.admin_id, name: p.name, fullName: p.fullName, role: p.role, access: p.access }
     : { id: "owner", name: "Owner", fullName: "Trinity Tech", role: "Owner", access: "superadmin" };
 }
-const SUPER_ONLY = new Set(["send-mail", "delete-enquiry", "delete-project", "delete-media", "test-email", "verify-smtp", "retry-email", "setup-code", "test-ai"]);
+// every admin may email clients (each send is logged with their name); deleting and settings stay Super Admin
+const SUPER_ONLY = new Set(["delete-enquiry", "delete-project", "delete-media", "test-email", "verify-smtp", "retry-email", "setup-code", "test-ai"]);
 
 async function audit(client, action) {
   try {
@@ -1003,15 +1061,11 @@ export default async function handler(req, res) {
               "\n3. STRICT RESPECT FOR NEGATIVE REQUIREMENTS: If a customer says 'I don't want online payments', 'no customer login', 'only WhatsApp orders', 'no admin dashboard', 'my budget is limited', or 'I already have a website'—STRICTLY RESPECT their choice. NEVER recommend or push features they specifically excluded. Recommend streamlined alternatives (e.g., product catalogue with WhatsApp ordering instead of full checkout)." +
               "\n4. ENGLISH & TELUGU-ENGLISH UNDERSTANDING: Understand natural English and conversational mixed Telugu-English (e.g., 'Naku clothing shop undhi, budget ₹5000. Simple website kavali', 'cost entha', 'ela start cheyali'). Understand their business, budget, and scope from the Telugu-English input and respond warmly in friendly English addressing their specific needs." +
               "\n5. BUDGET UNDERSTANDING: When a customer mentions a budget (e.g. ₹5,000), treat it as their preferred target. Explain what lean scope or MVP is achievable (e.g. focused WhatsApp catalogue or portfolio), what features can be phased in later, and NEVER promise rigid fixed quotes or invent pricing. Guide them to submit a project brief for a tailored estimate." +
-              "\n6. THE 5 CORE WEBSITE CATEGORIES:" +
-              "\n   - Personal Portfolio: Developers, designers, creators, students, personal branding (/project?category=Personal%20Portfolio)." +
-              "\n   - Blog / Content Website: Articles, knowledge base, tutorials, regular publication (/project?category=Blog%20%2F%20Content%20Website)." +
-              "\n   - Business Website: Local companies, service firms, corporate credibility, lead generation (/project?category=Business%20Website)." +
-              "\n   - Agency Website: Creative studios, multidisciplinary teams, case studies (/project?category=Agency%20Website)." +
-              "\n   - E-Commerce Website: Online stores, apparel/clothing shops, product catalogues with WhatsApp ordering or payment gateways (/project?category=E-Commerce%20Website)." +
+              "\n6. WEBSITE TYPES WE BUILD (start link, then a prototype or live example the customer can open):" +
+              DOMAINS.map(([label, use, url, kind]) => "\n   - " + label + ": " + use + " (/project?category=" + encodeURIComponent(label.replace(" / Online Store", "")) + "; " + kind + ": " + url + ")").join("") +
               "\n7. PROJECT ENQUIRY INTEGRATION: When a customer is ready to begin, recommend 'Start Your Project' at /project (or /project?category=...)." +
               "\n8. TRACKING INTEGRATION: When asked about a tracking code (e.g. TT-001), explain the secure tracking process at /track. Never disclose private client or project details in chat." +
-              "\n9. VERIFIED PORTFOLIO: Reference the real 5 projects (StarX Live, TicketX, ABPS Books, StarX Connect, AudioX) and direct to /work when requested." +
+              "\n9. VERIFIED PORTFOLIO: Reference the real 4 projects (StarX Live, TicketX, ABPS Books, StarX Connect) and the 12 prototypes (one per website type, listed above), and direct to /work when requested. When a customer names their business, suggest the matching prototype link so they can see an example." +
               "\n10. ACTION BUTTONS: Only provide action buttons when genuinely relevant (e.g. viewing projects or starting a brief). For casual greetings (e.g. 'hello'), respond conversationally without pushing buttons." +
               (contentSite.knowledge ? ("\n\nAPPROVED BUSINESS KNOWLEDGE:\n" + contentSite.knowledge) : "");
 
@@ -1711,10 +1765,19 @@ export default async function handler(req, res) {
           const to = String(body.to || "").trim();
           const subject = String(body.subject || "").trim().slice(0, 160);
           const message = String(body.message || "").trim().slice(0, 6000);
-          if (!/^[^s@,]+@[^s@,]+.[^s@,]+$/.test(to)) throw fail(400, "Enter one valid recipient email.");
+          if (!/^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/.test(to)) throw fail(400, "Enter one valid recipient email.");
           if (!subject || !message) throw fail(400, "Subject and message are required.");
+          const linkUrl = String(body.linkUrl || "").trim();
+          if (linkUrl && !/^https:\/\/[^\s"'<>]+$/.test(linkUrl)) throw fail(400, "The button link must start with https://");
           const html = formatCustomMessageHtml(
-            { name: String(body.name || "").slice(0, 80), heading: subject, message, trackingCode: body.trackingCode ? String(body.trackingCode).slice(0, 20) : "" },
+            {
+              name: String(body.name || "").slice(0, 80),
+              heading: subject,
+              message,
+              trackingCode: body.trackingCode ? String(body.trackingCode).slice(0, 20) : "",
+              linkUrl: linkUrl.slice(0, 300),
+              linkLabel: String(body.linkLabel || "").trim().slice(0, 60),
+            },
             env().SITE_URL,
           );
           const result = await sendEmail({

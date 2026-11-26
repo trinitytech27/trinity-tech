@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { siteTypes } from "./content";
 import {
   Send, Plus, Trash2, Pencil, Check, X, Mail, Inbox, FolderKanban, Activity, ShieldCheck, LayoutDashboard, Briefcase,
   BarChart3, FileText, Layers, ClipboardList, Image as ImageIcon, Globe, Bot, Settings, Bell, UserRound, Users, LogOut,
@@ -11,38 +12,146 @@ export const isSuper = (me?: Me | null) => !me || me.access === "superadmin";
 export const accessLabel = (me?: Me | null) => (isSuper(me) ? "Super Admin" : "Admin");
 
 /* ---------------------------------------------------------------------------
-   Compose a branded email from Trinity Tech (Super Admin only)
+   Compose a branded email from Trinity Tech (every admin; logged in the outbox)
    --------------------------------------------------------------------------- */
+export type ComposeInit = {
+  to?: string;
+  name?: string;
+  trackingCode?: string;
+  subject?: string;
+  message?: string;
+  category?: string;
+  domainKey?: string;
+};
+type Contact = { email: string; name?: string; code?: string; category?: string };
+
+/** Ready-made messages; {name} and {type} are filled in when chosen. */
+const TEMPLATES: { id: string; label: string; subject: string; message: string; withSample?: boolean }[] = [
+  {
+    id: "thanks",
+    label: "Thank you for your enquiry",
+    subject: "Thank you for contacting Trinity Tech",
+    message:
+      "Thank you for your enquiry. We have received your details and a member of our team will contact you within one working day to understand your requirements.\n\nYou can track your project any time with your tracking ID.",
+  },
+  {
+    id: "sample",
+    label: "Share a sample website (prototype)",
+    subject: "A sample {type} for you",
+    message:
+      "As promised, here is a working sample of a {type} we build. Open it on your phone or laptop and click through the models.\n\nTell us which one you like, and what you would change. We will build yours with your own name, content and photos.",
+    withSample: true,
+  },
+  {
+    id: "proposal",
+    label: "Proposal is ready",
+    subject: "Your website proposal is ready",
+    message:
+      "Your website proposal is ready. It covers the pages, features, timeline and cost we discussed.\n\nPlease reply to this email or message us on WhatsApp with any questions, and we can start as soon as you approve it.",
+  },
+  {
+    id: "payment",
+    label: "Payment reminder",
+    subject: "Gentle reminder: next payment for your website",
+    message:
+      "This is a gentle reminder that the next payment for your website project is due. Once it is received, we will move on to the next stage straight away.\n\nIf you have already paid, please ignore this message. Thank you!",
+  },
+  {
+    id: "live",
+    label: "Website is live",
+    subject: "Your website is live!",
+    message:
+      "Great news: your website is now live! Please open it, check every page on your phone and laptop, and share any changes you would like.\n\nThank you for choosing Trinity Tech.",
+  },
+];
+
+const fill = (text: string, name: string, type: string) =>
+  text.replace(/\{name\}/g, name || "there").replace(/\{type\}/g, type || "website");
+
 export function ComposeMail({
   api,
   initial,
+  contacts = [],
   onClose,
   onSent,
 }: {
   api: Api;
-  initial?: { to?: string; name?: string; trackingCode?: string; subject?: string };
+  initial?: ComposeInit;
+  contacts?: Contact[];
   onClose?: () => void;
   onSent?: () => void;
 }) {
+  const startDomain =
+    (initial?.domainKey && siteTypes.find((t) => t.key === initial.domainKey)) ||
+    (initial?.category && siteTypes.find((t) => t.category === initial.category)) ||
+    null;
   const [to, setTo] = useState(initial?.to || "");
   const [name, setName] = useState(initial?.name || "");
   const [trackingCode, setTrackingCode] = useState(initial?.trackingCode || "");
   const [subject, setSubject] = useState(initial?.subject || "");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initial?.message || "");
+  const [button, setButton] = useState<string>(startDomain ? "domain:" + startDomain.key : "none");
+  const [customUrl, setCustomUrl] = useState("");
+  const [customLabel, setCustomLabel] = useState("");
   const [state, setState] = useState<{ busy: boolean; msg: string; ok?: boolean }>({ busy: false, msg: "" });
+
+  const domain = button.startsWith("domain:") ? siteTypes.find((t) => "domain:" + t.key === button) : null;
+  const typeName = (domain || startDomain)?.title.toLowerCase() || "website";
+  const link = domain
+    ? { url: domain.demo.url, label: domain.demo.label === "Check prototype" ? "Open the " + domain.title.toLowerCase() + " sample" : "Open the live example" }
+    : button === "custom"
+      ? { url: customUrl.trim(), label: customLabel.trim() || "Open link" }
+      : null;
+
+  const applyTemplate = (id: string) => {
+    const t = TEMPLATES.find((x) => x.id === id);
+    if (!t) return;
+    if (t.withSample && !domain) {
+      const d = startDomain || siteTypes.find((x) => x.demo.label === "Check prototype");
+      if (d) setButton("domain:" + d.key);
+    }
+    const type = (domain || startDomain)?.title.toLowerCase() || "website";
+    setSubject(fill(t.subject, name, type));
+    setMessage(fill(t.message, name, type));
+  };
+
+  const pickContact = (email: string) => {
+    setTo(email);
+    const c = contacts.find((x) => x.email === email);
+    if (!c) return;
+    if (c.name && !name) setName(c.name);
+    if (c.code && !trackingCode) setTrackingCode(c.code);
+    const d = c.category ? siteTypes.find((t) => t.category === c.category) : null;
+    if (d && button === "none") setButton("domain:" + d.key);
+  };
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (link && !/^https:\/\/\S+$/.test(link.url)) {
+      setState({ busy: false, msg: "The button link must start with https://" });
+      return;
+    }
     setState({ busy: true, msg: "" });
     try {
-      await api({ action: "send-mail", to, name, trackingCode, subject, message });
-      setState({ busy: false, msg: "Email sent to " + to + ".", ok: true });
+      await api({
+        action: "send-mail",
+        to: to.trim(),
+        name,
+        trackingCode,
+        subject,
+        message,
+        linkUrl: link?.url || "",
+        linkLabel: link?.label || "",
+      });
+      setState({ busy: false, msg: "Email sent to " + to.trim() + ".", ok: true });
       setMessage("");
       onSent?.();
     } catch (err: any) {
       setState({ busy: false, msg: err?.message || "Could not send the email." });
     }
   };
+
+  const uniqueContacts = contacts.filter((c, i, a) => c.email && a.findIndex((x) => x.email === c.email) === i);
 
   return (
     <form className="tt-ax-card tt-compose" onSubmit={send}>
@@ -57,10 +166,22 @@ export function ComposeMail({
           </button>
         )}
       </div>
+
+      <label>
+        Start from a template
+        <select defaultValue="" onChange={(e) => { applyTemplate(e.target.value); e.target.value = ""; }}>
+          <option value="" disabled>Choose a ready-made message…</option>
+          {TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+        </select>
+      </label>
+
       <div className="tt-ax-grid">
         <label>
           To (client email)
-          <input type="email" required value={to} onChange={(e) => setTo(e.target.value)} placeholder="client@example.com" />
+          <input type="email" required list="tt-compose-contacts" value={to} onChange={(e) => pickContact(e.target.value)} placeholder="client@example.com" />
+          <datalist id="tt-compose-contacts">
+            {uniqueContacts.map((c) => <option key={c.email} value={c.email}>{[c.name, c.code].filter(Boolean).join(" · ")}</option>)}
+          </datalist>
         </label>
         <label>
           Client name
@@ -79,14 +200,105 @@ export function ComposeMail({
         Message
         <textarea required rows={7} maxLength={6000} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Write your message to the client…" />
       </label>
+
+      <div className="tt-ax-grid">
+        <label>
+          Add a button
+          <select value={button} onChange={(e) => setButton(e.target.value)}>
+            <option value="none">No button</option>
+            <optgroup label="Sample website for a domain">
+              {siteTypes.map((t) => (
+                <option key={t.key} value={"domain:" + t.key}>{t.title} ({t.demo.label === "Check prototype" ? "prototype" : "live project"})</option>
+              ))}
+            </optgroup>
+            <option value="custom">Custom link…</option>
+          </select>
+        </label>
+        {button === "custom" ? (
+          <>
+            <label>
+              Button link
+              <input type="url" value={customUrl} onChange={(e) => setCustomUrl(e.target.value)} placeholder="https://…" />
+            </label>
+            <label>
+              Button text
+              <input maxLength={60} value={customLabel} onChange={(e) => setCustomLabel(e.target.value)} placeholder="View the design" />
+            </label>
+          </>
+        ) : link ? (
+          <p className="tt-ax-note tt-compose-link">
+            Button: <b>{link.label}</b>{" "}
+            <a href={link.url} target="_blank" rel="noreferrer">{link.url.replace(/^https:\/\//, "")} ↗</a>
+          </p>
+        ) : null}
+      </div>
+
       <div className="tt-ax-actions">
         <span className={"tt-ax-status" + (state.ok ? " ok" : "")} role="status">{state.msg}</span>
         <button className="button" disabled={state.busy}>
           <Send size={15} /> {state.busy ? "Sending…" : "Send email"}
         </button>
       </div>
-      <p className="tt-ax-note">The client receives it in the Trinity Tech gold email design, with a button to their project when you add a tracking ID.</p>
+      <p className="tt-ax-note">
+        The client receives it in the Trinity Tech gold email design{link ? `, with a "${link.label}" button` : ""}
+        {trackingCode ? " and a button to their project" : ""}. Templates use the client name and the {typeName} you pick.
+      </p>
     </form>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Prototypes: open, copy or share the sample site for every domain
+   --------------------------------------------------------------------------- */
+export function PrototypeShelf({ onEmail }: { onEmail?: (init: ComposeInit) => void }) {
+  const [copied, setCopied] = useState("");
+  const copy = async (key: string, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 1600);
+    } catch {
+      /* clipboard blocked */
+    }
+  };
+  return (
+    <div className="tt-ax-card tt-shelf">
+      <div className="tt-ax-head">
+        <div>
+          <h3>Samples to share with clients</h3>
+          <p className="tt-ax-note">One sample for every domain we build. Copy the link, send it on WhatsApp or email it in the Trinity Tech design.</p>
+        </div>
+      </div>
+      <ul className="tt-shelf-list">
+        {siteTypes.map((t) => (
+          <li key={t.key}>
+            <span className="tt-shelf-main">
+              <b>{t.title}</b>
+              <small>{t.demo.label === "Check prototype" ? "Prototype" : "Live project"} · {t.demo.url.replace(/^https:\/\//, "").replace(/\/$/, "")}</small>
+            </span>
+            <span className="tt-shelf-actions">
+              <a className="button secondary" href={t.demo.url} target="_blank" rel="noreferrer">Open</a>
+              <button type="button" className="button secondary" onClick={() => void copy(t.key, t.demo.url)}>
+                {copied === t.key ? <><Check size={14} /> Copied</> : "Copy link"}
+              </button>
+              <a
+                className="button secondary"
+                href={"https://wa.me/?text=" + encodeURIComponent(`Here is a sample ${t.title.toLowerCase()} website by Trinity Tech: ${t.demo.url}`)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                WhatsApp
+              </a>
+              {onEmail && (
+                <button type="button" className="button" onClick={() => onEmail({ domainKey: t.key })}>
+                  <Send size={14} /> Email
+                </button>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -186,7 +398,7 @@ export function UpdatesEditor({ project, api, me, onSaved }: { project: any; api
 /* ---------------------------------------------------------------------------
    Overview: what needs attention today
    --------------------------------------------------------------------------- */
-export function AdminOverview({ data, me, goTo, onCompose }: { data: any; me?: Me | null; goTo: (tab: string) => void; onCompose: () => void }) {
+export function AdminOverview({ data, me, goTo, onCompose }: { data: any; me?: Me | null; goTo: (tab: string) => void; onCompose: (init?: ComposeInit) => void }) {
   const enquiries: any[] = data?.enquiries || [];
   const projects: any[] = data?.projects || [];
   const emails: any[] = data?.emails || [];
@@ -196,8 +408,8 @@ export function AdminOverview({ data, me, goTo, onCompose }: { data: any; me?: M
   const stats = [
     { icon: <Inbox size={18} />, n: fresh.length, label: "New enquiries", tab: "Enquiries" },
     { icon: <FolderKanban size={18} />, n: running.length, label: "Projects in progress", tab: "Active Projects" },
-    { icon: <Mail size={18} />, n: emails.length, label: "Emails sent", tab: "Email Outbox" },
-    { icon: <Activity size={18} />, n: failed.length, label: "Failed emails", tab: "Email Outbox" },
+    { icon: <Mail size={18} />, n: emails.length, label: "Emails sent", tab: isSuper(me) ? "Email Outbox" : "Overview" },
+    { icon: <Activity size={18} />, n: failed.length, label: "Failed emails", tab: isSuper(me) ? "Email Outbox" : "Overview" },
   ];
   return (
     <div className="tt-ov">
@@ -243,12 +455,12 @@ export function AdminOverview({ data, me, goTo, onCompose }: { data: any; me?: M
           <div className="tt-ov-actions">
             <button type="button" className="button" onClick={() => goTo("Active Projects")}>Manage client projects</button>
             <button type="button" className="button secondary" onClick={() => goTo("Projects")}>Edit portfolio projects</button>
-            <button type="button" className="button secondary" onClick={() => goTo("Page content")}>Edit site text &amp; settings</button>
             {isSuper(me) && (
-              <button type="button" className="button secondary" onClick={onCompose}>
-                <Send size={14} /> Email a client
-              </button>
+              <button type="button" className="button secondary" onClick={() => goTo("Page content")}>Edit site text &amp; settings</button>
             )}
+            <button type="button" className="button secondary" onClick={() => onCompose()}>
+              <Send size={14} /> Email a client
+            </button>
           </div>
           <h4 className="tt-ov-sub">Recent activity</h4>
           <ul className="tt-ov-activity">
@@ -261,6 +473,8 @@ export function AdminOverview({ data, me, goTo, onCompose }: { data: any; me?: M
           </ul>
         </div>
       </div>
+
+      <PrototypeShelf onEmail={onCompose} />
     </div>
   );
 }
