@@ -69,11 +69,12 @@ export default function Assistant() {
         type="button"
         className="chat-launch"
         aria-expanded={floatingOpen}
-        aria-label="Open Spideyy website consultant"
+        aria-label="Ask Spideyy, our website consultant"
+        title="Ask Spideyy"
         onClick={() => setFloatingOpen(!floatingOpen)}
       >
-        <img className="spider-official" src="/brand/spideyy.svg" alt="Spideyy" />
-        <span className="chat-launch-text">Ask Spideyy</span>
+        <img className="spider-official" src="/brand/spideyy.svg" alt="" />
+        <span className="chat-launch-ring" aria-hidden="true" />
       </button>
 
       {/* CHAT WINDOW */}

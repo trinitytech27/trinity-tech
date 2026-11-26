@@ -177,8 +177,66 @@ const drawers: Partial<Record<Shape, (ctx: CanvasRenderingContext2D, W: number, 
   },
 };
 
+/* "TRINITY TECH" letter by letter, so each letter can appear and fade on its own */
+const TEXT_LINES = ["TRINITY", "TECH"];
+export const TEXT_LETTERS = TEXT_LINES.join("").length; // 11
+
+function sampleLetters() {
+  const W = 1200;
+  const H = 520;
+  const res: Float32Array[] = [];
+  const probe = document.createElement("canvas").getContext("2d");
+  if (!probe) return res;
+  probe.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
+  let idx = 0;
+  TEXT_LINES.forEach((line, li) => {
+    const y = li === 0 ? H * 0.3 : H * 0.74;
+    const total = probe.measureText(line).width;
+    const x0 = W / 2 - total / 2;
+    for (let c = 0; c < line.length; c++) {
+      const x = x0 + probe.measureText(line.slice(0, c)).width;
+      res[idx] = sampleCanvas("letter-" + idx, (ctx) => {
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.font = `700 ${H * 0.38}px ${HEAD_FONT}`;
+        ctx.fillText(line[c], x, y);
+      }, W, H);
+      idx++;
+    }
+  });
+  return res;
+}
+
+/** Stars for the home title, each star tagged with the letter it belongs to. */
+function buildText(out: Float32Array, letterOf: Float32Array, from: number, count: number, view: View) {
+  const per = sampleLetters();
+  const sizes = per.map((p) => p.length / 2);
+  const totalPts = sizes.reduce((a, b) => a + b, 0);
+  if (!totalPts) return false;
+  const width = Math.min(view.w * (view.narrow ? 0.9 : 0.66), 86);
+  const scaleY = width * (520 / 1200);
+  const lift = view.h * (view.narrow ? 0.17 : 0.12);
+  // share the stars between letters by their ink
+  let k = 0;
+  for (let L = 0; L < per.length; L++) {
+    const share = L === per.length - 1 ? count - k : Math.round((count * sizes[L]) / totalPts);
+    const pts = per[L];
+    const n = sizes[L];
+    for (let s = 0; s < share && k < count; s++, k++) {
+      const i = from + k;
+      const j = Math.floor(Math.random() * n) * 2;
+      out[i * 3] = pts[j] * width + gauss() * 0.12;
+      out[i * 3 + 1] = pts[j + 1] * scaleY + lift + gauss() * 0.12;
+      out[i * 3 + 2] = gauss() * 0.9;
+      letterOf[i] = L;
+    }
+  }
+  return true;
+}
+
 /** Fill `out` (xyz per star) for the shaped stars. */
-function buildShape(shape: Shape, out: Float32Array, from: number, count: number, view: View) {
+function buildShape(shape: Shape, out: Float32Array, from: number, count: number, view: View, letterOf?: Float32Array) {
+  if (shape === "text" && letterOf && buildText(out, letterOf, from, count, view)) return;
   const set = (i: number, x: number, y: number, z: number) => {
     out[i * 3] = x;
     out[i * 3 + 1] = y;
@@ -339,6 +397,8 @@ const vertex = /* glsl */ `
   attribute float aSize;
   attribute float aShaped;
   attribute vec3 aColor;
+  attribute float aLetter;
+  uniform float uLetters[11];
   uniform float uTime;
   uniform float uMorph;
   uniform float uWarp;
@@ -366,11 +426,25 @@ const vertex = /* glsl */ `
     float freeY = mod(p.y + uScroll * depth + uSpan * 0.5, uSpan) - uSpan * 0.5;
     p.y = mix(freeY, p.y, aShaped);
 
+    // home title: a hidden letter's stars drift apart as glowing dust,
+    // then gather back in (each star a little early or late, so it shimmers)
+    float vis = 1.0;
+    if (aLetter > -0.5) {
+      for (int k = 0; k < 11; k++) {
+        if (abs(float(k) - aLetter) < 0.5) vis = uLetters[k];
+      }
+      vis = smoothstep(0.0, 1.0, clamp(vis * 1.6 - aSeed * 0.6, 0.0, 1.0));
+      float away = 1.0 - vis;
+      vec3 dir = normalize(vec3(sin(aSeed * 91.7), cos(aSeed * 53.3) + 0.35, sin(aSeed * 37.1)));
+      p += dir * away * (7.0 + aSeed * 15.0);
+      p.y += away * sin(uTime * 0.7 + aSeed * 20.0) * 1.5;
+    }
+
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
     float twinkle = 0.55 + 0.45 * sin(uTime * (0.8 + aSeed * 2.4) + aSeed * 90.0);
-    gl_PointSize = aSize * uPixelRatio * (1.0 + uWarp * 1.5) * (260.0 / -mv.z);
-    vAlpha = mix(twinkle, 0.7 + 0.3 * twinkle, aShaped);
+    gl_PointSize = aSize * uPixelRatio * (1.0 + uWarp * 1.5) * (260.0 / -mv.z) * mix(0.55, 1.0, vis);
+    vAlpha = mix(twinkle, 0.7 + 0.3 * twinkle, aShaped) * mix(0.12, 1.0, vis);
     float shift = 0.5 + 0.5 * sin(uTime * 0.12 + aSeed * 6.2831);
     vColor = mix(aColor, aColor.zxy, shift * 0.35);
   }
@@ -444,6 +518,7 @@ export default function Starfield({ route }: { route: string }) {
     const size = new Float32Array(N);
     const shaped = new Float32Array(N);
     const color = new Float32Array(N * 3);
+    const letterOf = new Float32Array(N).fill(-1);
 
     for (let i = 0; i < N; i++) {
       seed[i] = Math.random();
@@ -469,7 +544,7 @@ export default function Starfield({ route }: { route: string }) {
     // fonts must be ready before stars can spell text; start with a galaxy
     const needsFont = (s: Shape) => s === "text" || s === "code";
     let fontReady = !needsFont(shape);
-    buildShape(fontReady ? shape : "galaxy", to, AMBIENT, SHAPED, view);
+    buildShape(fontReady ? shape : "galaxy", to, AMBIENT, SHAPED, view, letterOf);
 
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(to.slice(), 3));
@@ -481,6 +556,8 @@ export default function Starfield({ route }: { route: string }) {
     geo.setAttribute("aSize", new THREE.BufferAttribute(size, 1));
     geo.setAttribute("aShaped", new THREE.BufferAttribute(shaped, 1));
     geo.setAttribute("aColor", new THREE.BufferAttribute(color, 3));
+    const aLetter = new THREE.BufferAttribute(letterOf, 1);
+    geo.setAttribute("aLetter", aLetter);
     geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 400);
 
     const uniforms = {
@@ -491,6 +568,7 @@ export default function Starfield({ route }: { route: string }) {
       uPixelRatio: { value: dpr },
       uScroll: { value: 0 },
       uSpan: { value: 200 },
+      uLetters: { value: new Array(TEXT_LETTERS).fill(1) as number[] },
     };
     const mat = new THREE.ShaderMaterial({
       vertexShader: vertex,
@@ -505,6 +583,80 @@ export default function Starfield({ route }: { route: string }) {
     scene.add(group);
 
     const renderOnce = () => renderer.render(scene, camera);
+
+    /* Home title: letters spell themselves in, play while the visitor is
+       idle (a few letters drift away and come back, like the name being
+       typed again), and snap to the full name on a click or tap. */
+    const L = uniforms.uLetters.value;
+    let titleTl: gsap.core.Timeline | null = null;
+    let lastInput = performance.now();
+    let holdUntil = 0;
+    const order = () => [...Array(TEXT_LETTERS).keys()].sort(() => Math.random() - 0.5);
+    const title = {
+      stop() {
+        titleTl?.kill();
+        titleTl = null;
+        gsap.to(L, { ...Object.fromEntries(L.map((_, i) => [i, 1])), duration: 0.4 } as gsap.TweenVars);
+      },
+      /** letters arrive one by one in a random order */
+      spell(delay = 0) {
+        titleTl?.kill();
+        if (reduced) {
+          L.fill(1);
+          return;
+        }
+        L.fill(0);
+        const tl = gsap.timeline({ delay });
+        order().forEach((idx, n) => tl.to(L, { [idx]: 1, duration: 0.7, ease: "power2.out" } as gsap.TweenVars, n * 0.13));
+        titleTl = tl;
+      },
+      /** click / tap: everything comes back together, quickly */
+      form() {
+        titleTl?.kill();
+        holdUntil = performance.now() + 6000;
+        const tl = gsap.timeline();
+        order().forEach((idx, n) => tl.to(L, { [idx]: 1, duration: 0.45, ease: "back.out(1.6)" } as gsap.TweenVars, n * 0.04));
+        titleTl = tl;
+      },
+      /** one idle round: the name dissolves, then re-forms a letter or two
+       *  at a time in a new random order (e.g. T and H first) until the
+       *  full name is back; it holds for a moment, then the next round */
+      play() {
+        const tl = gsap.timeline();
+        order().forEach((idx, n) => tl.to(L, { [idx]: 0, duration: 0.7, ease: "power2.in" } as gsap.TweenVars, n * 0.05));
+        let at = 0.05 * TEXT_LETTERS + 0.9;
+        const queue = order();
+        while (queue.length) {
+          const group = queue.splice(0, Math.random() < 0.45 ? 2 : 1);
+          group.forEach((idx) => tl.to(L, { [idx]: 1, duration: 0.8, ease: "power2.out" } as gsap.TweenVars, at));
+          at += 0.38 + Math.random() * 0.32;
+        }
+        tl.to({}, { duration: 3 + Math.random() * 1.5 }, at + 0.4);
+        titleTl = tl;
+      },
+    };
+    const busy = () => !!titleTl && titleTl.isActive();
+    const idleTimer = window.setInterval(() => {
+      if (reduced || document.hidden || shape !== "text" || !fontReady) return;
+      if (routeRef.current !== "/" || uniforms.uMorph.value < 1) return;
+      const now = performance.now();
+      if (now - lastInput < 2600 || now < holdUntil || busy()) return;
+      title.play();
+    }, 400);
+    const onInput = () => {
+      lastInput = performance.now();
+    };
+    const onTap = (e: PointerEvent) => {
+      lastInput = performance.now();
+      if (shape !== "text" || routeRef.current !== "/") return;
+      // ignore taps on buttons, links and fields
+      if ((e.target as HTMLElement | null)?.closest?.("a, button, input, textarea, select, label, [role=dialog]")) return;
+      title.form();
+    };
+    window.addEventListener("pointerdown", onTap, { passive: true });
+    window.addEventListener("keydown", onInput);
+    window.addEventListener("wheel", onInput, { passive: true });
+    window.addEventListener("touchmove", onInput, { passive: true });
     let morphTween: gsap.core.Tween | null = null;
     const style = { spin: styleOf(shape).spin, tilt: styleOf(shape).tilt };
 
@@ -523,10 +675,14 @@ export default function Starfield({ route }: { route: string }) {
           from[j] = from[j] + (to[j] - from[j]) * e;
         }
       }
+      const prev = shape;
       shape = next;
-      buildShape(next, to, AMBIENT, SHAPED, view);
+      buildShape(next, to, AMBIENT, SHAPED, view, letterOf);
       aFrom.needsUpdate = true;
       aTo.needsUpdate = true;
+      aLetter.needsUpdate = true;
+      if (next === "text" && prev !== "text") title.spell(1.1);
+      else if (next !== "text") title.stop();
       morphTween?.kill();
       uniforms.uMorph.value = 0;
       const dur = reduced ? 0 : quick ? 0.6 : 1.15; // quick, so stars keep up with scrolling
@@ -537,6 +693,7 @@ export default function Starfield({ route }: { route: string }) {
     };
     api.current = { morphTo: (s) => morphTo(s) };
     morphTween = gsap.to(uniforms.uMorph, { value: 1, duration: reduced ? 0 : 3, ease: "power2.out", delay: 0.2 });
+    if (fontReady && shape === "text") title.spell(0.9);
     if (shape === "wave") uniforms.uWave.value = 1;
 
     if (!fontReady) {
@@ -548,6 +705,7 @@ export default function Starfield({ route }: { route: string }) {
         fontReady = true;
         sampleCache.clear();
         morphTo(shape, false);
+        if (shape === "text") title.spell(0.6);
       });
     }
 
@@ -592,6 +750,7 @@ export default function Starfield({ route }: { route: string }) {
     };
     if (!small) window.addEventListener("pointermove", onPointer, { passive: true });
     const onScroll = () => {
+      lastInput = performance.now();
       const max = document.documentElement.scrollHeight - window.innerHeight;
       target.scroll = max > 0 ? window.scrollY / max : 0;
     };
@@ -666,6 +825,12 @@ export default function Starfield({ route }: { route: string }) {
       window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVis);
       window.clearTimeout(resizeT);
+      window.clearInterval(idleTimer);
+      window.removeEventListener("pointerdown", onTap);
+      window.removeEventListener("keydown", onInput);
+      window.removeEventListener("wheel", onInput);
+      window.removeEventListener("touchmove", onInput);
+      titleTl?.kill();
       morphTween?.kill();
       geo.dispose();
       mat.dispose();
